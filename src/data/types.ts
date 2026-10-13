@@ -1,0 +1,199 @@
+import { z } from 'zod';
+
+/** The 14 document collections (one Postgres table each). */
+export const COLLECTIONS = [
+  'books', 'booknotes', 'ideas', 'packs', 'posts', 'jobs', 'runs',
+  'reports', 'qa', 'metrics', 'chats', 'ratings', 'playbooks', 'settings',
+] as const;
+export type CollectionName = (typeof COLLECTIONS)[number];
+
+export const STAGES = ['Idea', 'Approved', 'Scripted', 'Voiced', 'Produced', 'QA passed', 'Posted'] as const;
+export const ALL_STATUS = [...STAGES, 'Dropped'] as const;
+export type Stage = (typeof STAGES)[number];
+export type Status = (typeof ALL_STATUS)[number];
+export const EVIDENCE = ['SUPPORTED', 'MIXED', 'MYTH', 'STORY', 'PHILOSOPHY', 'CHECK'] as const;
+export type Evidence = (typeof EVIDENCE)[number];
+export const SCORE_KEYS = [['hook', 'Hook'], ['visual', 'Visual'], ['truth', 'Truth'], ['send', 'Send']] as const;
+
+/** A stored document as the adapters hand it out. */
+export interface Doc {
+  id: string;
+  data: Record<string, unknown>;
+  version: number;
+}
+
+// ---------------------------------------------------------------- helpers
+const str = (v: unknown): string => (v == null ? '' : String(v));
+const numOr = (v: unknown, d: number | null): number | null => {
+  if (v == null || v === '') return d;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : d;
+};
+const arr = (x: unknown): unknown[] => (Array.isArray(x) ? x : []);
+const isO = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
+export const isHttps = (u: unknown): u is string => typeof u === 'string' && /^https:\/\//i.test(u.trim());
+
+const Loose = z.record(z.string(), z.unknown());
+
+// ---------------------------------------------------------------- zod schemas (raw documents)
+// These describe the stored shape. Readers are lenient (see the normalisers below): a bad field
+// never hides a whole collection from the owner.
+export const BookDoc = z.object({
+  title: z.string().optional(), author: z.string().optional(), lane: z.string().optional(),
+  why: z.string().optional(), status: z.string().optional(), order: z.number().optional(),
+  code: z.string().optional(), digest: z.string().optional(),
+  notesCount: z.number().nullable().optional(), ideaCount: z.number().nullable().optional(), researchedAt: z.string().optional(),
+}).passthrough();
+
+export const IdeaDoc = z.object({
+  code: z.string().optional(), bookId: z.string().optional(), rank: z.number().nullable().optional(),
+  hook: z.string().optional(), quietPart: z.string().optional(), why: z.string().optional(),
+  fromBook: z.string().optional(), tryThis: z.string().optional(),
+  evidence: z.string().optional(), evidenceNote: z.string().optional(),
+  sources: z.array(z.union([z.string(), z.object({ title: z.string().optional(), url: z.string().optional() })])).optional(),
+  visual: z.string().optional(), pages: z.string().optional(),
+  scores: z.object({ hook: z.number(), visual: z.number(), truth: z.number(), send: z.number() }).partial().optional(),
+  total: z.number().optional(), format: z.string().optional(),
+  status: z.enum(ALL_STATUS).optional(), updatedAt: z.string().optional(),
+  history: z.array(z.object({ status: z.string(), at: z.string().optional() })).optional(),
+  posted: z.object({ date: z.string().optional(), link: z.string().optional() }).nullable().optional(),
+  dropReason: z.string().optional(), packCurrent: z.string().optional(),
+  voiceAssetId: z.string().optional(), voiceFileName: z.string().optional(), voiceUploadedAt: z.string().optional(),
+  videoAssetId: z.string().optional(), videoFileName: z.string().optional(), videoSize: z.number().optional(), videoUploadedAt: z.string().optional(),
+  hookStyle: z.string().optional(),
+  qaLast: z.object({ qaId: z.string().optional(), verdict: z.string().optional(), at: z.string().optional() }).nullable().optional(),
+}).passthrough();
+
+export const PackDoc = z.object({
+  ideaCode: z.string().optional(), version: z.number().optional(), title: z.string().optional(),
+  intro: z.string().optional(), durationSec: z.number().optional(),
+  beats: z.array(z.object({ t: z.string().optional(), vo: z.string().optional(), onscreen: z.string().optional() })).optional(),
+}).passthrough();
+
+export const JobDoc = z.object({
+  node: z.string().optional(), ideaCode: z.string().optional(), bookId: z.string().optional(), packId: z.string().optional(),
+  request: z.string().optional(), status: z.string().optional(), error: z.string().optional(), kind: z.string().optional(),
+  createdAt: z.string().optional(), startedAt: z.string().optional(), finishedAt: z.string().optional(), videoAssetId: z.string().optional(),
+}).passthrough();
+
+export const BookNoteDoc = z.object({
+  bookId: z.string().optional(), chapterNo: z.number().optional(), title: z.string().optional(), pages: z.string().optional(),
+  keyIdeas: z.array(Loose).optional(), stories: z.array(Loose).optional(), claimsToCheck: z.array(Loose).optional(), lines: z.array(Loose).optional(),
+}).passthrough();
+
+export const ReportDoc = z.object({ type: z.string().optional(), at: z.string().optional(), candidates: z.array(Loose).optional() }).passthrough();
+export const MetricDoc = z.object({ ideaCode: z.string().optional(), postedAt: z.string().optional(), latest: Loose.nullable().optional(), snapshots: z.array(Loose).optional() }).passthrough();
+export const QaDoc = z.object({ ideaCode: z.string().optional(), packId: z.string().optional(), verdict: z.string().optional(), at: z.string().optional(), summary: z.string().optional() }).passthrough();
+export const GenericDoc = Loose;
+
+export const SCHEMAS: Record<CollectionName, z.ZodTypeAny> = {
+  books: BookDoc, booknotes: BookNoteDoc, ideas: IdeaDoc, packs: PackDoc, posts: GenericDoc, jobs: JobDoc, runs: GenericDoc,
+  reports: ReportDoc, qa: QaDoc, metrics: MetricDoc, chats: GenericDoc, ratings: GenericDoc, playbooks: GenericDoc, settings: GenericDoc,
+};
+
+// ---------------------------------------------------------------- normalised domain types
+export interface Book { id: string; version: number; title: string; author: string; lane: string; why: string; status: string; order: number; code: string; digest: string; notesCount: number | null; ideaCount: number | null; researchedAt: string }
+export interface Source { title: string; url: string }
+export interface Scores { hook: number; visual: number; truth: number; send: number }
+export interface Idea {
+  id: string; version: number; code: string; bookId: string; rank: number | null; hook: string; quietPart: string; why: string; fromBook: string; tryThis: string;
+  evidence: string; evidenceNote: string; sources: Source[]; visual: string; pages: string; scores: Scores; total: number; format: string;
+  status: Status; updatedAt: string; history: { status: string; at: string }[]; posted: { date: string; link: string } | null; dropReason: string; packCurrent: string;
+  voiceAssetId: string; voiceFileName: string; voiceUploadedAt: string; videoAssetId: string; videoFileName: string; videoSize: number; videoUploadedAt: string;
+  hookStyle: string; qaLast: { qaId: string; verdict: 'GO' | 'FIX' | 'NO-GO'; at: string } | null;
+}
+export interface Pack { id: string; ideaCode: string; version: number; title: string; intro: string; durationSec: number; beats: { t: string; vo: string; onscreen: string }[] }
+export interface Job { id: string; node: string; ideaCode: string; bookId: string; packId: string; request: string; status: string; error: string; kind: string; createdAt: string; startedAt: string; finishedAt: string }
+export interface BookNote {
+  id: string; bookId: string; chapterNo: number; title: string; pages: string;
+  keyIdeas: { idea: string; mechanism: string; pages: string }[]; stories: { who: string; what: string; pages: string }[];
+  claims: { claim: string; pages: string }[]; lines: { text: string; page: string }[];
+}
+export interface Report { id: string; type: string; at: string; d: Record<string, unknown> }
+export interface Metric { id: string; ideaCode: string; postedAt: string; latest: Record<string, number | null> | null }
+export interface QaRec { id: string; ideaCode: string; packId: string; verdict: string; at: string; summary: string }
+
+export function normVerdict(v: unknown): '' | 'GO' | 'FIX' | 'NO-GO' {
+  let s = str(v).trim().toUpperCase().replace(/[\s_]+/g, '-');
+  if (s === 'NOGO') s = 'NO-GO';
+  return s === 'GO' || s === 'FIX' || s === 'NO-GO' ? s : '';
+}
+
+export function normBook(d: Doc): Book {
+  const x = d.data;
+  return { id: d.id, version: d.version, title: str(x.title) || d.id, author: str(x.author), lane: str(x.lane), why: str(x.why), status: str(x.status),
+    order: numOr(x.order, 1e9) as number, code: str(x.code).trim().toUpperCase(), digest: str(x.digest), notesCount: numOr(x.notesCount, null), ideaCount: numOr(x.ideaCount, null), researchedAt: str(x.researchedAt) };
+}
+
+export function normIdea(d: Doc): Idea {
+  const x = d.data;
+  const sc = isO(x.scores) ? x.scores : {};
+  const scores: Scores = { hook: 0, visual: 0, truth: 0, send: 0 };
+  let sum = 0;
+  for (const [k] of SCORE_KEYS) { scores[k] = numOr(sc[k], 0) as number; sum += scores[k]; }
+  const sources: Source[] = arr(x.sources)
+    .map((s) => (typeof s === 'string' ? { title: s, url: isHttps(s) ? s : '' } : s))
+    .filter(isO).map((s) => ({ title: str(s.title), url: str(s.url) }));
+  const status = (ALL_STATUS as readonly string[]).includes(str(x.status)) ? (str(x.status) as Status) : 'Idea';
+  const posted = isO(x.posted) ? { date: str(x.posted.date), link: str(x.posted.link) } : null;
+  const ql = isO(x.qaLast) ? x.qaLast : null;
+  const verdict = ql ? normVerdict(ql.verdict) : '';
+  return {
+    id: d.id, version: d.version, code: str(x.code) || d.id, bookId: str(x.bookId), rank: numOr(x.rank, null), hook: str(x.hook), quietPart: str(x.quietPart),
+    why: str(x.why), fromBook: str(x.fromBook), tryThis: str(x.tryThis), evidence: str(x.evidence).toUpperCase(), evidenceNote: str(x.evidenceNote),
+    sources, visual: str(x.visual), pages: str(x.pages), scores, total: numOr(x.total, sum) as number, format: str(x.format), status, updatedAt: str(x.updatedAt),
+    history: arr(x.history).filter(isO).filter((h) => h.status).map((h) => ({ status: str(h.status), at: str(h.at) })),
+    posted, dropReason: str(x.dropReason), packCurrent: str(x.packCurrent),
+    voiceAssetId: str(x.voiceAssetId), voiceFileName: str(x.voiceFileName), voiceUploadedAt: str(x.voiceUploadedAt),
+    videoAssetId: str(x.videoAssetId), videoFileName: str(x.videoFileName), videoSize: numOr(x.videoSize, 0) as number, videoUploadedAt: str(x.videoUploadedAt),
+    hookStyle: str(x.hookStyle),
+    qaLast: ql && verdict ? { qaId: str(ql.qaId), verdict, at: str(ql.at) } : null,
+  };
+}
+
+export function normPack(d: Doc): Pack {
+  const x = d.data;
+  return { id: d.id, ideaCode: str(x.ideaCode), version: numOr(x.version, 1) as number, title: str(x.title) || d.id, intro: str(x.intro), durationSec: numOr(x.durationSec, 0) as number,
+    beats: arr(x.beats).filter(isO).map((b) => ({ t: str(b.t), vo: str(b.vo), onscreen: str(b.onscreen) })) };
+}
+
+export function normJob(d: Doc): Job {
+  const x = d.data;
+  return { id: d.id, node: str(x.node), ideaCode: str(x.ideaCode), bookId: str(x.bookId), packId: str(x.packId), request: str(x.request), status: str(x.status),
+    error: str(x.error), kind: str(x.kind), createdAt: str(x.createdAt), startedAt: str(x.startedAt), finishedAt: str(x.finishedAt) };
+}
+
+export function normNote(d: Doc): BookNote {
+  const x = d.data;
+  const o = (a: unknown) => arr(a).filter(isO);
+  return { id: d.id, bookId: str(x.bookId) || d.id.replace(/-\d+$/, ''), chapterNo: numOr(x.chapterNo, 0) as number, title: str(x.title), pages: str(x.pages),
+    keyIdeas: o(x.keyIdeas).map((k) => ({ idea: str(k.idea), mechanism: str(k.mechanism), pages: str(k.pages) })),
+    stories: o(x.stories).map((k) => ({ who: str(k.who), what: str(k.what), pages: str(k.pages) })),
+    claims: o(x.claimsToCheck).map((k) => ({ claim: str(k.claim), pages: str(k.pages) })),
+    lines: o(x.lines).map((k) => ({ text: str(k.text), page: str(k.page) })) };
+}
+
+export function normReport(d: Doc): Report {
+  return { id: d.id, type: str(d.data.type), at: str(d.data.at), d: d.data };
+}
+
+export function normMetric(d: Doc): Metric {
+  const x = d.data;
+  const l = isO(x.latest) ? x.latest : null;
+  const latest = l ? Object.fromEntries(Object.entries(l).map(([k, v]) => [k, typeof v === 'number' ? v : null])) : null;
+  return { id: d.id, ideaCode: str(x.ideaCode) || d.id, postedAt: str(x.postedAt), latest };
+}
+
+export function normQa(d: Doc): QaRec {
+  const x = d.data;
+  return { id: d.id, ideaCode: str(x.ideaCode), packId: str(x.packId), verdict: normVerdict(x.verdict), at: str(x.at), summary: str(x.summary) };
+}
+
+/** Parse a raw document against its schema; on failure keep the raw data (readers stay lenient). */
+export function checkDoc(coll: CollectionName, data: unknown): boolean {
+  return SCHEMAS[coll].safeParse(data).success;
+}
+
+export interface StudioUser { id: string; email: string }
+export type StudioMode = 'supabase' | 'mock' | 'demo';
+export interface QpConfig { mode: StudioMode; supabaseUrl: string; supabaseAnonKey: string }

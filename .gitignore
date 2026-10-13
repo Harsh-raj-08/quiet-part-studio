@@ -10,7 +10,7 @@ coverage/
 test-results/
 playwright-report/
 # never commit book files or real studio data
-data/
+/data/
 *.pdf
 *.epub
 test/output/
