@@ -1,0 +1,33 @@
+{
+  "name": "quiet-part-studio",
+  "version": "2.0.0-phase3a",
+  "private": true,
+  "description": "the quiet part: Studio v2. React + TypeScript SPA, Vercel functions, Supabase.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:test": "node scripts/build-test.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "test:unit": "node scripts/test.mjs --unit",
+    "test:e2e": "node scripts/test.mjs --e2e",
+    "design:capture": "node scripts/capture-design.mjs",
+    "fixtures": "node scripts/gen-fixtures.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.58.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vercel/node": "5.3.24",
+    "esbuild": "0.28.2",
+    "playwright": "1.56.0",
+    "typescript": "6.0.3"
+  }
+}

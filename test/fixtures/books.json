@@ -1,0 +1,92 @@
+[
+  {
+    "id": "thinking-fast-and-slow",
+    "data": {
+      "title": "Thinking, Fast and Slow",
+      "author": "Daniel Kahneman",
+      "code": "TFS",
+      "lane": "Well known",
+      "why": "Demo shelf entry.",
+      "status": "researched",
+      "order": 1,
+      "notesCount": 1,
+      "ideaCount": 0,
+      "researchedAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "atomic-habits",
+    "data": {
+      "title": "Atomic Habits",
+      "author": "James Clear",
+      "code": "AH",
+      "lane": "Well known",
+      "why": "Demo shelf entry.",
+      "status": "researched",
+      "order": 2,
+      "notesCount": 2,
+      "ideaCount": 0,
+      "researchedAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "enchiridion",
+    "data": {
+      "title": "Enchiridion",
+      "author": "Epictetus",
+      "code": "EN",
+      "lane": "Well known",
+      "why": "Demo shelf entry.",
+      "status": "researched",
+      "order": 3,
+      "notesCount": 0,
+      "ideaCount": 0,
+      "researchedAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "four-thousand-weeks",
+    "data": {
+      "title": "Four Thousand Weeks",
+      "author": "Oliver Burkeman",
+      "code": "FTW",
+      "lane": "Well known",
+      "why": "Demo shelf entry.",
+      "status": "researched",
+      "order": 4,
+      "notesCount": 0,
+      "ideaCount": 0,
+      "researchedAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "the-psychology-of-money",
+    "data": {
+      "title": "The Psychology of Money",
+      "author": "Morgan Housel",
+      "code": "PM",
+      "lane": "Well known",
+      "why": "Demo shelf entry.",
+      "status": "researched",
+      "order": 5,
+      "notesCount": 0,
+      "ideaCount": 0,
+      "researchedAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "stumbling-on-happiness",
+    "data": {
+      "title": "Stumbling on Happiness",
+      "author": "Daniel Gilbert",
+      "code": "SH",
+      "lane": "Well known",
+      "why": "Demo shelf entry.",
+      "status": "researched",
+      "order": 6,
+      "notesCount": 0,
+      "ideaCount": 0,
+      "researchedAt": "2026-10-02T12:00:00.000Z"
+    }
+  }
+]

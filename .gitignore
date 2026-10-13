@@ -13,3 +13,5 @@ playwright-report/
 data/
 *.pdf
 *.epub
+test/output/
+test/dist-unit/

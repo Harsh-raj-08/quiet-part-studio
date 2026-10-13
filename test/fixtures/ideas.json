@@ -1,0 +1,711 @@
+[
+  {
+    "id": "TFS-07",
+    "data": {
+      "code": "TFS-07",
+      "bookId": "thinking-fast-and-slow",
+      "rank": 1,
+      "hook": "You're not deciding. You're answering an easier question and calling it a decision.",
+      "quietPart": "When a question is hard, the mind quietly swaps it for an easy one and hands you that answer instead.",
+      "why": "Everyone has felt a decision that was 'obvious' in the moment and baffling a week later. This names the swap.",
+      "tryThis": "Next time a choice feels instant, write down the question you actually answered.",
+      "visual": "Two questions on a ghost page. The hard one fades; the easy one is lit and underlined.",
+      "evidence": "SUPPORTED",
+      "evidenceNote": "Attribute substitution is well documented across judgement studies (Kahneman & Frederick, 2002).",
+      "pages": "97–104",
+      "scores": {
+        "hook": 5,
+        "visual": 4,
+        "truth": 4,
+        "send": 5
+      },
+      "total": 18,
+      "status": "Idea",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "FTW-02",
+    "data": {
+      "code": "FTW-02",
+      "bookId": "four-thousand-weeks",
+      "rank": 2,
+      "hook": "The to-do list was never going to end. That was the point you kept missing.",
+      "quietPart": "Getting through everything is not a finish line you're late for. It doesn't exist.",
+      "why": "Lands with anyone who's had a productive week and still felt behind.",
+      "tryThis": "Pick three things you're deliberately not doing this week. Say them out loud.",
+      "visual": "An endless list scrolling past; one line stays still and lights up.",
+      "evidence": "PHILOSOPHY",
+      "evidenceNote": "An argument, not a finding. Present it as Burkeman's view.",
+      "pages": "21–30",
+      "scores": {
+        "hook": 4,
+        "visual": 3,
+        "truth": 5,
+        "send": 4
+      },
+      "total": 16,
+      "status": "Idea",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "SH-04",
+    "data": {
+      "code": "SH-04",
+      "bookId": "stumbling-on-happiness",
+      "rank": 3,
+      "hook": "You're terrible at predicting what will make future-you happy. Everyone is.",
+      "quietPart": "We imagine the future using today's mood, then act surprised when it feels different.",
+      "why": "Relief, not blame: the error is universal.",
+      "tryThis": "Before a big purchase, ask someone who already has it how they feel now.",
+      "visual": "Present-self and future-self as two ink figures; the forecast line between them is dashed.",
+      "evidence": "SUPPORTED",
+      "evidenceNote": "Affective forecasting errors replicate well (Wilson & Gilbert, 2005).",
+      "pages": "112–130",
+      "scores": {
+        "hook": 4,
+        "visual": 4,
+        "truth": 4,
+        "send": 4
+      },
+      "total": 16,
+      "status": "Idea",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PM-05",
+    "data": {
+      "code": "PM-05",
+      "bookId": "the-psychology-of-money",
+      "rank": 4,
+      "hook": "Rich and wealthy are opposites more often than you think.",
+      "quietPart": "Wealth is the money you didn't spend. You can't see it, which is why nobody admires it.",
+      "why": "Reframes status spending without lecturing.",
+      "tryThis": "Notice the last thing you bought so someone else would see it.",
+      "visual": "A car drawn in solid ink; beside it a dashed outline labelled 'the version you kept'.",
+      "evidence": "STORY",
+      "evidenceNote": "A framing from the book, illustrated with anecdotes rather than data.",
+      "pages": "99–106",
+      "scores": {
+        "hook": 4,
+        "visual": 3,
+        "truth": 4,
+        "send": 3
+      },
+      "total": 14,
+      "status": "Idea",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "AH-09",
+    "data": {
+      "code": "AH-09",
+      "bookId": "atomic-habits",
+      "rank": 5,
+      "hook": "Your environment is voting on your habits while you're asleep.",
+      "quietPart": "The room you wake up in has already made half your choices.",
+      "why": "Concrete and actionable, but the claim needs a source before it ships.",
+      "tryThis": "Move one thing in your room tonight that makes tomorrow's habit easier.",
+      "visual": "A bedroom drawn in line; one object glows faintly.",
+      "evidence": "CHECK",
+      "evidenceNote": "Needs a primary study on cue-driven behaviour before scripting.",
+      "pages": "81–92",
+      "scores": {
+        "hook": 3,
+        "visual": 4,
+        "truth": 3,
+        "send": 3
+      },
+      "total": 13,
+      "status": "Idea",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "AH-04",
+    "data": {
+      "code": "AH-04",
+      "bookId": "atomic-habits",
+      "rank": 6,
+      "hook": "Motivation is the least reliable part of any habit. So stop designing around it.",
+      "quietPart": "If the habit only works on good days, it isn't a habit yet.",
+      "why": "Takes the guilt out of low-motivation days and gives a design problem instead.",
+      "tryThis": "Shrink the habit until it works on your worst day.",
+      "visual": "A motivation curve drawn as a jagged line; a flat solid line runs underneath.",
+      "evidence": "SUPPORTED",
+      "evidenceNote": "Habit formation research favours cue and context over intention (Wood & Neal).",
+      "pages": "141–150",
+      "scores": {
+        "hook": 5,
+        "visual": 4,
+        "truth": 4,
+        "send": 4
+      },
+      "total": 17,
+      "status": "Approved",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "EN-01",
+    "data": {
+      "code": "EN-01",
+      "bookId": "enchiridion",
+      "rank": 7,
+      "hook": "Most of what upsets you was never yours to control. Epictetus wrote that down nineteen centuries ago.",
+      "quietPart": "Draw the line between what's yours and what isn't, and most of the weight falls on the other side.",
+      "why": "Old, short, and immediately usable. The age of the idea is the hook.",
+      "tryThis": "List what's bothering you today. Cross out everything you can't act on.",
+      "visual": "A single page split by an ink line. Left side lit, right side ghosted.",
+      "evidence": "PHILOSOPHY",
+      "evidenceNote": "A Stoic teaching, not an empirical claim. Credit it as philosophy.",
+      "pages": "§1",
+      "scores": {
+        "hook": 4,
+        "visual": 5,
+        "truth": 5,
+        "send": 4
+      },
+      "total": 18,
+      "status": "Approved",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "TFS-03",
+    "data": {
+      "code": "TFS-03",
+      "bookId": "thinking-fast-and-slow",
+      "rank": 8,
+      "hook": "The 'hot hand' you swear you can feel is mostly noise.",
+      "quietPart": "We see streaks in randomness because a pattern is easier to live with than chance.",
+      "why": "Sports fans argue about this, which drives sends.",
+      "tryThis": "Flip a coin 20 times and count the longest streak before you guess.",
+      "visual": "A row of coin flips; a streak is circled in pen, then shown to be ordinary.",
+      "evidence": "MIXED",
+      "evidenceNote": "Original studies found no effect; later re-analysis found a small one. Say both.",
+      "pages": "114–118",
+      "scores": {
+        "hook": 4,
+        "visual": 3,
+        "truth": 3,
+        "send": 4
+      },
+      "total": 14,
+      "status": "Approved",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "FTW-05",
+    "data": {
+      "code": "FTW-05",
+      "bookId": "four-thousand-weeks",
+      "rank": 9,
+      "hook": "The average life is about four thousand weeks. Count how many you've used.",
+      "quietPart": "Finitude isn't the problem to solve. It's what makes any choice mean something.",
+      "why": "Personal maths makes it stick; viewers comment their number.",
+      "tryThis": "Work out your week number. Write it somewhere you'll see it.",
+      "visual": "A grid of 4,000 small squares; filled ones in ink, the current week in lilac.",
+      "evidence": "PHILOSOPHY",
+      "evidenceNote": "The number is arithmetic; the argument is Burkeman's.",
+      "pages": "1–12",
+      "scores": {
+        "hook": 5,
+        "visual": 5,
+        "truth": 4,
+        "send": 5
+      },
+      "total": 19,
+      "status": "Scripted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "PM-02",
+    "data": {
+      "code": "PM-02",
+      "bookId": "the-psychology-of-money",
+      "rank": 10,
+      "hook": "Nobody is thinking about your car as much as you are.",
+      "quietPart": "People look at the car and imagine themselves in it. They don't think about you at all.",
+      "why": "Funny and slightly deflating in a useful way.",
+      "tryThis": "Ask a friend what car you drive. See if they know.",
+      "visual": "A valet story told in four ink frames.",
+      "evidence": "STORY",
+      "evidenceNote": "An anecdote from the book; frame it as a story.",
+      "pages": "91–94",
+      "scores": {
+        "hook": 4,
+        "visual": 4,
+        "truth": 4,
+        "send": 4
+      },
+      "total": 16,
+      "status": "Scripted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "SH-01",
+    "data": {
+      "code": "SH-01",
+      "bookId": "stumbling-on-happiness",
+      "rank": 11,
+      "hook": "Your brain fills the future with the present. That's why every plan feels obvious today.",
+      "quietPart": "Imagination borrows from now, so tomorrow always looks like today in a costume.",
+      "why": "Explains why plans made on good days fail on bad ones.",
+      "tryThis": "Plan the next week while you're tired. See what changes.",
+      "visual": "A calendar page; next week drawn as a faint copy of this one.",
+      "evidence": "SUPPORTED",
+      "evidenceNote": "Presentism in forecasting is well supported.",
+      "pages": "147–160",
+      "scores": {
+        "hook": 4,
+        "visual": 3,
+        "truth": 4,
+        "send": 3
+      },
+      "total": 14,
+      "status": "Voiced",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "voiceAssetId": "uploads/ideas/SH-01/voice-demo.m4a",
+      "voiceFileName": "voice-demo.m4a",
+      "voiceUploadedAt": "2026-10-09T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "AH-02",
+    "data": {
+      "code": "AH-02",
+      "bookId": "atomic-habits",
+      "rank": 12,
+      "hook": "'One percent better a day' is a nice line. The maths isn't why it works.",
+      "quietPart": "It works because it's small enough to start, not because it compounds to 37×.",
+      "why": "Corrects a popular quote without dunking on it.",
+      "tryThis": "Pick a change too small to skip.",
+      "visual": "The 1.01^365 curve, dashed; a short solid line labelled 'today'.",
+      "evidence": "MIXED",
+      "evidenceNote": "The compounding figure is illustrative, not measured.",
+      "pages": "15–20",
+      "scores": {
+        "hook": 4,
+        "visual": 4,
+        "truth": 4,
+        "send": 4
+      },
+      "total": 16,
+      "status": "Voiced",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ]
+    }
+  },
+  {
+    "id": "TFS-01",
+    "data": {
+      "code": "TFS-01",
+      "bookId": "thinking-fast-and-slow",
+      "rank": 13,
+      "hook": "A bat and a ball cost $1.10. Your first answer is wrong, and it arrived fast.",
+      "quietPart": "The answer that comes first is the one you least checked.",
+      "why": "Interactive: viewers pause to solve it.",
+      "tryThis": "Before answering anything fast today, count to three.",
+      "visual": "The puzzle written on paper; the wrong answer crossed out in pen.",
+      "evidence": "SUPPORTED",
+      "evidenceNote": "Cognitive Reflection Test, Frederick 2005.",
+      "pages": "44–46",
+      "scores": {
+        "hook": 5,
+        "visual": 5,
+        "truth": 5,
+        "send": 4
+      },
+      "total": 19,
+      "status": "Produced",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-03T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-09T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "videoAssetId": "uploads/ideas/TFS-01/final-demo.mp4",
+      "videoFileName": "final-demo.mp4",
+      "videoSize": 9437184,
+      "videoUploadedAt": "2026-10-10T12:00:00.000Z",
+      "qaLast": {
+        "qaId": "tfs-01-qa-1",
+        "verdict": "FIX",
+        "at": "2026-10-10T12:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "EN-04",
+    "data": {
+      "code": "EN-04",
+      "bookId": "enchiridion",
+      "rank": 14,
+      "hook": "It isn't the event that hurts. It's the sentence you say about it.",
+      "quietPart": "Between what happened and how you feel is a sentence. You wrote it.",
+      "why": "Short enough to remember; ends on the viewer.",
+      "tryThis": "Write the sentence you told yourself about today's worst moment.",
+      "visual": "An event in solid ink; the sentence about it in lilac underline.",
+      "evidence": "PHILOSOPHY",
+      "evidenceNote": "Stoic teaching; also the basis of cognitive reappraisal.",
+      "pages": "§5",
+      "scores": {
+        "hook": 5,
+        "visual": 4,
+        "truth": 4,
+        "send": 5
+      },
+      "total": 18,
+      "status": "QA passed",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-05T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-07T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-09T12:00:00.000Z"
+        },
+        {
+          "status": "QA passed",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "qaLast": {
+        "qaId": "en-04-qa-1",
+        "verdict": "GO",
+        "at": "2026-10-10T12:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "PM-01",
+    "data": {
+      "code": "PM-01",
+      "bookId": "the-psychology-of-money",
+      "rank": 15,
+      "hook": "Saving money is just paying future-you first.",
+      "quietPart": "Savings are a gift to a person you haven't met yet.",
+      "why": "Warm framing on a dry topic.",
+      "tryThis": "Name the account after the person you'll be in ten years.",
+      "visual": "Two ink figures; an envelope passes between them.",
+      "evidence": "STORY",
+      "evidenceNote": "A framing, illustrated by the book's stories.",
+      "pages": "145–150",
+      "scores": {
+        "hook": 4,
+        "visual": 4,
+        "truth": 4,
+        "send": 4
+      },
+      "total": 16,
+      "status": "Posted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "QA passed",
+          "at": "2026-10-10T12:00:00.000Z"
+        },
+        {
+          "status": "Posted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "posted": {
+        "date": "2026-10-03",
+        "link": "https://example.com/reel-demo"
+      }
+    }
+  },
+  {
+    "id": "AH-01",
+    "data": {
+      "code": "AH-01",
+      "bookId": "atomic-habits",
+      "rank": 16,
+      "hook": "You don't rise to your goals. You fall to your systems.",
+      "quietPart": "Goals pick the direction. Systems decide whether you get there.",
+      "why": "The book's best-known line, with a fresh visual.",
+      "tryThis": "Write the system behind one goal. Just the daily part.",
+      "visual": "A summit drawn faint; the staircase below in solid ink.",
+      "evidence": "SUPPORTED",
+      "evidenceNote": "Supported by research on implementation intentions.",
+      "pages": "23–27",
+      "scores": {
+        "hook": 5,
+        "visual": 4,
+        "truth": 4,
+        "send": 5
+      },
+      "total": 18,
+      "status": "Posted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "QA passed",
+          "at": "2026-10-10T12:00:00.000Z"
+        },
+        {
+          "status": "Posted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "format": "Reel",
+      "hookStyle": "contrarian",
+      "sources": [
+        {
+          "title": "Implementation intentions, a review (demo)",
+          "url": "https://example.com/implementation-intentions"
+        },
+        {
+          "title": "A source with an unsafe link",
+          "url": "http://example.com/not-https"
+        }
+      ],
+      "posted": {
+        "date": "2026-09-28",
+        "link": "https://example.com/reel-demo"
+      }
+    }
+  },
+  {
+    "id": "SH-06",
+    "data": {
+      "code": "SH-06",
+      "bookId": "stumbling-on-happiness",
+      "rank": 17,
+      "hook": "Money can't buy happiness. Or can it?",
+      "quietPart": "The cliché is wrong in both directions.",
+      "why": "Too familiar; the hook doesn't earn the second read.",
+      "tryThis": "—",
+      "visual": "—",
+      "evidence": "MYTH",
+      "evidenceNote": "The popular version of this claim isn't supported. Dropped before scripting.",
+      "pages": "210–215",
+      "scores": {
+        "hook": 3,
+        "visual": 2,
+        "truth": 2,
+        "send": 3
+      },
+      "total": 10,
+      "status": "Dropped",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-10T12:00:00.000Z"
+        },
+        {
+          "status": "Dropped",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "dropReason": "the hook doesn't earn a second read."
+    }
+  }
+]

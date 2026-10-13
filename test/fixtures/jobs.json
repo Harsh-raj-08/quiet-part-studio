@@ -1,0 +1,25 @@
+[
+  {
+    "id": "writer-AH-04-1",
+    "data": {
+      "node": "writer",
+      "ideaCode": "AH-04",
+      "request": "Write production pack",
+      "status": "running",
+      "createdAt": "2026-10-11T12:00:00.000Z",
+      "startedAt": "2026-10-11T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "writer-FTW-05-0",
+    "data": {
+      "node": "writer",
+      "ideaCode": "FTW-05",
+      "request": "Write production pack",
+      "status": "done",
+      "createdAt": "2026-10-05T12:00:00.000Z",
+      "startedAt": "2026-10-05T12:00:00.000Z",
+      "finishedAt": "2026-10-05T12:00:00.000Z"
+    }
+  }
+]

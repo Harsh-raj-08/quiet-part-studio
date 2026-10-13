@@ -1,0 +1,32 @@
+[
+  {
+    "id": "PM-01",
+    "data": {
+      "ideaCode": "PM-01",
+      "postedAt": "2026-10-03",
+      "latest": {
+        "views": 12400,
+        "avgWatchSec": 19,
+        "saves": 410,
+        "shares": 220,
+        "follows": 35,
+        "day": 7
+      }
+    }
+  },
+  {
+    "id": "AH-01",
+    "data": {
+      "ideaCode": "AH-01",
+      "postedAt": "2026-09-28",
+      "latest": {
+        "views": 31000,
+        "avgWatchSec": 19,
+        "saves": 410,
+        "shares": 220,
+        "follows": 35,
+        "day": 7
+      }
+    }
+  }
+]

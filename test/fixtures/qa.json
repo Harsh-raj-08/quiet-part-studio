@@ -1,0 +1,22 @@
+[
+  {
+    "id": "tfs-01-qa-1",
+    "data": {
+      "ideaCode": "TFS-01",
+      "packId": "tfs-01-v5",
+      "verdict": "FIX",
+      "at": "2026-10-10T12:00:00.000Z",
+      "summary": "Two fixes before it ships (demo)."
+    }
+  },
+  {
+    "id": "en-04-qa-1",
+    "data": {
+      "ideaCode": "EN-04",
+      "packId": "en-04-v3",
+      "verdict": "GO",
+      "at": "2026-10-10T12:00:00.000Z",
+      "summary": "Clean (demo)."
+    }
+  }
+]

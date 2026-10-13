@@ -1,0 +1,156 @@
+[
+  {
+    "id": "ftw-05-v2",
+    "data": {
+      "ideaCode": "FTW-05",
+      "version": 2,
+      "title": "Pack for FTW-05",
+      "intro": "Demo pack.",
+      "durationSec": 42,
+      "beats": [
+        {
+          "t": "0:00",
+          "vo": "The average life is about four thousand weeks. Count how many you've used.",
+          "onscreen": "Hook"
+        },
+        {
+          "t": "0:12",
+          "vo": "Finitude isn't the problem to solve. It's what makes any choice mean something.",
+          "onscreen": "The quiet part"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ftw-05-v3",
+    "data": {
+      "ideaCode": "FTW-05",
+      "version": 3,
+      "title": "Pack for FTW-05",
+      "intro": "Demo pack.",
+      "durationSec": 42,
+      "beats": [
+        {
+          "t": "0:00",
+          "vo": "The average life is about four thousand weeks. Count how many you've used.",
+          "onscreen": "Hook"
+        },
+        {
+          "t": "0:12",
+          "vo": "Finitude isn't the problem to solve. It's what makes any choice mean something.",
+          "onscreen": "The quiet part"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pm-02-v2",
+    "data": {
+      "ideaCode": "PM-02",
+      "version": 2,
+      "title": "Pack for PM-02",
+      "intro": "Demo pack.",
+      "durationSec": 42,
+      "beats": [
+        {
+          "t": "0:00",
+          "vo": "Nobody is thinking about your car as much as you are.",
+          "onscreen": "Hook"
+        },
+        {
+          "t": "0:12",
+          "vo": "People look at the car and imagine themselves in it. They don't think about you at all.",
+          "onscreen": "The quiet part"
+        }
+      ]
+    }
+  },
+  {
+    "id": "sh-01-v4",
+    "data": {
+      "ideaCode": "SH-01",
+      "version": 4,
+      "title": "Pack for SH-01",
+      "intro": "Demo pack.",
+      "durationSec": 42,
+      "beats": [
+        {
+          "t": "0:00",
+          "vo": "Your brain fills the future with the present. That's why every plan feels obvious today.",
+          "onscreen": "Hook"
+        },
+        {
+          "t": "0:12",
+          "vo": "Imagination borrows from now, so tomorrow always looks like today in a costume.",
+          "onscreen": "The quiet part"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ah-02-v2",
+    "data": {
+      "ideaCode": "AH-02",
+      "version": 2,
+      "title": "Pack for AH-02",
+      "intro": "Demo pack.",
+      "durationSec": 42,
+      "beats": [
+        {
+          "t": "0:00",
+          "vo": "'One percent better a day' is a nice line. The maths isn't why it works.",
+          "onscreen": "Hook"
+        },
+        {
+          "t": "0:12",
+          "vo": "It works because it's small enough to start, not because it compounds to 37×.",
+          "onscreen": "The quiet part"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tfs-01-v5",
+    "data": {
+      "ideaCode": "TFS-01",
+      "version": 5,
+      "title": "Pack for TFS-01",
+      "intro": "Demo pack.",
+      "durationSec": 42,
+      "beats": [
+        {
+          "t": "0:00",
+          "vo": "A bat and a ball cost $1.10. Your first answer is wrong, and it arrived fast.",
+          "onscreen": "Hook"
+        },
+        {
+          "t": "0:12",
+          "vo": "The answer that comes first is the one you least checked.",
+          "onscreen": "The quiet part"
+        }
+      ]
+    }
+  },
+  {
+    "id": "en-04-v3",
+    "data": {
+      "ideaCode": "EN-04",
+      "version": 3,
+      "title": "Pack for EN-04",
+      "intro": "Demo pack.",
+      "durationSec": 42,
+      "beats": [
+        {
+          "t": "0:00",
+          "vo": "It isn't the event that hurts. It's the sentence you say about it.",
+          "onscreen": "Hook"
+        },
+        {
+          "t": "0:12",
+          "vo": "Between what happened and how you feel is a sentence. You wrote it.",
+          "onscreen": "The quiet part"
+        }
+      ]
+    }
+  }
+]

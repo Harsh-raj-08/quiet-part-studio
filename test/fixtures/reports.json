@@ -1,0 +1,33 @@
+[
+  {
+    "id": "scout-2026-10-06",
+    "data": {
+      "type": "scout",
+      "at": "2026-10-06T12:00:00.000Z",
+      "summary": "Three demo candidates.",
+      "candidates": [
+        {
+          "title": "Slow Mornings",
+          "author": "Marta Vell",
+          "year": "2021",
+          "lane": "Hidden gem",
+          "why": "Invented demo entry."
+        },
+        {
+          "title": "The Cost of Attention",
+          "author": "R. Ono",
+          "year": "2019",
+          "lane": "Trending",
+          "why": "Invented demo entry."
+        },
+        {
+          "title": "Small Hours",
+          "author": "J. Aldren",
+          "year": "2017",
+          "lane": "Well known",
+          "why": "Invented demo entry."
+        }
+      ]
+    }
+  }
+]

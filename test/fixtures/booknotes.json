@@ -1,0 +1,80 @@
+[
+  {
+    "id": "atomic-habits-2",
+    "data": {
+      "bookId": "atomic-habits",
+      "chapterNo": 2,
+      "title": "Systems and goals (demo notes)",
+      "pages": "18–31",
+      "keyIdeas": [
+        {
+          "idea": "A system is what you do every day; a goal is what you want.",
+          "mechanism": "Demo mechanism line.",
+          "pages": "23–25"
+        },
+        {
+          "idea": "Unrelated idea elsewhere in the chapter.",
+          "mechanism": "",
+          "pages": "30"
+        }
+      ],
+      "stories": [
+        {
+          "who": "A demo team",
+          "what": "Changed its process, not its target.",
+          "pages": "26"
+        }
+      ],
+      "claimsToCheck": [
+        {
+          "claim": "Demo claim to check.",
+          "pages": "24"
+        }
+      ],
+      "lines": [
+        {
+          "text": "A short invented line for the demo.",
+          "page": "27"
+        }
+      ]
+    }
+  },
+  {
+    "id": "atomic-habits-9",
+    "data": {
+      "bookId": "atomic-habits",
+      "chapterNo": 9,
+      "title": "Environment (demo notes)",
+      "pages": "80–95",
+      "keyIdeas": [
+        {
+          "idea": "Cues live in rooms.",
+          "mechanism": "",
+          "pages": "81–84"
+        }
+      ],
+      "stories": [],
+      "claimsToCheck": [],
+      "lines": []
+    }
+  },
+  {
+    "id": "thinking-fast-and-slow-12",
+    "data": {
+      "bookId": "thinking-fast-and-slow",
+      "chapterNo": 12,
+      "title": "A far-away chapter (demo notes)",
+      "pages": "300–320",
+      "keyIdeas": [
+        {
+          "idea": "Nothing to do with TFS-07.",
+          "mechanism": "",
+          "pages": "305"
+        }
+      ],
+      "stories": [],
+      "claimsToCheck": [],
+      "lines": []
+    }
+  }
+]
