@@ -54,7 +54,8 @@ export function createSupabaseAdapter(cfg: QpConfig): Adapter {
     };
     void load();
     sb.channel(`qps-${c}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: c }, (p: { eventType: string; new: Row; old: { id?: string } }) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: c }, (raw) => {
+        const p = raw as unknown as { eventType: string; new: Row; old: { id?: string } };
         const m = maps.get(c)!;
         if (p.eventType === 'DELETE') { if (p.old?.id) m.delete(p.old.id); }
         else if (p.new?.id) m.set(p.new.id, toDoc(p.new));
