@@ -12,7 +12,22 @@ export function nw(n: number, cap = false): string {
   return cap ? w.charAt(0).toUpperCase() + w.slice(1) : w;
 }
 
-export const ts = (s: string): number => { const t = Date.parse(s); return Number.isFinite(t) ? t : 0; };
+/**
+ * Every date the studio shows is in the viewer's local zone. A date-only string ("2026-10-09", a posted day or
+ * "week of") means that calendar day locally, so it parses as local midnight, not UTC midnight.
+ */
+export function parseWhen(s: string): number {
+  const v = str(s).trim();
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return new Date(+m[1]!, +m[2]! - 1, +m[3]!).getTime();
+  const t = Date.parse(v);
+  return Number.isFinite(t) ? t : NaN;
+}
+export const ts = (s: string): number => { const t = parseWhen(s); return Number.isFinite(t) ? t : 0; };
+const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+/** Whole local calendar days from `a` to `b`. */
+export const dayDiff = (a: Date, b: Date) => Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime() - new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime()) / 86400000);
+export const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 /** "Sunday 11 October" (eyebrow). */
 export function longDate(d: Date = new Date()): string {
@@ -21,7 +36,7 @@ export function longDate(d: Date = new Date()): string {
 }
 
 export function isToday(t: string, now: Date = new Date()): boolean {
-  const d = new Date(Date.parse(t));
+  const d = new Date(parseWhen(t));
   if (!Number.isFinite(+d)) return false;
   return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
 }
@@ -31,7 +46,7 @@ export const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep
 /** "8 Oct", or "8 Oct 2025" in another year (three-letter months: "Sep", not "Sept"). */
 export function fmtDay(s: string, now: Date = new Date()): string {
   if (!s) return '';
-  const t = Date.parse(s);
+  const t = parseWhen(s);
   if (!Number.isFinite(t)) return str(s);
   const d = new Date(t);
   const base = `${d.getDate()} ${MON[d.getMonth()]}`;
@@ -97,14 +112,13 @@ export function todayISO(d: Date = new Date()): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-/** "today, 09:12" / "yesterday, 18:40" / "8 Oct" (UTC clock like the rest of the studio's dates). */
+/** "today, 09:12" / "yesterday, 18:40" / "8 Oct", in the viewer's local time. */
 export function fmtWhen(s: string, now: Date = new Date()): string {
-  const t = Date.parse(s);
+  const t = parseWhen(s);
   if (!Number.isFinite(t)) return '';
   const d = new Date(t);
-  const day = (x: Date) => Date.UTC(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate());
-  const diff = Math.round((day(now) - day(d)) / 86400000);
-  const hm = `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+  const diff = dayDiff(d, now);
+  const hm = hhmm(d);
   if (diff === 0) return `today, ${hm}`;
   if (diff === 1) return `yesterday, ${hm}`;
   return fmtDay(s, now);
@@ -119,15 +133,28 @@ export function fmtChatWhen(s: string, now: Date = new Date()): string {
 }
 /** "2026-10-05" -> "5 October". */
 export function dayMonth(s: string): string {
-  const t = Date.parse(s);
+  const t = parseWhen(s);
   if (!Number.isFinite(t)) return str(s);
   const d = new Date(t);
-  return `${d.getUTCDate()} ${d.toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' })}`;
+  return `${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'long' })}`;
 }
 /** "6 Oct 2026". */
 export function dayMonYear(s: string): string {
-  const t = Date.parse(s);
+  const t = parseWhen(s);
   if (!Number.isFinite(t)) return str(s);
   const d = new Date(t);
-  return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`;
 }
+/** The System table's "when": now (running), 09:14 (today), Mon 06:00 (this week), else 7 Oct. Local time. */
+export function whenText(iso: string, running: boolean, now: number): string {
+  if (running) return 'now';
+  const t = parseWhen(iso);
+  if (!Number.isFinite(t)) return '';
+  const d = new Date(t);
+  const diff = dayDiff(d, new Date(now));
+  if (diff <= 0) return hhmm(d);
+  if (diff < 7) return `${DAYS[d.getDay()]} ${hhmm(d)}`;
+  return `${d.getDate()} ${MON[d.getMonth()]}`;
+}
+/** "8 Oct" for a timestamp (ms), local. */
+export const shortDay = (t: number) => (t ? `${new Date(t).getDate()} ${MON[new Date(t).getMonth()]}` : '–');

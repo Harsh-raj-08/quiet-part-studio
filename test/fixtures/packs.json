@@ -47,7 +47,7 @@
         "Keep the grid legible at 1080 wide; no squares under 6 px."
       ],
       "createdBy": "writer",
-      "createdAt": "2026-10-08T12:00:00.000Z",
+      "createdAt": "2026-10-08T06:30:00.000Z",
       "version": 3
     }
   },
@@ -86,7 +86,7 @@
         "Frame it as Housel's story, not a study."
       ],
       "createdBy": "writer",
-      "createdAt": "2026-10-06T12:00:00.000Z",
+      "createdAt": "2026-10-06T06:30:00.000Z",
       "version": 1
     }
   },
@@ -131,7 +131,7 @@
         "Frame it as Housel's story, not a study."
       ],
       "createdBy": "writer",
-      "createdAt": "2026-10-08T12:00:00.000Z",
+      "createdAt": "2026-10-08T06:30:00.000Z",
       "hooks": [
         {
           "style": "story",
@@ -220,7 +220,7 @@
         "Keep 'presentism' on screen for at least 1.5 s."
       ],
       "createdBy": "writer",
-      "createdAt": "2026-10-08T12:00:00.000Z",
+      "createdAt": "2026-10-08T06:30:00.000Z",
       "frames": [
         {
           "t": "0:00",
@@ -278,7 +278,7 @@
         "Evidence stamp: MIXED."
       ],
       "createdBy": "writer",
-      "createdAt": "2026-10-08T12:00:00.000Z",
+      "createdAt": "2026-10-08T06:30:00.000Z",
       "version": 2
     }
   },
@@ -329,7 +329,7 @@
         "Leave a real pause at 0:12 for viewers to solve."
       ],
       "createdBy": "writer",
-      "createdAt": "2026-10-08T12:00:00.000Z",
+      "createdAt": "2026-10-08T06:30:00.000Z",
       "version": 5
     }
   },
@@ -374,7 +374,7 @@
         "Credit as philosophy, not research."
       ],
       "createdBy": "writer",
-      "createdAt": "2026-10-08T12:00:00.000Z",
+      "createdAt": "2026-10-08T06:30:00.000Z",
       "version": 3
     }
   }

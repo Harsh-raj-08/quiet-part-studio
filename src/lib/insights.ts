@@ -1,6 +1,6 @@
 // Insights rules (old studio + SPEC5, adjusted for 3c): KPIs, the 7-day expectation, What works grouping.
 import type { Account, Book, Idea, Metric, Pack, Snap } from '../data/types';
-import { compactViews, kfmt, ts } from './format';
+import { compactViews, DAYS, kfmt, parseWhen, ts } from './format';
 
 export interface PostRow { idea: Idea; metric: Metric | null; latest: Snap | null; postedAt: number }
 const D = 864e5;
@@ -104,8 +104,8 @@ export function groupOf(i: Idea, k: GroupKey, books: Map<string, Book>, pack: Pa
   if (k === 'hook') return HOOK_LABEL[i.hookStyle] ?? (i.hookStyle || '(none)');
   if (k === 'format') return fmtKind(i.format) || '(none)';
   if (k === 'length') { const l = reelLen(i, pack); return l == null ? 'Unknown' : l < 45 ? '<45 s' : l <= 60 ? '45–60 s' : l <= 75 ? '60–75 s' : '>75 s'; }
-  const t = Date.parse(i.posted?.date ?? '');
-  return Number.isFinite(t) ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(t).getUTCDay()]! : 'Unknown';
+  const t = parseWhen(i.posted?.date ?? '');
+  return Number.isFinite(t) ? DAYS[new Date(t).getDay()]! : 'Unknown';
 }
 export function metricOf(l: Snap, k: MetricKey, len: number | null): number | null {
   const reach = l.reach != null && l.reach > 0 ? l.reach : l.views != null && l.views > 0 ? l.views : null;

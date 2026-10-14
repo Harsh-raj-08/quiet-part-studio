@@ -7,7 +7,7 @@ import { METRIC_FIELDS, type MetricField, type Snap } from '../../data/types';
 import { MONO, SANS, SERIF } from '../../design/fonts';
 import { Btn, JobRow, Label, Overlay } from '../../design/kit';
 import { compactViews, expectations, kpis, type PostRow } from '../../lib/insights';
-import { fmtDay, MON } from '../../lib/format';
+import { fmtDay, parseWhen, shortDay } from '../../lib/format';
 
 export const IMG_ACCEPT = '.png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp';
 const IMG_MAX = 10 * 1024 * 1024;
@@ -26,7 +26,7 @@ export function checkImages(files: File[], max: number): string | null {
 
 const COLS = '52px minmax(160px,1.4fr) minmax(80px,.8fr) 52px 40px 76px';
 const fn = (v: number | null, d = 0) => (v == null || !Number.isFinite(v) ? '–' : (Math.round(v * 10 ** d) / 10 ** d).toLocaleString('en-US', { maximumFractionDigits: d }));
-const shortDate = (t: number) => (t ? `${new Date(t).getUTCDate()} ${MON[new Date(t).getUTCMonth()]}` : '–');
+const shortDate = shortDay;
 
 export function Log({ rows, open, setOpen }: { rows: PostRow[]; open: string | null; setOpen: (c: string | null) => void }) {
   const account = useAccount();
@@ -119,7 +119,7 @@ function Body({ r }: { r: PostRow }) {
     for (const [k] of METRIC_FIELDS) { const t = edit[k].trim().replace(/,/g, ''); if (t === '') vals[k] = null; else { const n = Number(t); if (!Number.isFinite(n) || n < 0) { R.toast(`Check the ${k} number`, true); return; } vals[k] = n; } }
     void R.run(`edit:${code}`, async () => {
       const at = new Date().toISOString();
-      const posted = Date.parse(r.idea.posted?.date ?? '');
+      const posted = parseWhen(r.idea.posted?.date ?? '');
       const snap = { at, day: Number.isFinite(posted) ? Math.max(0, Math.round((Date.parse(at) - posted) / 864e5)) : null, ...vals, source: 'edit', note: '' };
       const cur = await R.store.get('metrics', code);
       if (!cur) await R.store.set('metrics', code, { ideaCode: code, postedAt: r.idea.posted?.date ?? '', snapshots: [snap], latest: snap, screenshots: [], updatedAt: at });

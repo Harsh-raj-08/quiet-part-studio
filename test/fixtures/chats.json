@@ -4,8 +4,8 @@
     "data": {
       "node": "scout",
       "title": "Angles on decision fatigue",
-      "createdAt": "2026-10-11T10:40:00.000Z",
-      "updatedAt": "2026-10-11T10:42:00.000Z",
+      "createdAt": "2026-10-11T05:10:00.000Z",
+      "updatedAt": "2026-10-11T05:12:00.000Z",
       "jobs": [
         "scout-chat-1"
       ],
@@ -13,11 +13,11 @@
         {
           "role": "user",
           "content": "What's a fresh angle on decision fatigue that we could source from the shelf?",
-          "at": "2026-10-11T10:40:00.000Z"
+          "at": "2026-10-11T05:10:00.000Z"
         },
         {
           "role": "assistant",
-          "at": "2026-10-11T10:42:00.000Z",
+          "at": "2026-10-11T05:12:00.000Z",
           "content": "Decision fatigue itself has a shaky replication record, so I'd avoid leading with it. The stronger angle on the shelf is that hard choices get quietly swapped for easier ones. That's well supported and lands the same feeling. Three candidates:",
           "ideas": [
             {
@@ -47,19 +47,19 @@
     "data": {
       "node": "scout",
       "title": "Is the 21-day habit thing real?",
-      "createdAt": "2026-10-10T15:00:00.000Z",
-      "updatedAt": "2026-10-10T15:02:00.000Z",
+      "createdAt": "2026-10-10T09:30:00.000Z",
+      "updatedAt": "2026-10-10T09:32:00.000Z",
       "jobs": [],
       "turns": [
         {
           "role": "user",
           "content": "Is the '21 days to form a habit' claim real?",
-          "at": "2026-10-10T15:00:00.000Z"
+          "at": "2026-10-10T09:30:00.000Z"
         },
         {
           "role": "assistant",
           "content": "No. It traces back to a 1960 observation about patients adjusting to surgery, not habit research. The best study we have found a median of about 66 days, with a very wide range. Good material for a MYTH stamp.",
-          "at": "2026-10-10T15:02:00.000Z",
+          "at": "2026-10-10T09:32:00.000Z",
           "sources": [
             "Lally et al. 2010"
           ]
@@ -72,19 +72,19 @@
     "data": {
       "node": "scout",
       "title": "Stoic ideas that aren't clichés",
-      "createdAt": "2026-10-07T09:00:00.000Z",
-      "updatedAt": "2026-10-07T09:01:00.000Z",
+      "createdAt": "2026-10-07T03:30:00.000Z",
+      "updatedAt": "2026-10-07T03:31:00.000Z",
       "jobs": [],
       "turns": [
         {
           "role": "user",
           "content": "Stoic ideas that haven't been done to death?",
-          "at": "2026-10-07T09:00:00.000Z"
+          "at": "2026-10-07T03:30:00.000Z"
         },
         {
           "role": "assistant",
           "content": "Skip 'the obstacle is the way'. Epictetus on roles is underused: you're a sibling, a friend, a citizen, and each role carries its own duties. It reframes conflict well.",
-          "at": "2026-10-07T09:01:00.000Z",
+          "at": "2026-10-07T03:31:00.000Z",
           "books": [
             {
               "title": "Meditations",

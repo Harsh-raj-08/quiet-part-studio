@@ -11,7 +11,8 @@ import { cleanLearnings } from '../../src/screens/insights/Review';
 import { cleanTaste } from '../../src/screens/insights/Taste';
 import { normAccount, normBook, normChat, normIdea, normMetric, normSettings, type Idea } from '../../src/data/types';
 
-const NOW = Date.parse('2026-10-11T12:00:00Z');
+// Tests run with TZ=Asia/Kolkata (scripts/test.mjs): 12:00 IST on Sunday 11 October.
+const NOW = Date.parse('2026-10-11T12:00:00+05:30');
 const idea = (code: string, date: string, extra: Record<string, unknown> = {}): Idea => normIdea({ id: code, version: 1, data: { code, status: 'Posted', posted: { date, link: '' }, evidence: 'SUPPORTED', ...extra } });
 const metric = (code: string, views: number, d7: number | null, extra: Record<string, unknown> = {}) =>
   normMetric({ id: code, version: 1, data: { ideaCode: code, snapshots: [...(d7 != null ? [{ day: 7, views: d7 }] : []), { day: 20, views, shares: views / 20, follows: 10, watchThroughPct: 60, ...extra }] } });
@@ -34,7 +35,7 @@ test('expectation: median of earlier day-7 views once there are 3, else the medi
 test('KPIs: 30-day sums with deltas; followers from account snapshots, else follows from reels', () => {
   const ideas = [idea('A', '2026-10-01'), idea('B', '2026-09-01')];
   const rows = postedRows(ideas, [metric('A', 2000, null), metric('B', 1000, null)]);
-  const acct = [['2026-08-11', 9000], ['2026-09-11', 10280], ['2026-10-11', 11460]].map(([at, f]) => normAccount({ id: String(at), version: 1, data: { at: `${at}T09:00:00Z`, followers: f } }));
+  const acct = [['2026-08-11', 9000], ['2026-09-11', 10280], ['2026-10-11', 11460]].map(([at, f]) => normAccount({ id: String(at), version: 1, data: { at: `${at}T09:00:00+05:30`, followers: f } }));
   const k = kpis(rows, acct, NOW);
   assert.deepEqual(k.map((x) => [x.label, x.value, x.delta]), [['Views', '2k', '+100% vs prior 30 days'], ['Avg. watch', '60%', '0 pts'], ['Sends', '100', '+100%'], ['Followers', '+1,180', '−8% vs prior']]);
   assert.equal(kpis(rows, [], NOW)[3]!.label, 'Follows from reels');
@@ -57,10 +58,10 @@ test('What works: hook labels, groups, metrics, sorted by the metric', () => {
 
 test('worker heartbeat (13 h) and the system headline', () => {
   assert.equal(workerOnline('2026-10-11T00:00:01Z', NOW), true);
-  assert.equal(workerOnline('2026-10-10T22:59:00Z', NOW), false);
+  assert.equal(workerOnline('2026-10-10T22:59:00+05:30', NOW), false);
   assert.equal(workerOnline('', NOW), false);
-  assert.equal(idleSince('2026-10-09T08:00:00Z', new Date(NOW)), 'idle since 9 Oct');
-  assert.equal(idleSince('2026-10-10T18:40:00Z', new Date(NOW)), 'idle since yesterday, 18:40');
+  assert.equal(idleSince('2026-10-09T08:00:00+05:30', new Date(NOW)), 'idle since 9 Oct');
+  assert.equal(idleSince('2026-10-10T18:40:00+05:30', new Date(NOW)), 'idle since yesterday, 18:40');
   const base = { loading: () => false, ideas: [], books: [], runs: [], metrics: [], reports: [], ratings: 0, now: new Date(NOW) };
   const run = { id: 'j', node: 'w', ideaCode: '', bookId: '', packId: '', chatId: '', request: '', status: 'running', error: '', kind: '', createdAt: '', startedAt: '', finishedAt: '', progress: null };
   assert.equal(headlines('system', { ...base, jobs: [run], workerSeenAt: '2026-10-11T11:00:00Z' }).g, 'Worker online, one job running.');
@@ -70,9 +71,9 @@ test('worker heartbeat (13 h) and the system headline', () => {
 
 test('System table: took and when', () => {
   assert.equal(took(48_000), '48s'); assert.equal(took(72_000), '1m 12s'); assert.equal(took(3_900_000), '1h 05m');
-  assert.equal(whenText('2026-10-11T09:14:00Z', false, NOW), '09:14');
-  assert.equal(whenText('2026-10-05T06:00:00Z', false, NOW), 'Mon 06:00');
-  assert.equal(whenText('2026-09-29T06:00:00Z', false, NOW), '29 Sep');
+  assert.equal(whenText('2026-10-11T09:14:00+05:30', false, NOW), '09:14');
+  assert.equal(whenText('2026-10-05T06:00:00+05:30', false, NOW), 'Mon 06:00');
+  assert.equal(whenText('2026-09-29T06:00:00+05:30', false, NOW), '29 Sep');
   assert.equal(whenText('', true, NOW), 'now');
 });
 
@@ -99,4 +100,16 @@ test('chat, settings and account normalisers', () => {
   const s = normSettings([{ id: 'studio', version: 1, data: { writerLane: 'QUICK', workerTriggerId: 't' } }]);
   assert.deepEqual([s.writerLane, s.cadence, s.autoArt, s.notifyQa, s.spacePhilosophy, s.triggerSet], ['quick', '4 per week', true, true, false, true]);
   assert.equal(normAccount({ id: 'a', version: 1, data: { at: 'x', followers: '12' } }).followers, 12);
+});
+
+test('dates render in the local zone; date-only strings are local calendar days', async () => {
+  const { parseWhen, fmtWhen, dayMonth, fmtDay, shortDay } = await import('../../src/lib/format');
+  assert.match(Intl.DateTimeFormat().resolvedOptions().timeZone, /^Asia\/(Kolkata|Calcutta)$/, 'scripts/test.mjs pins TZ');
+  assert.equal(new Date(parseWhen('2026-10-09')).getDate(), 9);
+  assert.equal(new Date(parseWhen('2026-10-09')).getHours(), 0);
+  // 23:30 UTC on 10 Oct is 05:00 on 11 Oct in India.
+  assert.equal(fmtWhen('2026-10-10T23:30:00Z', new Date(NOW)), 'today, 05:00');
+  assert.equal(fmtDay('2026-10-10T23:30:00Z', new Date(NOW)), '11 Oct');
+  assert.equal(dayMonth('2026-10-05'), '5 October');
+  assert.equal(shortDay(parseWhen('2026-09-28')), '28 Sep');
 });

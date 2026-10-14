@@ -6,8 +6,8 @@
       "target": "AH-04",
       "summary": "Drafting production pack v1",
       "status": "running",
-      "startedAt": "2026-10-11T11:58:48.000Z",
-      "at": "2026-10-11T11:58:48.000Z",
+      "startedAt": "2026-10-11T06:28:48.000Z",
+      "at": "2026-10-11T06:28:48.000Z",
       "jobId": "writer-AH-04-1"
     }
   },
@@ -18,8 +18,8 @@
       "target": "CD",
       "summary": "Reading chapter 6 of 13",
       "status": "running",
-      "startedAt": "2026-10-11T11:51:20.000Z",
-      "at": "2026-10-11T11:51:20.000Z",
+      "startedAt": "2026-10-11T06:21:20.000Z",
+      "at": "2026-10-11T06:21:20.000Z",
       "jobId": "research-the-courage-to-be-disliked-1"
     }
   },
@@ -30,9 +30,9 @@
       "target": "TFS-01",
       "summary": "Fix verdict: loudness, caption safe zone",
       "status": "done",
-      "startedAt": "2026-10-11T09:13:12.000Z",
-      "finishedAt": "2026-10-11T09:14:00.000Z",
-      "at": "2026-10-11T09:14:00.000Z"
+      "startedAt": "2026-10-11T03:43:12.000Z",
+      "finishedAt": "2026-10-11T03:44:00.000Z",
+      "at": "2026-10-11T03:44:00.000Z"
     }
   },
   {
@@ -42,9 +42,9 @@
       "target": "FTW-05",
       "summary": "Six reference frames generated",
       "status": "done",
-      "startedAt": "2026-10-11T08:48:55.000Z",
-      "finishedAt": "2026-10-11T08:51:00.000Z",
-      "at": "2026-10-11T08:51:00.000Z"
+      "startedAt": "2026-10-11T03:18:55.000Z",
+      "finishedAt": "2026-10-11T03:21:00.000Z",
+      "at": "2026-10-11T03:21:00.000Z"
     }
   },
   {
@@ -54,9 +54,9 @@
       "target": "",
       "summary": "Weekly report: nine candidates",
       "status": "done",
-      "startedAt": "2026-10-05T05:56:29.000Z",
-      "finishedAt": "2026-10-05T06:00:00.000Z",
-      "at": "2026-10-05T06:00:00.000Z"
+      "startedAt": "2026-10-05T00:26:29.000Z",
+      "finishedAt": "2026-10-05T00:30:00.000Z",
+      "at": "2026-10-05T00:30:00.000Z"
     }
   },
   {
@@ -66,9 +66,9 @@
       "target": "",
       "summary": "Weekly trends report",
       "status": "done",
-      "startedAt": "2026-10-05T06:03:02.000Z",
-      "finishedAt": "2026-10-05T06:05:00.000Z",
-      "at": "2026-10-05T06:05:00.000Z"
+      "startedAt": "2026-10-05T00:33:02.000Z",
+      "finishedAt": "2026-10-05T00:35:00.000Z",
+      "at": "2026-10-05T00:35:00.000Z"
     }
   },
   {
@@ -78,9 +78,9 @@
       "target": "",
       "summary": "Weekly review written",
       "status": "done",
-      "startedAt": "2026-10-04T20:58:50.000Z",
-      "finishedAt": "2026-10-04T21:00:00.000Z",
-      "at": "2026-10-04T21:00:00.000Z"
+      "startedAt": "2026-10-04T15:28:50.000Z",
+      "finishedAt": "2026-10-04T15:30:00.000Z",
+      "at": "2026-10-04T15:30:00.000Z"
     }
   },
   {
@@ -90,9 +90,9 @@
       "target": "SH-01",
       "summary": "Pack v4 after prompt edit",
       "status": "done",
-      "startedAt": "2026-10-10T16:18:58.000Z",
-      "finishedAt": "2026-10-10T16:20:00.000Z",
-      "at": "2026-10-10T16:20:00.000Z"
+      "startedAt": "2026-10-10T10:48:58.000Z",
+      "finishedAt": "2026-10-10T10:50:00.000Z",
+      "at": "2026-10-10T10:50:00.000Z"
     }
   },
   {
@@ -102,9 +102,9 @@
       "target": "PM-02",
       "summary": "Frame 03 rejected by safety filter",
       "status": "failed",
-      "startedAt": "2026-10-09T11:06:38.000Z",
-      "finishedAt": "2026-10-09T11:07:00.000Z",
-      "at": "2026-10-09T11:07:00.000Z"
+      "startedAt": "2026-10-09T05:36:38.000Z",
+      "finishedAt": "2026-10-09T05:37:00.000Z",
+      "at": "2026-10-09T05:37:00.000Z"
     }
   }
 ]

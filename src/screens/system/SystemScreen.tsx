@@ -7,7 +7,7 @@ import type { Job, StudioSettings } from '../../data/types';
 import { MONO, SANS, SERIF, EASE } from '../../design/fonts';
 import { Btn, statusStyle, SubTabs } from '../../design/kit';
 import { Eyebrow, Headline } from '../../design/primitives';
-import { fmtWhen, MON } from '../../lib/format';
+import { fmtWhen, whenText } from '../../lib/format';
 import { idleSince, workerOnline } from '../../lib/worker';
 
 const SUBS = [['runs', 'Runs'], ['jobs', 'Jobs'], ['settings', 'Settings']] as const;
@@ -15,7 +15,6 @@ type Sub = (typeof SUBS)[number][0];
 const NODES = ['all', 'writer', 'research', 'art', 'qa', 'scout', 'trends', 'review'];
 const STATUSES = ['all', 'queued', 'running', 'done', 'failed'];
 const COLS = '76px 60px minmax(0,1fr) 92px 96px';
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 /** "1m 12s", "48s", "1h 05m". */
 export function took(ms: number): string {
@@ -26,18 +25,7 @@ export function took(ms: number): string {
   if (m < 60) return `${m}m ${String(n % 60).padStart(2, '0')}s`;
   return `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m`;
 }
-/** The design's "when": now (running), 09:14 (today), Mon 06:00 (this week), else 7 Oct. UTC clock. */
-export function whenText(iso: string, running: boolean, now: number): string {
-  if (running) return 'now';
-  const t = Date.parse(iso);
-  if (!Number.isFinite(t)) return '';
-  const d = new Date(t); const hm = `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
-  const day = (x: number) => Math.floor(x / 864e5);
-  const diff = day(now) - day(t);
-  if (diff <= 0) return hm;
-  if (diff < 7) return `${DAYS[d.getUTCDay()]} ${hm}`;
-  return `${d.getUTCDate()} ${MON[d.getUTCMonth()]}`;
-}
+export { whenText };
 
 function useTick(on: boolean) {
   const [, set] = useState(0);

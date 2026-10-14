@@ -3,7 +3,7 @@
     "id": "studio",
     "data": {
       "workerSchedule": "every 30 minutes",
-      "workerSeenAt": "2026-10-11T11:40:00.000Z",
+      "workerSeenAt": "2026-10-11T06:10:00.000Z",
       "writerLane": "careful",
       "cadence": "4 per week",
       "autoArt": true,

@@ -158,7 +158,7 @@ test('Taste: profile, ratings trend with the Critic tick, proposal Accept, Run t
   assert.equal((await page.locator('#taste-count').innerText()).toLowerCase(), '4 scripts rated · average 7.3');
   assert.equal(await page.locator('[data-rating]').count(), 4);
   assert.equal(await page.locator('[data-rating="PM-02-v2"] [data-pred]').count(), 1);
-  await mock(page, (m) => m.put('playbooks', 'taste-proposed', { node: 'taste', at: '2026-10-11T09:00:00Z', text: '- [medium] Prefers endings that hand the viewer one small action.\n- [strong] Likes a source chip after the first beat.' }));
+  await mock(page, (m) => m.put('playbooks', 'taste-proposed', { node: 'taste', at: '2026-10-11T05:00:00Z', text: '- [medium] Prefers endings that hand the viewer one small action.\n- [strong] Likes a source chip after the first beat.' }));
   await page.waitForSelector('#taste-prop');
   await page.click('#taste-accept');
   await page.waitForFunction(() => !document.getElementById('taste-prop'));

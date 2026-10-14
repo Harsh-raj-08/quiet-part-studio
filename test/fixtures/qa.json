@@ -6,7 +6,7 @@
       "packId": "TFS-01-v5",
       "videoAssetId": "media/TFS-01/demo-TFS-01_v2.mp4",
       "verdict": "FIX",
-      "at": "2026-10-11T12:00:00.000Z",
+      "at": "2026-10-11T06:30:00.000Z",
       "summary": "Two fixes before it ships. Both are small.",
       "measurements": {
         "width": 1080,
@@ -69,7 +69,7 @@
       "ideaCode": "TFS-01",
       "packId": "TFS-01-v5",
       "verdict": "NO-GO",
-      "at": "2026-10-10T12:00:00.000Z",
+      "at": "2026-10-10T06:30:00.000Z",
       "summary": "First cut: no source chip. (Demo.)",
       "checks": [
         {
@@ -85,7 +85,7 @@
       "ideaCode": "EN-04",
       "packId": "EN-04-v3",
       "verdict": "GO",
-      "at": "2026-10-10T12:00:00.000Z",
+      "at": "2026-10-10T06:30:00.000Z",
       "summary": "Clean pass. Ready to post.",
       "measurements": {
         "durationSec": 34,

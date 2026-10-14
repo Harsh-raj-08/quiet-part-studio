@@ -7,7 +7,14 @@ import path from 'node:path';
 
 const OUT = path.resolve('test/fixtures');
 fs.mkdirSync(OUT, { recursive: true });
-const write = (name, docs) => fs.writeFileSync(path.join(OUT, `${name}.json`), JSON.stringify(docs, null, 2) + '\n');
+// Timestamps below are written as the owner's wall-clock time (Asia/Kolkata) with a Z for brevity; write() turns
+// them into real UTC instants (minus 5 h 30). The tests pin the browser to Asia/Kolkata and freeze the clock at
+// 12:00 IST on Sunday 11 October, so the screens read exactly like the design ("Today, 10:42", "09:14", "Mon 06:00").
+const IST = 5.5 * 3600e3;
+const ISO_T = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?Z$/;
+const toUtc = (v) => (typeof v === 'string' && ISO_T.test(v) ? new Date(Date.parse(v) - IST).toISOString()
+  : Array.isArray(v) ? v.map(toUtc) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, toUtc(x)])) : v);
+const write = (name, docs) => fs.writeFileSync(path.join(OUT, `${name}.json`), JSON.stringify(toUtc(docs), null, 2) + '\n');
 
 const STAGES = ['Idea', 'Approved', 'Scripted', 'Voiced', 'Produced', 'QA passed', 'Posted'];
 const iso = (d) => `2026-10-${String(d).padStart(2, '0')}T12:00:00.000Z`;

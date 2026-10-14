@@ -28,7 +28,8 @@ export async function startServer(dir = DIST) {
   return { url, close: () => new Promise((r) => server.close(r)) };
 }
 
-export const FIXED_NOW = '2026-10-11T12:00:00Z'; // "Sunday 11 October", the design's date
+export const FIXED_NOW = '2026-10-11T06:30:00Z'; // 12:00 in Asia/Kolkata on "Sunday 11 October", the design's date
+export const TZ = 'Asia/Kolkata';
 
 /**
  * Open the app in a fresh context.
@@ -38,7 +39,7 @@ export async function openApp(browser, base, opts = {}) {
   const ctx = await browser.newContext({
     viewport: { width: opts.width ?? 1440, height: opts.height ?? 1000 }, deviceScaleFactor: 1,
     reducedMotion: opts.reducedMotion ? 'reduce' : 'no-preference',
-    timezoneId: 'UTC', locale: 'en-GB', acceptDownloads: true,
+    timezoneId: TZ, locale: 'en-GB', acceptDownloads: true,
   });
   const page = await ctx.newPage();
   const errors = [];

@@ -4,7 +4,7 @@
     "data": {
       "type": "scout",
       "mode": "weekly",
-      "at": "2026-10-06T06:00:00.000Z",
+      "at": "2026-10-06T00:30:00.000Z",
       "summary": "Attention and choice dominate this week. Six books surfaced; three fit the shelf's lanes without overlapping what we already cover, and one is already on the shelf.",
       "sources": [
         "Publisher catalogues",
@@ -90,7 +90,7 @@
     "data": {
       "type": "scout",
       "mode": "briefs",
-      "at": "2026-10-03T15:00:00.000Z",
+      "at": "2026-10-03T09:30:00.000Z",
       "request": "Books about regret that aren't self-help.",
       "summary": "Two strong options. Both are research-led and avoid the advice-list format, and both have short chapters that map to single reels.",
       "sources": [
@@ -129,7 +129,7 @@
     "data": {
       "type": "scout",
       "mode": "manual",
-      "at": "2026-09-29T10:00:00.000Z",
+      "at": "2026-09-29T04:30:00.000Z",
       "summary": "Quick run on money and motivation. One overlap with the shelf, one hidden gem worth a look.",
       "sources": [
         "Bestseller lists",
@@ -165,7 +165,7 @@
     "id": "trends-2026-10-05",
     "data": {
       "type": "trends",
-      "at": "2026-10-05T06:05:00.000Z",
+      "at": "2026-10-05T00:35:00.000Z",
       "weekOf": "2026-10-05",
       "summary": "Calm, evidence-led content is saving well, while hustle-framed productivity is losing shares. Money anxiety is rising; Housel and Burkeman are the right books to lean on this week.",
       "actions": [
@@ -269,7 +269,7 @@
     "id": "trends-2026-09-28",
     "data": {
       "type": "trends",
-      "at": "2026-09-28T06:05:00.000Z",
+      "at": "2026-09-28T00:35:00.000Z",
       "weekOf": "2026-09-28",
       "summary": "Stoic content is steady; future-self framing is up. Keep philosophy posts spaced apart.",
       "actions": [
@@ -314,7 +314,7 @@
     "id": "review-2026-10-05",
     "data": {
       "type": "review",
-      "at": "2026-10-04T21:00:00.000Z",
+      "at": "2026-10-04T15:30:00.000Z",
       "weekOf": "2026-10-05",
       "headline": "The systems line carried the week. The money post found a quieter audience.",
       "note": "sends > views. keep the stamp visible.",
@@ -359,7 +359,7 @@
     "id": "review-2026-09-28",
     "data": {
       "type": "review",
-      "at": "2026-09-27T21:00:00.000Z",
+      "at": "2026-09-27T15:30:00.000Z",
       "weekOf": "2026-09-28",
       "summary": "A quiet week: two reels, both above the median.",
       "wins": [
