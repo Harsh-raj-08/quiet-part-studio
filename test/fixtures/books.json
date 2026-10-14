@@ -5,13 +5,19 @@
       "title": "Thinking, Fast and Slow",
       "author": "Daniel Kahneman",
       "code": "TFS",
+      "topic": "Mind",
       "lane": "Well known",
-      "why": "Demo shelf entry.",
-      "status": "researched",
+      "why": "The richest source of 'you're doing it too' moments. Every chapter has a testable trick.",
+      "status": "Done",
       "order": 1,
-      "notesCount": 1,
+      "notesCount": 38,
       "ideaCount": 0,
-      "researchedAt": "2026-10-02T12:00:00.000Z"
+      "researchedAt": "2026-10-02T09:00:00.000Z",
+      "digest": "Two systems run your thinking. One is fast and confident; the other is slow and lazy. Most errors happen when the fast one answers and the slow one signs off without reading.",
+      "filePath": "books/thinking-fast-and-slow/demo-tfs.pdf",
+      "fileName": "tfs-demo.pdf",
+      "fileSize": 2306867,
+      "uploadedAt": "2026-10-01T12:00:00.000Z"
     }
   },
   {
@@ -20,13 +26,15 @@
       "title": "Atomic Habits",
       "author": "James Clear",
       "code": "AH",
+      "topic": "Habits",
       "lane": "Well known",
-      "why": "Demo shelf entry.",
-      "status": "researched",
+      "why": "Concrete, visual, and endlessly quotable. Good for systems-over-goals framing.",
+      "status": "Done",
       "order": 2,
-      "notesCount": 2,
+      "notesCount": 26,
       "ideaCount": 0,
-      "researchedAt": "2026-10-02T12:00:00.000Z"
+      "researchedAt": "2026-09-28T09:00:00.000Z",
+      "digest": "Habits are the compound interest of behaviour. Change the system and the environment rather than relying on motivation, and make the next action small enough to start."
     }
   },
   {
@@ -35,13 +43,15 @@
       "title": "Enchiridion",
       "author": "Epictetus",
       "code": "EN",
+      "topic": "Philosophy",
       "lane": "Well known",
-      "why": "Demo shelf entry.",
-      "status": "researched",
+      "why": "Short, ancient, and blunt. Two-line ideas that end on the viewer.",
+      "status": "Done",
       "order": 3,
-      "notesCount": 0,
+      "notesCount": 14,
       "ideaCount": 0,
-      "researchedAt": "2026-10-02T12:00:00.000Z"
+      "researchedAt": "2026-09-20T09:00:00.000Z",
+      "digest": "A handbook for separating what is yours to control from what isn't. Judgements, not events, are what disturb us."
     }
   },
   {
@@ -50,13 +60,14 @@
       "title": "Four Thousand Weeks",
       "author": "Oliver Burkeman",
       "code": "FTW",
+      "topic": "Time",
       "lane": "Well known",
-      "why": "Demo shelf entry.",
-      "status": "researched",
+      "why": "Anti-productivity with real warmth. Good closers.",
+      "status": "Done",
       "order": 4,
-      "notesCount": 0,
+      "notesCount": 21,
       "ideaCount": 0,
-      "researchedAt": "2026-10-02T12:00:00.000Z"
+      "researchedAt": "2026-09-16T09:00:00.000Z"
     }
   },
   {
@@ -65,13 +76,14 @@
       "title": "The Psychology of Money",
       "author": "Morgan Housel",
       "code": "PM",
+      "topic": "Money",
       "lane": "Well known",
-      "why": "Demo shelf entry.",
-      "status": "researched",
+      "why": "Stories over spreadsheets. Each chapter is a short reel already.",
+      "status": "Done",
       "order": 5,
-      "notesCount": 0,
+      "notesCount": 19,
       "ideaCount": 0,
-      "researchedAt": "2026-10-02T12:00:00.000Z"
+      "researchedAt": "2026-09-12T09:00:00.000Z"
     }
   },
   {
@@ -80,13 +92,48 @@
       "title": "Stumbling on Happiness",
       "author": "Daniel Gilbert",
       "code": "SH",
+      "topic": "Mind",
       "lane": "Well known",
-      "why": "Demo shelf entry.",
-      "status": "researched",
+      "why": "Forecasting errors everyone recognises. Light, funny, well-sourced.",
+      "status": "Done",
       "order": 6,
+      "notesCount": 16,
+      "ideaCount": 0,
+      "researchedAt": "2026-09-08T09:00:00.000Z"
+    }
+  },
+  {
+    "id": "the-courage-to-be-disliked",
+    "data": {
+      "title": "The Courage to Be Disliked",
+      "author": "Kishimi & Koga",
+      "code": "CD",
+      "topic": "Philosophy",
+      "lane": "Well known",
+      "why": "Dialogue format gives natural two-voice reels.",
+      "status": "In research",
+      "order": 7,
       "notesCount": 0,
       "ideaCount": 0,
-      "researchedAt": "2026-10-02T12:00:00.000Z"
+      "filePath": "books/the-courage-to-be-disliked/demo-cd.pdf",
+      "fileName": "cd-demo.pdf",
+      "fileSize": 2306867,
+      "uploadedAt": "2026-10-01T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "mans-search-for-meaning",
+    "data": {
+      "title": "Man's Search for Meaning",
+      "author": "Viktor Frankl",
+      "code": "MSM",
+      "topic": "Meaning",
+      "lane": "Well known",
+      "why": "Needs careful handling. Hold until the tone guide is ready.",
+      "status": "Candidate",
+      "order": 8,
+      "notesCount": 0,
+      "ideaCount": 0
     }
   }
 ]

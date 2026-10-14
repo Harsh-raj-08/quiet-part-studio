@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useLoaded, useNorm } from './store';
-import { normBook, normIdea, normJob, normMetric, normNote, normPack, normQa, normReport, type Book, type BookNote, type Idea, type Job, type Metric, type Pack, type QaRec, type Report } from './types';
+import { normBook, normIdea, normJob, normMetric, normNote, normPack, normPost, normQa, normRating, normReport, type Book, type Post, type Rating, type BookNote, type Idea, type Job, type Metric, type Pack, type QaRec, type Report } from './types';
 
 export function useBooks(): Book[] {
   const l = useNorm('books', normBook);
@@ -18,5 +18,13 @@ export function useJobs(): Job[] {
 export function useNotes(): BookNote[] { return useNorm('booknotes', normNote); }
 export function useReports(): Report[] { return useNorm('reports', normReport); }
 export function useMetrics(): Metric[] { return useNorm('metrics', normMetric); }
-export function useQa(): QaRec[] { return useNorm('qa', normQa); }
+export function useQa(): QaRec[] {
+  const l = useNorm('qa', normQa);
+  return useMemo(() => l.slice().sort((a, b) => (Date.parse(b.at) || 0) - (Date.parse(a.at) || 0)), [l]);
+}
+export function usePosts(): Post[] { return useNorm('posts', normPost); }
+export function useRatings(): Rating[] {
+  const l = useNorm('ratings', normRating);
+  return useMemo(() => l.filter((r) => r.score >= 1 && r.score <= 10), [l]);
+}
 export { useLoaded };

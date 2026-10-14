@@ -58,7 +58,7 @@ function Media({ idea }: { idea: Idea }) {
       )}
       {q && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <button type="button" data-qa-chip title="Open the QA report" onClick={() => { const p = ops.curPack(idea); go('studio', 'qa'); if (p) openPackId(p.id); }}
+          <button type="button" data-qa-chip title="Open the QA report" onClick={() => { const p = ops.curPack(idea); if (p) openPackId(p.id, 'qa'); else go('studio'); }}
             style={{ cursor: 'pointer', background: 'transparent', font: `500 9.5px/1 ${MONO}`, letterSpacing: '.16em', color: qaColor, border: `1.5px solid ${qaColor}`, padding: '5px 7px 4px', borderRadius: 3, transform: 'rotate(-2deg)', whiteSpace: 'nowrap' }}>QA · {q.verdict}</button>
           <span style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>{fmtDay(q.at)}</span>
         </div>

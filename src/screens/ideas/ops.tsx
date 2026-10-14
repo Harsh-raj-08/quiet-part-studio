@@ -141,7 +141,7 @@ export function IdeaOps({ children }: { children: ReactNode }) {
     if (inflight.current.has(key)) return false;
     inflight.current.add(key); mark(setUploading, key, true);
     try {
-      await uploadMedia(store, idea.id, kind, file);
+      await uploadMedia(store, idea, kind, file);
       const fresh = await store.get('ideas', idea.id);
       if (fresh && fresh.data.status === MEDIA[kind].to) { toast(kind === 'voice' ? 'Voiceover uploaded' : 'Video uploaded'); }
       else await moveIdea(store, idea.id, MEDIA[kind].to, null).then(() => toast(kind === 'voice' ? 'Voiceover uploaded. Moved to Voiced' : 'Video uploaded. Moved to Produced'));
@@ -185,7 +185,7 @@ export function IdeaOps({ children }: { children: ReactNode }) {
   const openPackFor = useCallback((idea: Idea) => {
     const p = curPack(idea);
     if (!p) { toast('No pack found for this idea', true); return; }
-    go('studio', 'script'); openPackId(p.id);
+    openPackId(p.id, 'script');
   }, [curPack, go, openPackId, toast]);
 
   const value: Ops = {

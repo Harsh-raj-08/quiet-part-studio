@@ -39,8 +39,13 @@ export function checkFile(kind: MediaKind, f: File): string | null {
 }
 
 /** Upload through the adapter, then record it on the idea. Does not move the idea. */
-export async function uploadMedia(store: Store, ideaId: string, kind: MediaKind, file: File, now: () => string = () => new Date().toISOString()): Promise<void> {
-  const r = await store.adapter.uploadFile(file, { folder: `ideas/${ideaId}` });
+/** Storage folder for an idea's media: studio/media/{code}/… (private bucket; the idea stores the path). */
+export const mediaFolder = (code: string) => `media/${code.replace(/[^A-Za-z0-9_-]/g, '_')}`;
+export const bookFolder = (id: string) => `books/${id.replace(/[^A-Za-z0-9_-]/g, '_')}`;
+
+export async function uploadMedia(store: Store, idea: { id: string; code: string }, kind: MediaKind, file: File, now: () => string = () => new Date().toISOString()): Promise<void> {
+  const ideaId = idea.id;
+  const r = await store.adapter.uploadFile(file, { folder: mediaFolder(idea.code) });
   const at = now();
   const patch = kind === 'voice'
     ? { voiceAssetId: r.id, voiceFileName: file.name, voiceUploadedAt: at }
@@ -51,6 +56,19 @@ export async function uploadMedia(store: Store, ideaId: string, kind: MediaKind,
 const sane = (s: string) => s.replace(/[^A-Za-z0-9_.-]/g, '_');
 
 export interface QueueJob { node: string; request: string; ideaCode?: string; bookId?: string; packId?: string; videoAssetId?: string; kind?: string }
+
+export const BOOK_EXTS = { pdf: 'application/pdf', epub: 'application/epub+zip' } as const;
+export function checkBookFile(f: File): string | null {
+  const ext = (f.name.match(/\.([A-Za-z0-9]+)$/)?.[1] ?? '').toLowerCase();
+  if (!(ext in BOOK_EXTS)) return 'Choose a PDF or EPUB file.';
+  if (!(f.size > 0)) return 'That file is empty.';
+  if (f.size > MAX_UPLOAD) return 'That file is over the 50 MB limit.';
+  return null;
+}
+export async function uploadBookFile(store: Store, bookId: string, file: File, now: () => string = () => new Date().toISOString()): Promise<void> {
+  const r = await store.adapter.uploadFile(file, { folder: bookFolder(bookId) });
+  await store.mutate('books', bookId, () => ({ filePath: r.path, fileName: file.name, fileSize: file.size, uploadedAt: now() }));
+}
 
 export async function queueJob(store: Store, o: QueueJob, now: () => string = () => new Date().toISOString()): Promise<string> {
   const target = o.ideaCode || o.bookId || 'x';

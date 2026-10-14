@@ -18,9 +18,18 @@ export interface MockHandle {
   failNext(message?: string): void;
   get(coll: CollectionName, id: string): Doc | null;
   list(coll: CollectionName): Doc[];
+  /** Write as the worker would (not logged in `writes`): creates or merges, then notifies subscribers. */
+  put(coll: CollectionName, id: string, data: Record<string, unknown>): void;
 }
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x)) as T;
+
+/** A 9:16 hatched SVG with the file name, standing in for a fixture image. */
+function placeholderImage(p: string): string {
+  const name = p.split('/').pop()!.replace(/[^A-Za-z0-9 ._-]/g, '').slice(0, 40);
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='360' height='640' viewBox='0 0 360 640'><defs><pattern id='h' width='12' height='12' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect width='1' height='12' fill='#3a3733'/></pattern></defs><rect width='360' height='640' fill='#1e1c19'/><rect width='360' height='640' fill='url(#h)'/><text x='180' y='326' fill='#9a948a' font-family='monospace' font-size='16' text-anchor='middle'>${name}</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
 
 export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { adapter: Adapter; handle: MockHandle } {
   let base: Fixtures = fixtures;
@@ -40,6 +49,12 @@ export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { 
     failNext(message = 'write_failed') { failMsg = message; },
     get: (c, id) => { const d = store.get(c)?.get(id); return d ? clone(d) : null; },
     list: (c) => list(c).map(clone),
+    put(c, id, data) {
+      const m = store.get(c)!;
+      const cur = m.get(id);
+      m.set(id, { id, data: { ...(cur?.data ?? {}), ...clone(data) }, version: (cur?.version ?? 0) + 1 });
+      emit(c);
+    },
   };
 
   function load(f: Fixtures) {
@@ -118,7 +133,9 @@ export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { 
     },
     async signedUrl(p) {
       const f = files.get(p);
-      return f ? URL.createObjectURL(f) : 'data:,';
+      if (f) return URL.createObjectURL(f);
+      // Fixture paths have no bytes behind them: images get a drawn stand-in, media get nothing (the UI shows its placeholder).
+      return /\.(png|jpe?g|webp|gif)$/i.test(p) ? placeholderImage(p) : '';
     },
     async fireWorker(): Promise<FireResult> { handle.fires++; return { ok: true }; },
     async user() { return user; },

@@ -94,3 +94,16 @@ export const slugOf = (t: string): string => str(t).toLowerCase().replace(/[^a-z
 export function todayISO(d: Date = new Date()): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
+
+/** "today, 09:12" / "yesterday, 18:40" / "8 Oct" (UTC clock like the rest of the studio's dates). */
+export function fmtWhen(s: string, now: Date = new Date()): string {
+  const t = Date.parse(s);
+  if (!Number.isFinite(t)) return '';
+  const d = new Date(t);
+  const day = (x: Date) => Date.UTC(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate());
+  const diff = Math.round((day(now) - day(d)) / 86400000);
+  const hm = `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+  if (diff === 0) return `today, ${hm}`;
+  if (diff === 1) return `yesterday, ${hm}`;
+  return fmtDay(s, now);
+}

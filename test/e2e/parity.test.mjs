@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { chromium, startServer, OUT } from '../helpers.mjs';
-import { captureApp, compare, readDesign, saveSheet } from '../parity-lib.mjs';
+import { captureApp, captureScreens, compare, readDesign, saveSheet } from '../parity-lib.mjs';
 
 const THRESHOLD = 3; // percent of pixels, full frame
 const THRESHOLD_MASKED = 2;
@@ -30,6 +30,24 @@ for (const theme of ['night', 'paper']) {
         assert.ok(full.pct < THRESHOLD, `${name} differs by ${full.pct.toFixed(2)}%`);
         assert.ok(masked.pct < THRESHOLD_MASKED, `${name} (masked) differs by ${masked.pct.toFixed(2)}%`);
       }
+    }
+    assert.equal(errors.filter((e) => !/Failed to load resource|ERR_FAILED/.test(e)).length, 0);
+  });
+}
+
+// Phase 3b: Studio (grid + the four pack sub-tabs) and Library (shelf, notes, bank). No mask: the extras
+// the design doesn't show (hooks row, rating, lanes, file fold, filters) are counted in the figure.
+const THRESHOLD_3B = 4;
+for (const theme of ['night', 'paper']) {
+  test(`parity studio + library ${theme}`, async () => {
+    const { shots, errors } = await captureScreens(browser, srv.url, theme);
+    for (const name of Object.keys(shots)) {
+      const design = readDesign(name);
+      fs.writeFileSync(path.join(OUT, `app-${name}.png`), shots[name]);
+      const full = await compare(browser, design, shots[name]);
+      saveSheet(name, full.sheet);
+      console.log(`parity ${name}: ${full.pct.toFixed(2)}%`);
+      if (process.env.PARITY_ASSERT !== '0') assert.ok(full.pct < THRESHOLD_3B, `${name} differs by ${full.pct.toFixed(2)}%`);
     }
     assert.equal(errors.filter((e) => !/Failed to load resource|ERR_FAILED/.test(e)).length, 0);
   });

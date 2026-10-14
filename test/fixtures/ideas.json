@@ -378,7 +378,7 @@
           "at": "2026-10-11T12:00:00.000Z"
         }
       ],
-      "voiceAssetId": "uploads/ideas/SH-01/voice-demo.m4a",
+      "voiceAssetId": "media/SH-01/demo-voice.m4a",
       "voiceFileName": "voice-demo.m4a",
       "voiceUploadedAt": "2026-10-09T12:00:00.000Z"
     }
@@ -471,14 +471,14 @@
           "at": "2026-10-11T12:00:00.000Z"
         }
       ],
-      "videoAssetId": "uploads/ideas/TFS-01/final-demo.mp4",
-      "videoFileName": "final-demo.mp4",
+      "videoAssetId": "media/TFS-01/demo-TFS-01_v2.mp4",
+      "videoFileName": "TFS-01_v2.mp4",
       "videoSize": 9437184,
-      "videoUploadedAt": "2026-10-10T12:00:00.000Z",
+      "videoUploadedAt": "2026-10-11T09:12:00.000Z",
       "qaLast": {
         "qaId": "tfs-01-qa-1",
         "verdict": "FIX",
-        "at": "2026-10-10T12:00:00.000Z"
+        "at": "2026-10-11T12:00:00.000Z"
       }
     }
   },
@@ -531,6 +531,10 @@
           "at": "2026-10-11T12:00:00.000Z"
         }
       ],
+      "videoAssetId": "media/EN-04/demo-EN-04_final.mp4",
+      "videoFileName": "EN-04_final.mp4",
+      "videoSize": 7340032,
+      "videoUploadedAt": "2026-10-10T12:00:00.000Z",
       "qaLast": {
         "qaId": "en-04-qa-1",
         "verdict": "GO",

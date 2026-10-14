@@ -35,6 +35,16 @@ async function page() {
   await pg.waitForTimeout(100);
   return pg;
 }
+export const STEPS_3B = [
+  ['studio-grid', ['04 · Studio']],
+  ['studio-script', ['04 · Studio', 'FTW-05']],
+  ['studio-frames', ['04 · Studio', 'FTW-05', 'Frames']],
+  ['studio-qa', ['04 · Studio', 'TFS-01', 'Media & QA']],
+  ['studio-posts', ['04 · Studio', 'FTW-05', 'Posts & stories']],
+  ['library-shelf', ['02 · Library']],
+  ['library-notes', ['02 · Library', 'Chapter notes']],
+  ['library-bank', ['02 · Library', 'Idea bank']],
+];
 const shot = (pg, name) => pg.screenshot({ path: path.join(OUT, `design-${name}.png`) });
 
 for (const theme of ['night', 'paper']) {
@@ -49,6 +59,20 @@ for (const theme of ['night', 'paper']) {
   await pg.keyboard.press('Control+\\'); await pg.waitForTimeout(900);
   await shot(pg, `${theme}-drawer-command`);
   await pg.context().close();
+}
+
+// Phase 3b: Studio and Library, in the owner's Command bar layout.
+const click = async (pg, text) => { await pg.getByText(text, { exact: true }).first().click(); await pg.waitForTimeout(500); };
+for (const theme of ['night', 'paper']) {
+  for (const [name, steps] of STEPS_3B) {
+    const pg = await page();
+    if (theme === 'paper') { await pg.getByText('Paper', { exact: true }).first().click(); await pg.waitForTimeout(600); }
+    await pg.keyboard.press('Control+\\'); await pg.waitForTimeout(900);
+    for (const s of steps) await click(pg, s);
+    await pg.waitForTimeout(300);
+    await shot(pg, `${theme}-${name}`);
+    await pg.context().close();
+  }
 }
 await browser.close(); server.close();
 console.log('design baselines written to', OUT);

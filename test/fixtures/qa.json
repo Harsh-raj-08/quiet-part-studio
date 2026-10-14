@@ -3,20 +3,118 @@
     "id": "tfs-01-qa-1",
     "data": {
       "ideaCode": "TFS-01",
-      "packId": "tfs-01-v5",
+      "packId": "TFS-01-v5",
+      "videoAssetId": "media/TFS-01/demo-TFS-01_v2.mp4",
       "verdict": "FIX",
+      "at": "2026-10-11T12:00:00.000Z",
+      "summary": "Two fixes before it ships. Both are small.",
+      "measurements": {
+        "width": 1080,
+        "height": 1920,
+        "fps": 30,
+        "durationSec": 41,
+        "lufs": -13.1,
+        "truePeak": -0.8,
+        "safeZonePct": 96,
+        "firstWordSec": 0.3,
+        "silences": []
+      },
+      "checks": [
+        {
+          "name": "Hook lands in the first second.",
+          "status": "pass"
+        },
+        {
+          "name": "Source chip appears before 0:05.",
+          "status": "pass"
+        },
+        {
+          "name": "Caption at 0:14 sits under the like button.",
+          "status": "warn",
+          "t": "0:14"
+        },
+        {
+          "name": "Loudness is 1 LU hot; target −14.",
+          "status": "fail",
+          "t": "0:00"
+        },
+        {
+          "name": "One lilac mark per frame.",
+          "status": "pass"
+        }
+      ],
+      "fixes": [
+        {
+          "t": "0:14",
+          "issue": "Caption under the like button.",
+          "fix": "Raise the caption 120 px."
+        },
+        {
+          "t": "0:00",
+          "issue": "Mix is 1 LU hot.",
+          "fix": "Bring the master down 1 dB."
+        }
+      ],
+      "images": [
+        {
+          "path": "qa/TFS-01/demo-0-14.png",
+          "label": "0:14 safe zone"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tfs-01-qa-0",
+    "data": {
+      "ideaCode": "TFS-01",
+      "packId": "TFS-01-v5",
+      "verdict": "NO-GO",
       "at": "2026-10-10T12:00:00.000Z",
-      "summary": "Two fixes before it ships (demo)."
+      "summary": "First cut: no source chip. (Demo.)",
+      "checks": [
+        {
+          "name": "Source chip missing.",
+          "status": "fail"
+        }
+      ]
     }
   },
   {
     "id": "en-04-qa-1",
     "data": {
       "ideaCode": "EN-04",
-      "packId": "en-04-v3",
+      "packId": "EN-04-v3",
       "verdict": "GO",
       "at": "2026-10-10T12:00:00.000Z",
-      "summary": "Clean (demo)."
+      "summary": "Clean pass. Ready to post.",
+      "measurements": {
+        "durationSec": 34,
+        "lufs": -14,
+        "safeZonePct": 100,
+        "firstWordSec": 0.2
+      },
+      "checks": [
+        {
+          "name": "Hook lands in the first second.",
+          "status": "pass"
+        },
+        {
+          "name": "Source chip appears before 0:05.",
+          "status": "pass"
+        },
+        {
+          "name": "Captions clear of UI.",
+          "status": "pass"
+        },
+        {
+          "name": "Loudness on target.",
+          "status": "pass"
+        },
+        {
+          "name": "One lilac mark per frame.",
+          "status": "pass"
+        }
+      ]
     }
   }
 ]

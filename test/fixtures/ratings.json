@@ -1,1 +1,46 @@
-[]
+[
+  {
+    "id": "PM-02-v2",
+    "data": {
+      "packId": "PM-02-v2",
+      "ideaCode": "PM-02",
+      "version": 2,
+      "score": 7,
+      "note": "",
+      "at": "2026-10-03T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "SH-01-v4",
+    "data": {
+      "packId": "SH-01-v4",
+      "ideaCode": "SH-01",
+      "version": 4,
+      "score": 8,
+      "note": "",
+      "at": "2026-10-04T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "AH-02-v2",
+    "data": {
+      "packId": "AH-02-v2",
+      "ideaCode": "AH-02",
+      "version": 2,
+      "score": 6,
+      "note": "",
+      "at": "2026-10-05T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "TFS-01-v5",
+    "data": {
+      "packId": "TFS-01-v5",
+      "ideaCode": "TFS-01",
+      "version": 5,
+      "score": 8,
+      "note": "",
+      "at": "2026-10-06T12:00:00.000Z"
+    }
+  }
+]

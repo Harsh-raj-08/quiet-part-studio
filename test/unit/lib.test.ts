@@ -91,7 +91,7 @@ test('headlines: templates', () => {
   assert.equal(headlines('ideas', { ...D, loading: () => true }).g, 'Loading…');
   assert.equal(headlines('studio', D).g, 'No packs in production.');
   assert.equal(headlines('system', D).g, 'Worker idle.');
-  assert.equal(headlines('system', { ...D, jobs: [{ id: 'j', node: 'writer', ideaCode: '', bookId: '', packId: '', request: '', status: 'running', error: '', kind: '', createdAt: '', startedAt: '', finishedAt: '' }] }).g, 'One job running.');
+  assert.equal(headlines('system', { ...D, jobs: [{ id: 'j', node: 'writer', ideaCode: '', bookId: '', packId: '', request: '', status: 'running', error: '', kind: '', createdAt: '', startedAt: '', finishedAt: '', progress: null }] }).g, 'One job running.');
 });
 
 test('search: groups, snippets, marks', () => {

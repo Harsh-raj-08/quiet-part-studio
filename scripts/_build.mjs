@@ -16,7 +16,10 @@ export async function bundle({ outdir, mode, mock, alias = {}, minify, config = 
     outdir: path.join(outdir, 'assets'),
     entryNames: '[name]',
     bundle: true,
-    format: 'iife',
+    // ES modules with code splitting: each screen is its own chunk, loaded when first opened.
+    format: 'esm',
+    splitting: true,
+    chunkNames: 'chunks/[name]-[hash]',
     target: 'es2022',
     jsx: 'automatic',
     platform: 'browser',

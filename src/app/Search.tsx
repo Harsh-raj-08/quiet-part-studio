@@ -4,6 +4,7 @@ import { useBooks, useIdeas, useNotes, usePacks, useReports } from '../data/hook
 import { MONO, SANS, SERIF } from '../design/fonts';
 import { searchAll, markParts, type Group, type Hit } from '../lib/search';
 import { useApp, type SearchWhere } from './context';
+import { setFocus } from './focus';
 
 interface SearchApi {
   query: string;
@@ -38,9 +39,9 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     close(true);
     const t = h.target;
     if (t.type === 'idea') { go('ideas'); select(t.id); }
-    else if (t.type === 'book') go('library', 'shelf');
-    else if (t.type === 'pack') { go('studio', 'script'); openPackId(t.id); }
-    else if (t.type === 'note') go('library', 'notes');
+    else if (t.type === 'book') { setFocus('book', t.id); go('library', 'shelf', t.id); }
+    else if (t.type === 'pack') openPackId(t.id, 'script');
+    else if (t.type === 'note') { setFocus('chapter', t.id); go('library', 'notes', t.bookId); }
     else go('discover', 'reports');
   }, [close, go, select, openPackId]);
 

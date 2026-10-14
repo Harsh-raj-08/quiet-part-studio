@@ -16,6 +16,6 @@
 // Apply the remembered theme before first paint (body, not <html>).
 try { var t = localStorage.getItem('qps.theme'); if (t === 'paper' || t === 'night') document.body.setAttribute('data-theme', t); } catch (e) {}
 </script>
-<script src="/assets/app.js"></script>
+<script type="module" src="/assets/app.js"></script>
 </body>
 </html>

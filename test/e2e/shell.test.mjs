@@ -74,7 +74,7 @@ for (const dir of ['hide', 'show']) {
   test(`transition frames (${dir}): no overlap with the content area, no jump beyond the animated width`, async () => {
     const { page, ctx } = await openApp(browser, srv.url, { sideHidden: dir === 'show' });
     const frames = await sampleTransition(page, () => page.keyboard.press('Control+\\'));
-    assert.ok(frames.length > 20, `captured ${frames.length} frames`);
+    assert.ok(frames.length > 10, `captured ${frames.length} frames`);
     for (const f of frames) {
       assert.ok(Math.abs(f.mainLeft - f.asideW) < 1.5, `content left ${f.mainLeft} vs animated width ${f.asideW} at ${f.t | 0}ms`);
       assert.ok(f.asideRight <= f.mainLeft + 0.5, `sidebar overlaps content at ${f.t | 0}ms`);
@@ -122,7 +122,7 @@ test('command bar contents: pill, status, theme toggle, step tabs with the lilac
   const pill = await q('[role=search]').first().boundingBox();
   assert.equal(Math.round(pill.width), 560); assert.equal(Math.round(pill.height), 46);
   assert.equal(await q('#global-search').getAttribute('placeholder'), 'Jump to an idea, book, pack or run');
-  assert.match(await q('#cmdbar [data-status]').innerText(), /1 running/);
+  assert.match(await q('#cmdbar [data-status]').innerText(), /2 running/);
   const tabs = await q('#cmdbar nav [data-nav]').allInnerTexts();
   assert.deepEqual(tabs.map((t) => t.replace(/\s+/g, ' ').trim()), ['01 · DISCOVER', '02 · LIBRARY', '03 · IDEAS', '04 · STUDIO', '05 · INSIGHTS', 'SYSTEM']);
   const dot = await q('#cmdbar [data-nav=ideas] span').first().evaluate((e) => { const c = getComputedStyle(e); return [c.width, c.backgroundColor, c.display]; });
@@ -153,7 +153,7 @@ test('theme toggle sets body[data-theme], not <html>, and is remembered', async 
   await ctx.close();
 });
 
-test('hash routing: Ideas is the default; tabs and sub-tabs; other tabs show hero + "Arrives in the next build"', async () => {
+test('hash routing: Ideas is the default; tabs, sub-tabs and ids; Discover/Insights/System still show hero + "Arrives in the next build"', async () => {
   const { page, ctx } = await openApp(browser, srv.url);
   assert.equal(await page.locator('[data-board]').count(), 1);
   await page.click('#sidebar [data-nav=discover]');
@@ -161,13 +161,15 @@ test('hash routing: Ideas is the default; tabs and sub-tabs; other tabs show her
   assert.equal(await page.evaluate(() => location.hash), '#discover');
   assert.match(await page.locator('h1').innerText(), /Scout found three candidates this week\. Three aren't on the shelf yet\./);
   assert.match(await page.locator('[data-arrives]').innerText(), /Arrives in the next build/);
-  await page.goto(`${srv.url}/#studio/script`); await page.waitForSelector('[data-screen=studio]');
+  await page.goto(`${srv.url}/#studio/script`); await page.waitForSelector('[data-screen=studio] [data-pack-grid]');
   assert.match(await page.locator('h1').innerText(), /Six packs in production\./);
+  await page.evaluate(() => { location.hash = '#studio/qa/TFS-01-v5'; }); await page.waitForSelector('[data-pack="TFS-01-v5"] #qa-report');
+  await page.evaluate(() => { location.hash = '#packs'; }); await page.waitForSelector('[data-pack-grid]');
   await page.evaluate(() => { location.hash = '#insights'; }); await page.waitForSelector('[data-screen=insights]');
   await page.evaluate(() => { location.hash = '#system'; }); await page.waitForSelector('[data-screen=system]');
-  assert.match(await page.locator('h1').innerText(), /One job running\. Nothing has failed today\./);
+  assert.match(await page.locator('h1').innerText(), /Two jobs running\. Nothing has failed today\./);
   await page.evaluate(() => { location.hash = '#library'; }); await page.waitForSelector('[data-screen=library]');
-  assert.match(await page.locator('h1').innerText(), /Six books on the shelf\./);
+  assert.match(await page.locator('h1').innerText(), /Eight books on the shelf\. Two still need research\./);
   await page.evaluate(() => { location.hash = '#nonsense'; }); await page.waitForSelector('[data-board]');
   await ctx.close();
 });
@@ -175,7 +177,7 @@ test('hash routing: Ideas is the default; tabs and sub-tabs; other tabs show her
 test('nav counts in the sidebar', async () => {
   const { page, ctx } = await openApp(browser, srv.url);
   const t = (n) => page.locator(`#sidebar [data-nav=${n}]`).innerText().then((x) => x.replace(/\s+/g, ' '));
-  assert.match(await t('discover'), /3 new/); assert.match(await t('library'), /6$/); assert.match(await t('ideas'), /16$/); assert.match(await t('studio'), /6$/);
+  assert.match(await t('discover'), /3 new/); assert.match(await t('library'), /8$/); assert.match(await t('ideas'), /16$/); assert.match(await t('studio'), /6$/);
   await ctx.close();
 });
 

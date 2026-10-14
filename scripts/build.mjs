@@ -13,4 +13,5 @@ if (mode === 'supabase' && !(url && key)) {
 }
 const r = await bundle({ outdir: path.join(root, 'dist'), mode, mock: false, minify: true, config: { supabaseUrl: url, supabaseAnonKey: key } });
 const kb = Object.values(r.metafile.outputs).map((o) => o.bytes).reduce((a, b) => a + b, 0) / 1024;
-console.log(`built dist/ in ${mode} mode (${kb.toFixed(0)} KB)`);
+console.log(`built dist/ in ${mode} mode (${kb.toFixed(0)} KB total)`);
+for (const [f, o] of Object.entries(r.metafile.outputs)) console.log(`  ${path.relative(path.join(root, 'dist'), f).padEnd(44)} ${(o.bytes / 1024).toFixed(1).padStart(7)} KB`);

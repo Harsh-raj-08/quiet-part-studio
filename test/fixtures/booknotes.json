@@ -1,21 +1,142 @@
 [
   {
-    "id": "atomic-habits-2",
+    "id": "thinking-fast-and-slow-01",
+    "data": {
+      "bookId": "thinking-fast-and-slow",
+      "chapterNo": 1,
+      "title": "Two systems",
+      "pages": "19–46",
+      "summary": "Fast thinking runs on its own. Slow thinking only joins when something looks wrong.",
+      "keyIdeas": [
+        {
+          "idea": "System 1 is automatic and always on.",
+          "mechanism": "",
+          "pages": ""
+        },
+        {
+          "idea": "System 2 is effortful and easily tired.",
+          "mechanism": "",
+          "pages": ""
+        }
+      ],
+      "stories": [],
+      "claimsToCheck": [],
+      "lines": [],
+      "createdAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "thinking-fast-and-slow-02",
+    "data": {
+      "bookId": "thinking-fast-and-slow",
+      "chapterNo": 2,
+      "title": "The lazy controller",
+      "pages": "39–49",
+      "summary": "Checking an answer costs effort, so we mostly don't.",
+      "keyIdeas": [
+        {
+          "idea": "The bat-and-ball puzzle shows how rarely we check.",
+          "mechanism": "",
+          "pages": ""
+        },
+        {
+          "idea": "Effort and self-control draw on the same budget.",
+          "mechanism": "",
+          "pages": ""
+        }
+      ],
+      "stories": [],
+      "claimsToCheck": [],
+      "lines": [],
+      "createdAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "thinking-fast-and-slow-03",
+    "data": {
+      "bookId": "thinking-fast-and-slow",
+      "chapterNo": 3,
+      "title": "Answering an easier question",
+      "pages": "97–108",
+      "summary": "Faced with a hard question, the mind quietly answers a simpler one.",
+      "keyIdeas": [
+        {
+          "idea": "Substitution feels like insight from the inside.",
+          "mechanism": "",
+          "pages": ""
+        }
+      ],
+      "stories": [],
+      "claimsToCheck": [],
+      "lines": [],
+      "createdAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "thinking-fast-and-slow-04",
+    "data": {
+      "bookId": "thinking-fast-and-slow",
+      "chapterNo": 4,
+      "title": "The illusion of patterns",
+      "pages": "109–118",
+      "summary": "We see causes in randomness because chance is uncomfortable.",
+      "keyIdeas": [
+        {
+          "idea": "Small samples produce extreme results.",
+          "mechanism": "",
+          "pages": ""
+        },
+        {
+          "idea": "Streaks are normal in random sequences.",
+          "mechanism": "",
+          "pages": ""
+        }
+      ],
+      "stories": [],
+      "claimsToCheck": [],
+      "lines": [],
+      "createdAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "atomic-habits-01",
+    "data": {
+      "bookId": "atomic-habits",
+      "chapterNo": 1,
+      "title": "The surprising power of small habits",
+      "pages": "13–20",
+      "summary": "Tiny changes look like nothing until they don't.",
+      "keyIdeas": [
+        {
+          "idea": "Results lag behind habits.",
+          "mechanism": "",
+          "pages": ""
+        },
+        {
+          "idea": "The 'plateau of latent potential'.",
+          "mechanism": "",
+          "pages": ""
+        }
+      ],
+      "stories": [],
+      "claimsToCheck": [],
+      "lines": [],
+      "createdAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "atomic-habits-02",
     "data": {
       "bookId": "atomic-habits",
       "chapterNo": 2,
-      "title": "Systems and goals (demo notes)",
-      "pages": "18–31",
+      "title": "Systems over goals",
+      "pages": "23–31",
+      "summary": "Goals set the direction; the system decides the result.",
       "keyIdeas": [
         {
-          "idea": "A system is what you do every day; a goal is what you want.",
-          "mechanism": "Demo mechanism line.",
-          "pages": "23–25"
-        },
-        {
-          "idea": "Unrelated idea elsewhere in the chapter.",
+          "idea": "Winners and losers share the same goals.",
           "mechanism": "",
-          "pages": "30"
+          "pages": ""
         }
       ],
       "stories": [
@@ -36,45 +157,76 @@
           "text": "A short invented line for the demo.",
           "page": "27"
         }
-      ]
+      ],
+      "createdAt": "2026-10-02T12:00:00.000Z"
     }
   },
   {
-    "id": "atomic-habits-9",
+    "id": "atomic-habits-03",
     "data": {
       "bookId": "atomic-habits",
-      "chapterNo": 9,
-      "title": "Environment (demo notes)",
-      "pages": "80–95",
+      "chapterNo": 3,
+      "title": "Motivation is overrated",
+      "pages": "81–150",
+      "summary": "Environment beats intention.",
       "keyIdeas": [
         {
-          "idea": "Cues live in rooms.",
+          "idea": "Make cues obvious and friction low.",
           "mechanism": "",
-          "pages": "81–84"
+          "pages": ""
         }
       ],
       "stories": [],
       "claimsToCheck": [],
-      "lines": []
+      "lines": [],
+      "createdAt": "2026-10-02T12:00:00.000Z"
     }
   },
   {
-    "id": "thinking-fast-and-slow-12",
+    "id": "enchiridion-01",
     "data": {
-      "bookId": "thinking-fast-and-slow",
-      "chapterNo": 12,
-      "title": "A far-away chapter (demo notes)",
-      "pages": "300–320",
+      "bookId": "enchiridion",
+      "chapterNo": 1,
+      "title": "What is up to us",
+      "pages": "§1–4",
+      "summary": "Some things are ours; most are not. Confusing the two causes most of our distress.",
       "keyIdeas": [
         {
-          "idea": "Nothing to do with TFS-07.",
+          "idea": "Opinions, desires and aversions are ours.",
           "mechanism": "",
-          "pages": "305"
+          "pages": ""
+        },
+        {
+          "idea": "Body, reputation and office are not.",
+          "mechanism": "",
+          "pages": ""
         }
       ],
       "stories": [],
       "claimsToCheck": [],
-      "lines": []
+      "lines": [],
+      "createdAt": "2026-10-02T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "enchiridion-02",
+    "data": {
+      "bookId": "enchiridion",
+      "chapterNo": 2,
+      "title": "Judgements, not events",
+      "pages": "§5",
+      "summary": "It's our view of a thing that troubles us.",
+      "keyIdeas": [
+        {
+          "idea": "Reframe the sentence, not the event.",
+          "mechanism": "",
+          "pages": ""
+        }
+      ],
+      "stories": [],
+      "claimsToCheck": [],
+      "lines": [],
+      "createdAt": "2026-10-02T12:00:00.000Z"
     }
   }
 ]

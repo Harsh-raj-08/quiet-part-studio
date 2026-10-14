@@ -1,1 +1,82 @@
-[]
+[
+  {
+    "id": "FTW-05-story-v1",
+    "data": {
+      "ideaCode": "FTW-05",
+      "kind": "story",
+      "version": 1,
+      "createdAt": "2026-10-09T12:00:00.000Z",
+      "designPrompt": "Paper stories, Newsreader, one lilac mark. (Demo.)",
+      "frames": [
+        {
+          "n": 1,
+          "text": "How many weeks have you used?",
+          "visual": "Grid on paper.",
+          "sticker": {
+            "type": "question",
+            "prompt": "Your number?",
+            "options": []
+          }
+        },
+        {
+          "n": 2,
+          "text": "Most people guess low.",
+          "visual": "Filled squares.",
+          "sticker": {
+            "type": "poll",
+            "prompt": "Did you guess low?",
+            "options": [
+              "Yes",
+              "No"
+            ]
+          }
+        },
+        {
+          "n": 3,
+          "text": "¹ Four Thousand Weeks",
+          "visual": "Source card.",
+          "sticker": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "FTW-05-carousel-v1",
+    "data": {
+      "ideaCode": "FTW-05",
+      "kind": "carousel",
+      "version": 1,
+      "createdAt": "2026-10-09T12:00:00.000Z",
+      "designPrompt": "Paper carousel, 4:5. (Demo.)",
+      "cover": "YOUR NUMBER",
+      "caption": "Count your weeks. (Demo caption.)",
+      "altText": "A grid of small squares, some filled.",
+      "slides": [
+        {
+          "n": 1,
+          "headline": "Four thousand weeks.",
+          "body": "That is the average.",
+          "visual": "Grid fades in."
+        },
+        {
+          "n": 2,
+          "headline": "You have used some.",
+          "body": "Work out how many.",
+          "visual": "Filled squares."
+        },
+        {
+          "n": 3,
+          "headline": "The list never ends.",
+          "body": "That was always true.",
+          "visual": "Ghost list."
+        },
+        {
+          "n": 4,
+          "headline": "Pick this week.",
+          "body": "What is it for?",
+          "visual": "One lilac square."
+        }
+      ]
+    }
+  }
+]

@@ -6,7 +6,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { bundle, root } from '../../scripts/_build.mjs';
 
-const read = (d) => fs.readFileSync(path.join(d, 'assets/app.js'), 'utf8');
+// All emitted JavaScript (the entry plus the split chunks).
+const read = (d) => { const out = []; const walk = (p) => fs.readdirSync(p, { withFileTypes: true }).forEach((e) => (e.isDirectory() ? walk(path.join(p, e.name)) : e.name.endsWith('.js') && out.push(fs.readFileSync(path.join(p, e.name), 'utf8')))); walk(path.join(d, 'assets')); return out.join('\n'); };
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'qps-build-'));
 
 test('demo build has fixtures and no supabase client', async () => {
@@ -33,4 +34,12 @@ test('no secrets or service-role key in the repo', () => {
     const m = t.match(bad);
     if (m && !/SUPABASE_SERVICE_ROLE_KEY/.test(m[0])) assert.fail(`${f} mentions ${m[0]}`);
   }
+});
+
+test('screens are split into their own chunks; the entry stays lean', async () => {
+  const d = tmp(); const r = await bundle({ outdir: d, mode: 'supabase', mock: false, alias: { '@supabase/supabase-js': path.join(root, 'test/stubs/supabase.ts') }, minify: true, config: { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'k' } });
+  const files = Object.keys(r.metafile.outputs).map((f) => path.basename(f));
+  for (const n of ['StudioScreen', 'LibraryScreen', 'DiscoverScreen']) assert.ok(files.some((f) => f.startsWith(n)), `${n} chunk`);
+  const entry = fs.readFileSync(path.join(d, 'assets/app.js'), 'utf8');
+  assert.ok(!entry.includes('Copy for Claude Design'), 'Studio code is not in the entry');
 });

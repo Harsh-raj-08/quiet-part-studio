@@ -35,7 +35,7 @@ export function IdeasScreen() {
   const visible: Idea[] = useMemo(() => inScope.filter((i) => (book === 'all' || i.bookId === book) && (ev === 'All' || i.evidence === ev)), [inScope, book, ev]);
   const filtered = book !== 'all' || ev !== 'All';
 
-  const chips = [{ k: 'all', label: 'All books', title: 'All books', n: inScope.length }].concat(books.map((b) => ({ k: b.id, label: b.code || initials(b.title) || b.title, title: b.title, n: inScope.filter((i) => i.bookId === b.id).length })));
+  const chips = [{ k: 'all', label: 'All books', title: 'All books', n: inScope.length }].concat(books.map((b) => ({ k: b.id, label: b.code || initials(b.title) || b.title, title: b.title, n: inScope.filter((i) => i.bookId === b.id).length })).filter((c) => c.n > 0 || c.k === book));
 
   const goStage = (k: number) => {
     setView('board');

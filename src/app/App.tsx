@@ -3,16 +3,13 @@ import { useBooks, useIdeas, useJobs, useLoaded, useReports } from '../data/hook
 import { useStore } from '../data/store';
 import { SANS, EASE } from '../design/fonts';
 import { ToastProvider } from '../design/primitives';
+import { CopyFallback } from '../design/kit';
 import { newCandidates } from '../lib/headlines';
 import { lsGet, lsSet } from '../lib/storage';
 import { IdeaDrawer } from '../screens/ideas/Drawer';
 import { IdeaOps } from '../screens/ideas/ops';
 import { IdeasScreen } from '../screens/ideas/IdeasScreen';
-import { DiscoverScreen } from '../screens/discover/DiscoverScreen';
-import { LibraryScreen } from '../screens/library/LibraryScreen';
-import { StudioScreen } from '../screens/studio/StudioScreen';
-import { InsightsScreen } from '../screens/insights/InsightsScreen';
-import { SystemScreen } from '../screens/system/SystemScreen';
+import { DiscoverScreen, InsightsScreen, LibraryScreen, ScreenSlot, StudioScreen, SystemScreen } from './screens';
 import { AppCtx, type AppState, type SearchWhere, type Theme } from './context';
 import { useRoute } from './route';
 import { SearchPanel, SearchProvider } from './Search';
@@ -48,13 +45,14 @@ export function App() {
   const [theme, setTheme] = useTheme();
   const [collapsed, toggleSide] = useSide();
   const [selected, select] = useState<string | null>(null);
-  const [openPack, openPackId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState<SearchWhere | null>(null);
   const jobs = useJobs(); const ideas = useIdeas(); const books = useBooks(); const reports = useReports();
   const ideasLoaded = useLoaded('ideas'); const booksLoaded = useLoaded('books'); const reportsLoaded = useLoaded('reports');
 
   // Same behaviour as the design's goTab: leaving a screen clears the selection and the open pack.
-  const go = useCallback((tab: AppState['tab'], sub?: string) => { select(null); openPackId(null); goRoute(tab, sub); }, [goRoute]);
+  const go = useCallback((tab: AppState['tab'], sub?: string, id?: string) => { select(null); goRoute(tab, sub, id); }, [goRoute]);
+  const openPack = route.tab === 'studio' && route.id ? route.id : null;
+  const openPackId = useCallback((id: string | null, sub?: string) => { select(null); goRoute('studio', sub ?? 'script', id ?? undefined); }, [goRoute]);
   useEffect(() => { if (route.tab !== 'ideas') select(null); }, [route.tab]);
   useEffect(() => { setSearchOpen(null); }, [collapsed]);
 
@@ -68,7 +66,7 @@ export function App() {
   }), [reports, books, ideas, reportsLoaded, booksLoaded, ideasLoaded]);
 
   const app: AppState = {
-    tab: route.tab, sub: route.sub, go, selected, select, openPack, openPackId, collapsed, toggleSide, theme, setTheme, searchOpen, setSearchOpen, running, mode: store.adapter.mode,
+    tab: route.tab, sub: route.sub, id: route.id, go, selected, select, openPack, openPackId, collapsed, toggleSide, theme, setTheme, searchOpen, setSearchOpen, running, mode: store.adapter.mode,
   };
 
   const rootStyle = { background: 'var(--bg)', color: 'var(--ink)', minHeight: '100vh', fontFamily: SANS, position: 'relative' as const, transition: 'background .3s, color .3s' };
@@ -89,16 +87,21 @@ export function App() {
                 <main id="main" style={{ padding: '0 48px 64px', minWidth: 0 }}>
                   <UtilRow />
                   {route.tab === 'ideas' && <IdeasScreen />}
-                  {route.tab === 'discover' && <DiscoverScreen />}
-                  {route.tab === 'library' && <LibraryScreen />}
-                  {route.tab === 'studio' && <StudioScreen />}
-                  {route.tab === 'insights' && <InsightsScreen />}
-                  {route.tab === 'system' && <SystemScreen />}
+                  {route.tab !== 'ideas' && (
+                    <ScreenSlot>
+                      {route.tab === 'discover' && <DiscoverScreen />}
+                      {route.tab === 'library' && <LibraryScreen />}
+                      {route.tab === 'studio' && <StudioScreen />}
+                      {route.tab === 'insights' && <InsightsScreen />}
+                      {route.tab === 'system' && <SystemScreen />}
+                    </ScreenSlot>
+                  )}
                 </main>
               </div>
             </div>
             {route.tab === 'ideas' && selected && <IdeaDrawer />}
             <SearchPanel />
+            <CopyFallback />
           </div>
           </IdeaOps>
         </SearchProvider>

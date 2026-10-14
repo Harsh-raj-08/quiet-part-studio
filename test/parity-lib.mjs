@@ -10,6 +10,24 @@ export const FREEZE = '*,*::before,*::after{animation:none!important}';
 /** A pixel counts as different when any channel moves by more than TOL (out of 255). */
 export const TOL = 16;
 
+/** Phase 3b screens, opened by hash in the Command bar layout (as the owner uses them). */
+export const SHOTS_3B = {
+  'studio-grid': '#studio', 'studio-script': '#studio/script/FTW-05-v3', 'studio-frames': '#studio/frames/FTW-05-v3', 'studio-qa': '#studio/qa/TFS-01-v5',
+  'studio-posts': '#studio/posts/FTW-05-v3', 'library-shelf': '#library', 'library-notes': '#library/notes', 'library-bank': '#library/bank',
+};
+export async function captureScreens(browser, base, theme) {
+  const shots = {}; const errors = [];
+  for (const [name, hash] of Object.entries(SHOTS_3B)) {
+    const { page, ctx, errors: e } = await openApp(browser, base, { theme, sideHidden: true, hash });
+    await page.addStyleTag({ content: FREEZE });
+    await page.waitForTimeout(400);
+    shots[`${theme}-${name}`] = await page.screenshot();
+    errors.push(...e);
+    await ctx.close();
+  }
+  return { shots, errors };
+}
+
 export const SHOTS = ['night-sidebar', 'night-command', 'night-drawer', 'night-drawer-command', 'paper-sidebar', 'paper-command', 'paper-drawer', 'paper-drawer-command'];
 
 /** Drive the app through the same steps capture-design.mjs drives the design through. */

@@ -41,8 +41,9 @@ const Loose = z.record(z.string(), z.unknown());
 export const BookDoc = z.object({
   title: z.string().optional(), author: z.string().optional(), lane: z.string().optional(),
   why: z.string().optional(), status: z.string().optional(), order: z.number().optional(),
-  code: z.string().optional(), digest: z.string().optional(),
+  code: z.string().optional(), digest: z.string().optional(), topic: z.string().optional(),
   notesCount: z.number().nullable().optional(), ideaCount: z.number().nullable().optional(), researchedAt: z.string().optional(),
+  filePath: z.string().optional(), fileName: z.string().optional(), fileSize: z.number().optional(), uploadedAt: z.string().optional(),
 }).passthrough();
 
 export const IdeaDoc = z.object({
@@ -67,32 +68,45 @@ export const IdeaDoc = z.object({
 export const PackDoc = z.object({
   ideaCode: z.string().optional(), version: z.number().optional(), title: z.string().optional(),
   intro: z.string().optional(), durationSec: z.number().optional(),
-  beats: z.array(z.object({ t: z.string().optional(), vo: z.string().optional(), onscreen: z.string().optional() })).optional(),
+  beats: z.array(z.object({ t: z.string().optional(), vo: z.string().optional(), onscreen: z.string().optional(), visual: z.string().optional() })).optional(),
+  voiceover: z.string().optional(), designPrompt: z.string().optional(), cover: z.string().optional(), caption: z.string().optional(), captionFinal: z.string().optional(),
+  watchouts: z.union([z.array(z.string()), z.string()]).optional(),
+  frames: z.array(z.object({ t: z.string().optional(), path: z.string().optional(), note: z.string().optional() }).passthrough()).optional(),
+  hooks: z.array(z.object({ style: z.string(), vo: z.string(), onscreen: z.string().optional(), why: z.string().optional() })).optional(),
 }).passthrough();
 
 export const JobDoc = z.object({
   node: z.string().optional(), ideaCode: z.string().optional(), bookId: z.string().optional(), packId: z.string().optional(),
   request: z.string().optional(), status: z.string().optional(), error: z.string().optional(), kind: z.string().optional(),
   createdAt: z.string().optional(), startedAt: z.string().optional(), finishedAt: z.string().optional(), videoAssetId: z.string().optional(),
+  progress: z.object({ step: z.number().optional(), of: z.number().optional(), label: z.string().optional() }).nullable().optional(),
 }).passthrough();
 
 export const BookNoteDoc = z.object({
-  bookId: z.string().optional(), chapterNo: z.number().optional(), title: z.string().optional(), pages: z.string().optional(),
+  bookId: z.string().optional(), chapterNo: z.number().optional(), title: z.string().optional(), pages: z.string().optional(), summary: z.string().optional(),
   keyIdeas: z.array(Loose).optional(), stories: z.array(Loose).optional(), claimsToCheck: z.array(Loose).optional(), lines: z.array(Loose).optional(),
 }).passthrough();
 
 export const ReportDoc = z.object({ type: z.string().optional(), at: z.string().optional(), candidates: z.array(Loose).optional() }).passthrough();
 export const MetricDoc = z.object({ ideaCode: z.string().optional(), postedAt: z.string().optional(), latest: Loose.nullable().optional(), snapshots: z.array(Loose).optional() }).passthrough();
-export const QaDoc = z.object({ ideaCode: z.string().optional(), packId: z.string().optional(), verdict: z.string().optional(), at: z.string().optional(), summary: z.string().optional() }).passthrough();
+export const QaDoc = z.object({
+  ideaCode: z.string().optional(), packId: z.string().optional(), videoAssetId: z.string().optional(), verdict: z.string().optional(), at: z.string().optional(), summary: z.string().optional(),
+  checks: z.array(Loose).optional(), fixes: z.array(Loose).optional(), measurements: Loose.optional(), images: z.array(Loose).optional(),
+}).passthrough();
+export const PostDoc = z.object({ ideaCode: z.string().optional(), kind: z.string().optional(), version: z.number().optional(), slides: z.array(Loose).optional(), frames: z.array(Loose).optional(), postedAt: z.string().optional() }).passthrough();
+export const RatingDoc = z.object({ packId: z.string(), ideaCode: z.string().optional(), version: z.number().optional(), score: z.number().int().min(1).max(10), note: z.string().optional(), at: z.string() }).passthrough();
 export const GenericDoc = Loose;
 
 export const SCHEMAS: Record<CollectionName, z.ZodTypeAny> = {
-  books: BookDoc, booknotes: BookNoteDoc, ideas: IdeaDoc, packs: PackDoc, posts: GenericDoc, jobs: JobDoc, runs: GenericDoc,
-  reports: ReportDoc, qa: QaDoc, metrics: MetricDoc, chats: GenericDoc, ratings: GenericDoc, playbooks: GenericDoc, settings: GenericDoc,
+  books: BookDoc, booknotes: BookNoteDoc, ideas: IdeaDoc, packs: PackDoc, posts: PostDoc, jobs: JobDoc, runs: GenericDoc,
+  reports: ReportDoc, qa: QaDoc, metrics: MetricDoc, chats: GenericDoc, ratings: RatingDoc, playbooks: GenericDoc, settings: GenericDoc,
 };
 
 // ---------------------------------------------------------------- normalised domain types
-export interface Book { id: string; version: number; title: string; author: string; lane: string; why: string; status: string; order: number; code: string; digest: string; notesCount: number | null; ideaCount: number | null; researchedAt: string }
+export interface Book {
+  id: string; version: number; title: string; author: string; lane: string; topic: string; why: string; status: string; order: number; code: string; digest: string;
+  notesCount: number | null; ideaCount: number | null; researchedAt: string; filePath: string; fileName: string; fileSize: number; uploadedAt: string;
+}
 export interface Source { title: string; url: string }
 export interface Scores { hook: number; visual: number; truth: number; send: number }
 export interface Idea {
@@ -102,16 +116,42 @@ export interface Idea {
   voiceAssetId: string; voiceFileName: string; voiceUploadedAt: string; videoAssetId: string; videoFileName: string; videoSize: number; videoUploadedAt: string;
   hookStyle: string; qaLast: { qaId: string; verdict: 'GO' | 'FIX' | 'NO-GO'; at: string } | null;
 }
-export interface Pack { id: string; ideaCode: string; version: number; title: string; intro: string; durationSec: number; beats: { t: string; vo: string; onscreen: string }[] }
-export interface Job { id: string; node: string; ideaCode: string; bookId: string; packId: string; request: string; status: string; error: string; kind: string; createdAt: string; startedAt: string; finishedAt: string }
+export interface Beat { t: string; vo: string; onscreen: string; visual: string }
+export interface Frame { t: string; path: string; note: string }
+export interface HookOpt { style: string; vo: string; onscreen: string; why: string }
+export interface Pack {
+  id: string; ideaCode: string; version: number; title: string; intro: string; durationSec: number; beats: Beat[];
+  voiceover: string; designPrompt: string; cover: string; caption: string; captionFinal: string; watchouts: string[];
+  createdBy: string; createdAt: string; basedOn: string; changeNote: string; frames: Frame[]; hooks: HookOpt[];
+  story: { belief: string; truth: string; scene: string; turn: string; feeling: string } | null;
+  critic: { total: number | null; scores: Record<string, number | null>; predictedOwnerScore: number | null; notes: string } | null;
+}
+export interface Job {
+  id: string; node: string; ideaCode: string; bookId: string; packId: string; request: string; status: string; error: string; kind: string;
+  createdAt: string; startedAt: string; finishedAt: string; progress: { step: number | null; of: number | null; label: string } | null;
+}
 export interface BookNote {
-  id: string; bookId: string; chapterNo: number; title: string; pages: string;
+  id: string; bookId: string; chapterNo: number; title: string; pages: string; summary: string;
   keyIdeas: { idea: string; mechanism: string; pages: string }[]; stories: { who: string; what: string; pages: string }[];
   claims: { claim: string; pages: string }[]; lines: { text: string; page: string }[];
 }
 export interface Report { id: string; type: string; at: string; d: Record<string, unknown> }
 export interface Metric { id: string; ideaCode: string; postedAt: string; latest: Record<string, number | null> | null }
-export interface QaRec { id: string; ideaCode: string; packId: string; verdict: string; at: string; summary: string }
+export interface QaCheck { name: string; status: 'pass' | 'warn' | 'fail'; detail: string; t: string }
+export interface QaRec {
+  id: string; ideaCode: string; packId: string; videoAssetId: string; verdict: string; at: string; summary: string;
+  checks: QaCheck[]; fixes: { t: string; issue: string; fix: string }[];
+  meas: { width: number | null; height: number | null; fps: number | null; durationSec: number | null; lufs: number | null; truePeak: number | null; silences: unknown[]; ssimLoop: number | null; safeZonePct: number | null; firstWordSec: number | null };
+  images: { path: string; label: string }[];
+}
+export interface Sticker { type: string; prompt: string; options: string[] }
+export interface Post {
+  id: string; ideaCode: string; kind: 'carousel' | 'story'; version: number;
+  slides: { n: number; headline: string; body: string; visual: string }[];
+  frames: { n: number; text: string; visual: string; sticker: Sticker | null }[];
+  designPrompt: string; cover: string; caption: string; altText: string; createdAt: string; postedAt: string;
+}
+export interface Rating { id: string; packId: string; ideaCode: string; version: number; score: number; note: string; at: string }
 
 export function normVerdict(v: unknown): '' | 'GO' | 'FIX' | 'NO-GO' {
   let s = str(v).trim().toUpperCase().replace(/[\s_]+/g, '-');
@@ -121,8 +161,9 @@ export function normVerdict(v: unknown): '' | 'GO' | 'FIX' | 'NO-GO' {
 
 export function normBook(d: Doc): Book {
   const x = d.data;
-  return { id: d.id, version: d.version, title: str(x.title) || d.id, author: str(x.author), lane: str(x.lane), why: str(x.why), status: str(x.status),
-    order: numOr(x.order, 1e9) as number, code: str(x.code).trim().toUpperCase(), digest: str(x.digest), notesCount: numOr(x.notesCount, null), ideaCount: numOr(x.ideaCount, null), researchedAt: str(x.researchedAt) };
+  return { id: d.id, version: d.version, title: str(x.title) || d.id, author: str(x.author), lane: str(x.lane), topic: str(x.topic), why: str(x.why), status: str(x.status),
+    order: numOr(x.order, 1e9) as number, code: str(x.code).trim().toUpperCase(), digest: str(x.digest), notesCount: numOr(x.notesCount, null), ideaCount: numOr(x.ideaCount, null), researchedAt: str(x.researchedAt),
+    filePath: str(x.filePath), fileName: str(x.fileName), fileSize: numOr(x.fileSize, 0) as number, uploadedAt: str(x.uploadedAt) };
 }
 
 export function normIdea(d: Doc): Idea {
@@ -153,20 +194,33 @@ export function normIdea(d: Doc): Idea {
 
 export function normPack(d: Doc): Pack {
   const x = d.data;
+  const wo = x.watchouts;
+  const st = isO(x.story) ? x.story : null;
+  const cr = isO(x.critic) ? x.critic : null;
   return { id: d.id, ideaCode: str(x.ideaCode), version: numOr(x.version, 1) as number, title: str(x.title) || d.id, intro: str(x.intro), durationSec: numOr(x.durationSec, 0) as number,
-    beats: arr(x.beats).filter(isO).map((b) => ({ t: str(b.t), vo: str(b.vo), onscreen: str(b.onscreen) })) };
+    beats: arr(x.beats).filter(isO).map((b) => ({ t: str(b.t), vo: str(b.vo), onscreen: str(b.onscreen), visual: str(b.visual) })),
+    voiceover: str(x.voiceover), designPrompt: str(x.designPrompt), cover: str(x.cover), caption: str(x.caption), captionFinal: str(x.captionFinal),
+    watchouts: Array.isArray(wo) ? wo.map(str).filter(Boolean) : str(wo).split('\n').map((l) => l.replace(/^\s*[-•]\s*/, '').trim()).filter(Boolean),
+    createdBy: str(x.createdBy), createdAt: str(x.createdAt), basedOn: str(x.basedOn), changeNote: str(x.changeNote),
+    frames: arr(x.frames).filter(isO).map((f) => ({ t: str(f.t), path: str(f.path ?? f.assetId), note: str(f.note) })),
+    hooks: arr(x.hooks).filter(isO).map((h) => ({ style: str(h.style), vo: str(h.vo), onscreen: str(h.onscreen), why: str(h.why) })).filter((h) => h.vo.trim()),
+    story: st ? { belief: str(st.belief), truth: str(st.truth), scene: str(st.scene), turn: str(st.turn), feeling: str(st.feeling) } : null,
+    critic: cr ? { total: numOr(cr.total, null), scores: isO(cr.scores) ? Object.fromEntries(Object.entries(cr.scores).map(([k, v]) => [k, numOr(v, null)])) : {}, predictedOwnerScore: numOr(cr.predictedOwnerScore, null),
+      notes: Array.isArray(cr.notes) ? cr.notes.map(str).filter(Boolean).join('\n') : str(cr.notes) } : null,
+  };
 }
 
 export function normJob(d: Doc): Job {
   const x = d.data;
   return { id: d.id, node: str(x.node), ideaCode: str(x.ideaCode), bookId: str(x.bookId), packId: str(x.packId), request: str(x.request), status: str(x.status),
-    error: str(x.error), kind: str(x.kind), createdAt: str(x.createdAt), startedAt: str(x.startedAt), finishedAt: str(x.finishedAt) };
+    error: str(x.error), kind: str(x.kind), createdAt: str(x.createdAt), startedAt: str(x.startedAt), finishedAt: str(x.finishedAt),
+    progress: isO(x.progress) ? { step: numOr(x.progress.step, null), of: numOr(x.progress.of, null), label: str(x.progress.label) } : null };
 }
 
 export function normNote(d: Doc): BookNote {
   const x = d.data;
   const o = (a: unknown) => arr(a).filter(isO);
-  return { id: d.id, bookId: str(x.bookId) || d.id.replace(/-\d+$/, ''), chapterNo: numOr(x.chapterNo, 0) as number, title: str(x.title), pages: str(x.pages),
+  return { id: d.id, bookId: str(x.bookId) || d.id.replace(/-\d+$/, ''), chapterNo: numOr(x.chapterNo, 0) as number, title: str(x.title), pages: str(x.pages), summary: str(x.summary),
     keyIdeas: o(x.keyIdeas).map((k) => ({ idea: str(k.idea), mechanism: str(k.mechanism), pages: str(k.pages) })),
     stories: o(x.stories).map((k) => ({ who: str(k.who), what: str(k.what), pages: str(k.pages) })),
     claims: o(x.claimsToCheck).map((k) => ({ claim: str(k.claim), pages: str(k.pages) })),
@@ -186,7 +240,34 @@ export function normMetric(d: Doc): Metric {
 
 export function normQa(d: Doc): QaRec {
   const x = d.data;
-  return { id: d.id, ideaCode: str(x.ideaCode), packId: str(x.packId), verdict: normVerdict(x.verdict), at: str(x.at), summary: str(x.summary) };
+  const o = (a: unknown) => arr(a).filter(isO);
+  const m = isO(x.measurements) ? x.measurements : {};
+  const n = (v: unknown) => numOr(v, null);
+  return {
+    id: d.id, ideaCode: str(x.ideaCode), packId: str(x.packId), videoAssetId: str(x.videoAssetId), verdict: normVerdict(x.verdict), at: str(x.at), summary: str(x.summary),
+    checks: o(x.checks).map((c) => { const st = str(c.status).toLowerCase(); return { name: str(c.name), status: (st === 'pass' || st === 'fail' ? st : 'warn') as QaCheck['status'], detail: str(c.detail), t: str(c.t) }; }),
+    fixes: o(x.fixes).map((f) => ({ t: str(f.t), issue: str(f.issue), fix: str(f.fix) })),
+    meas: { width: n(m.width), height: n(m.height), fps: n(m.fps), durationSec: n(m.durationSec), lufs: n(m.lufs), truePeak: n(m.truePeak), silences: arr(m.silences), ssimLoop: n(m.ssimLoop), safeZonePct: n(m.safeZonePct), firstWordSec: n(m.firstWordSec) },
+    images: o(x.images).map((f) => ({ path: str(f.path ?? f.assetId), label: str(f.label) })),
+  };
+}
+
+export function normPost(d: Doc): Post {
+  const x = d.data;
+  const m = d.id.match(/^(.*)-(carousel|story)-v(\d+)$/);
+  const o = (a: unknown) => arr(a).filter(isO);
+  return {
+    id: d.id, ideaCode: str(x.ideaCode) || (m ? m[1]! : ''), kind: m ? (m[2] as Post['kind']) : str(x.kind) === 'story' ? 'story' : 'carousel', version: numOr(x.version, m ? +m[3]! : 1) as number,
+    slides: o(x.slides).map((s, k) => ({ n: numOr(s.n, k + 1) as number, headline: str(s.headline), body: str(s.body), visual: str(s.visual) })),
+    frames: o(x.frames).map((f, k) => ({ n: numOr(f.n, k + 1) as number, text: str(f.text), visual: str(f.visual),
+      sticker: isO(f.sticker) ? { type: str(f.sticker.type), prompt: str(f.sticker.prompt), options: arr(f.sticker.options).map(str) } : null })),
+    designPrompt: str(x.designPrompt), cover: str(x.cover), caption: str(x.caption), altText: str(x.altText), createdAt: str(x.createdAt), postedAt: str(x.postedAt),
+  };
+}
+
+export function normRating(d: Doc): Rating {
+  const x = d.data;
+  return { id: d.id, packId: str(x.packId) || d.id, ideaCode: str(x.ideaCode), version: numOr(x.version, 1) as number, score: numOr(x.score, 0) as number, note: str(x.note), at: str(x.at) };
 }
 
 /** Parse a raw document against its schema; on failure keep the raw data (readers stay lenient). */
