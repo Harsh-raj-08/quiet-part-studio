@@ -126,7 +126,7 @@ export async function copyText(text: string, label: string): Promise<boolean> {
 /** A copy button that relabels to "Copied" for 1.6 s, as in the design. */
 export function useCopied(): [string, (key: string, text: string, label: string) => void] {
   const [copied, setCopied] = useState('');
-  const t = useRef<ReturnType<typeof setTimeout>>();
+  const t = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(t.current), []);
   const copy = useCallback((key: string, text: string, label: string) => {
     void copyText(text, label).then((ok) => {
