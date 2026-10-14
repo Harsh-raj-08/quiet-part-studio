@@ -13,7 +13,7 @@ const toDoc = (r: Row): Doc => ({ id: r.id, data: (r.data ?? {}) as Record<strin
  * - writes go through the write_doc() RPC so versions are checked in the database.
  */
 export function createSupabaseAdapter(cfg: QpConfig): Adapter {
-  const sb: SupabaseClient = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  const sb: SupabaseClient = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
   const maps = new Map<CollectionName, Map<string, Doc>>();
   const cbs = new Map<CollectionName, Set<(d: Doc[]) => void>>();
   const started = new Set<CollectionName>();
