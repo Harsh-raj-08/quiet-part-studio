@@ -20,8 +20,7 @@ test('Ask Scout: conversations list (newest first, design dates), first one open
   assert.match(await page.locator('#scout-thread').innerText(), /Sources · Kahneman ch\. 9 · Clear ch\. 12 · Hagger et al\. 2016 \(replication\)/);
   assert.equal(await page.locator('#scout-thinking').count(), 0);
   await page.click('#chat-scout-2');
-  await page.waitForFunction(() => location.hash === '#discover/ask/scout-2');
-  assert.match(await page.locator('#scout-thread').innerText(), /Lally et al\. 2010/);
+  await page.waitForFunction(() => location.hash === '#discover/ask/scout-2' && /Lally et al\. 2010/.test(document.getElementById('scout-thread').textContent));
   assert.deepEqual(errors.filter((e) => !benign(e)), []);
   await ctx.close();
 });
@@ -89,8 +88,7 @@ test('a failed chat job says so in the thread', async () => {
 test('New conversation + a suggestion chip sends immediately and creates the chat', async () => {
   const { page, ctx } = await open('#discover');
   await page.click('#chat-new');
-  await page.waitForFunction(() => location.hash === '#discover/ask/new');
-  assert.equal(await page.locator('[data-turn]').count(), 0);
+  await page.waitForFunction(() => location.hash === '#discover/ask/new' && !document.querySelector('[data-turn]'));
   await page.click('#scout-sugg-0');
   await page.waitForSelector('#scout-thinking');
   const id = await page.evaluate(() => location.hash.split('/')[2]);
