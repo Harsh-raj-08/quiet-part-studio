@@ -14,20 +14,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   const out = await handleFire({
     token: bearer(req),
     verifyOwner: async (t) => !!(await verifyOwner(sb, t)),
+    // Naive rate limit: settings/studio.lastFireAt (merged into the studio settings doc, versioned).
     getLastFire: async () => {
-      const { data } = await sb.from('settings').select('data').eq('id', 'worker-fire').maybeSingle();
-      const at = (data?.data as { lastFiredAt?: string } | undefined)?.lastFiredAt;
+      const { data } = await sb.from('settings').select('data').eq('id', 'studio').maybeSingle();
+      const at = (data?.data as { lastFireAt?: string } | undefined)?.lastFireAt;
       const ms = at ? Date.parse(at) : NaN;
       return Number.isFinite(ms) ? ms : null;
     },
     setLastFire: async (ms) => {
-      await sb.from('settings').upsert({ id: 'worker-fire', data: { lastFiredAt: new Date(ms).toISOString() }, updated_at: new Date(ms).toISOString() });
+      const at = new Date(ms).toISOString();
+      const { data } = await sb.from('settings').select('version').eq('id', 'studio').maybeSingle();
+      await sb.rpc('write_doc', { p_table: 'settings', p_id: 'studio', p_data: { lastFireAt: at }, p_if_version: (data as { version?: number } | null)?.version ?? null, p_merge: true });
     },
     post: async () => {
       const r = await fetch(url, {
         method: 'POST',
         headers: { Authorization: `Bearer ${secret}`, 'anthropic-beta': 'experimental-cc-routine-2026-04-01', 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-        body: JSON.stringify({ text: 'jobs queued' }),
+        body: JSON.stringify({ text: 'Jobs are queued in the Studio. Work the queue through the Worker API (playbooks/runner.md).' }),
       });
       return { ok: r.ok, body: await r.json().catch(() => null) };
     },
