@@ -1,4 +1,4 @@
-# Architecture (Phase 3a–3c)
+# Architecture (Phase 3a–3d)
 
 - `src/app` shell (Sidebar <-> Command bar, theme, hash routing, search, auth gate); every tab (`src/screens/*`) is a full screen.
 - `src/data`: `Adapter` interface; `mockAdapter` (tests, demo), `supabaseAdapter` (the only importer of supabase-js); `Store` holds one subscription per collection; writes use `mutate()` = fresh get + ifVersion update, retried once on conflict.
@@ -34,3 +34,51 @@ Worker contracts added in 3c (job fields the page writes → what the worker mus
 
 Settings the page now writes to `settings/studio`: `writerLane` (careful|quick), `cadence`, `autoArt`, `notifyQa`, `spacePhilosophy`.
 Migration `0002_account.sql` adds the `account` table (same shape, RLS, realtime) and allows it in `write_doc`.
+
+## Phase 3d: time zone, Worker API, fire, playbooks, import
+
+**Time zone.** Every date and clock time renders in the viewer's local zone (`src/lib/format.ts`: `parseWhen` reads date-only strings as local midnight; `hhmm`, `fmtWhen`, `whenText`, `shortDay` use local getters). Stored values stay ISO UTC. Tests pin `TZ=Asia/Kolkata` (scripts/test.mjs, CI) and the browser `timezoneId`; the fixed clock is 2026-10-11 12:00 IST. Fixture generators write IST wall-clock times and convert to UTC.
+
+**Worker API** (`api/worker/[action].ts` → `api/_lib/worker-core.ts`, DB adapter `api/_lib/worker-db.ts`). The only way the scheduled worker touches the Studio. POST only, `Content-Type: application/json`, body ≤ 1 MB, `Authorization: Bearer $WORKER_TOKEN` (constant-time compare; 401 on mismatch, 503 when `WORKER_TOKEN` or the service role is not configured). Runs server-side with the service role key; responses are `no-store`. Errors are `{ok:false, error}`.
+
+| Action | Body | Returns |
+|---|---|---|
+| `next` | `{}` | atomically claims the oldest queued job (versioned write; a lost race moves to the next one), sets `status:"running"`, `startedAt`, `runId`, records `settings/studio.workerSeenAt` → `{job, runId}` or `{job:null}` |
+| `heartbeat` | `{}` | sets `settings/studio.workerSeenAt` |
+| `get` | `{table, id}` | `{doc}` (`{id, version, data}` or null) |
+| `query` | `{table, where?:[[field, op, value]], orderBy?:{field, dir}, limit?}` | `{docs}`; ops `eq neq gt gte lt lte in`; limit ≤ 100 (default 50) |
+| `write` | `{table, id, data, ifVersion?, merge?, runId?}` | `{id, version}`; 409 on version conflict or when the doc exists and neither `ifVersion` nor `merge` is given |
+| `file-url` | `{path}` | 10-minute signed download URL from bucket `studio` |
+| `upload-url` | `{path}` | signed upload URL; path must match `^(media\|frames\|exports)/[A-Za-z0-9._/-]+$`, no `..` |
+
+Readable tables: books, booknotes, ideas, packs, posts, jobs, runs, reports, qa, metrics, chats, ratings, playbooks, settings, account. Write rules (nothing is ever deleted; there is no delete action):
+
+- ideas, packs, posts, reports, qa, runs, booknotes, account: free (use `ifVersion` or `merge`).
+- metrics: append-only. A new doc is fine; an existing doc may only grow: `snapshots` and `screenshots` keep every existing entry as a prefix; `latest`, `updatedAt` may change.
+- jobs: only the job this run claimed (`runId` must match and status must be `running`), only `status/progress/result/error/finishedAt`, merge. Workers cannot create jobs.
+- books: only `topic/status/summary`, merged.
+- chats: only append to `turns` (new turns must be `role:"assistant"`), plus `updatedAt`.
+- playbooks: only `learnings-proposed` and `taste-proposed`.
+- settings: only `studio.workerSeenAt`. ratings: never.
+
+```sh
+STUDIO_URL=https://quiet-part-studio.vercel.app
+api() { curl -sS -X POST "$STUDIO_URL/api/worker/$1" -H "Authorization: Bearer $WORKER_TOKEN" -H "Content-Type: application/json" -d "${2:-{\}}"; }
+
+api next                                   # {"ok":true,"job":{"id":"job-…","version":2,"data":{…}},"runId":"run-…"}
+api get '{"table":"packs","id":"IK-07-v5"}'
+api query '{"table":"ideas","where":[["status","eq","Approved"]],"orderBy":{"field":"updatedAt","dir":"desc"},"limit":20}'
+api write '{"table":"jobs","id":"job-123","runId":"run-abc","merge":true,"data":{"progress":{"step":6,"of":13,"label":"Reading chapter 6 of 13"}}}'
+api write '{"table":"jobs","id":"job-123","runId":"run-abc","merge":true,"data":{"status":"done","finishedAt":"2026-10-11T06:40:00Z"}}'
+api file-url '{"path":"books/bk-ikigai/book.pdf"}'
+api upload-url '{"path":"frames/IK-07/01.png"}'   # then: curl -X PUT --upload-file 01.png "<signedUrl>"
+api heartbeat
+```
+
+`playbooks/runner.md` is the worker's contract for all jobs. Unit tests (`test/unit/worker.test.ts`) run the core against an in-memory DB.
+
+**Fire** (`api/fire.ts`): owner only (Supabase JWT → `auth.getUser` → `studio_owner` row). Rate limit: refuses (429) if `settings/studio.lastFireAt` is under 60 s old, otherwise stores the new `lastFireAt` (versioned merge) and POSTs `{"text": …}` to `ROUTINE_FIRE_URL` with `Authorization: Bearer ROUTINE_FIRE_TOKEN`, `anthropic-beta: experimental-cc-routine-2026-04-01`, `anthropic-version: 2023-06-01`.
+
+**Playbooks** live in `playbooks/*.md` (brand, runner, scout, trends, research, writer, critic, art, qa, review, taste). Owner data (`taste-profile`, `learnings`) stays in the database. `node scripts/hash-playbooks.mjs` rewrites `playbooks/HASHES.txt` (first 16 hex of sha256 per file); a test fails when they differ (`--check` to verify).
+
+**Import** (`scripts/import-artifact-export.mjs <exportDir> [--dry-run] [--files <dir>]`): reads `<exportDir>/<collection>/<id>.json` (a plain document or an `{id, version, data}` wrapper), upserts each into the table of the same name with the id kept and `version` 1, using `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`. `--files` uploads a directory to bucket `studio` at the same relative paths. `--dry-run` prints counts and problems only. The owner runs it; CI never does.

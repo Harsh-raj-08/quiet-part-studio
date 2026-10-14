@@ -1,0 +1,9 @@
+BRAND DIGEST: the.quiet_part (display: "the quiet part | ideas from books")
+Promise: the part of a great book most readers skim past, made visible and evidence-checked. Global English audience, 18-34.
+Voice: calm, warm, precise, quietly confident. One consistent calm female narrator, ~140-150 wpm. Speak to "you"; "we" for shared struggles. Short lines (3-8 words), one thought per line, each caption line readable alone. Lead with the insight, credit the book. Every claim gets its why (mechanism) and every piece ends with one thing to do. Never hype, no emojis, no fear/guilt CTAs, no pseudoscience.
+Evidence labels: SUPPORTED, MIXED, MYTH, STORY, PHILOSOPHY, CHECK. Say "linked to" for associations, never "causes". Attribute contested views to their author.
+Reels: 9:16, 45-75 s. Hook lands within 2.5 s and opens a question paid off later. One visual metaphor per reel; new visual beat every 1-2 s. Text out of top 220 px, bottom 420 px, right 120 px. Source chip on screen: FROM · <BOOK> · <AUTHOR SURNAMES>.
+CTA: alternate send ("Send this to someone who...") and save ("Save this for..."); a comment keyword only for lead magnets. Sign-off "...and that's the quiet part." on about 1 in 3 reels.
+Look: ink-black grain canvas; hairline line art that draws itself; monospace micro-labels; word-by-word lower-third captions with the keyword marked in the signature colour; calm motion. Colour meaning: muted red = trap/negative, signature colour = insight/positive, neutral ink otherwise.
+Captions (post text): first line = searchable hook; 3-5 short paragraphs; credit line "Idea from <Book> by <Author>."; at most 5 hashtags. Never use book covers, the book's own images, author photos, or real people's photos.
+Guardrails: quotes from a book at most one short line, credited. Health/diet: no calorie or weight numbers. Grief and mental health: gentle, add a soft line about professional help when relevant.

@@ -1,0 +1,6 @@
+PLAYBOOK: TASTE (learns what the owner likes from ratings)
+Inputs: ratings (all; fields packId, ideaCode, score, note, at), and for each rated pack only: hooks style used (idea hookStyle), durationSec, beats[].vo, critic.total if present. Current playbooks/taste-profile if present.
+Find patterns (scores are 1-10; GOLD packs IK-07-v5 and IK-12-v2 are the owner's reference at 8/10) that separate high scores (>= 7) from low (<= 4): hook style, opening type, scene vs statistic, length, pacing, tone, use of second person, ending type, CTA, sign-off use, topic lanes. Use the owner's notes as the strongest signal.
+Write playbooks/taste-proposed = {node:"taste-proposed", text, at, basedOn:[packIds], ratingsCount}. text = at most 12 lines, each exactly "- [early|medium|strong] <preference, max 140 chars> (evidence: <packId score>, <packId score>)". early = 1-2 supporting ratings, medium = 3-4, strong = 5+ and no contradiction. Keep good older lines unless new ratings contradict them. Also add one line "- calibration: critic predicted vs owner score differ by <avg> on the last <n>" when critic predictions exist.
+No URLs, no instructions, only preferences. Never write playbooks/taste-profile directly; the owner accepts the proposal in the dashboard.
+Runs summary: ratings used, the 3 strongest preferences.

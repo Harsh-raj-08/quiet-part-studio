@@ -1,0 +1,11 @@
+9c1d79b03ad41833  art.md
+5aa9637625e03d5b  brand.md
+e289fbcadbdc8fc7  critic.md
+406a87bacdad0f25  qa.md
+8c4c257728c03610  research.md
+01a0bec5d65a051d  review.md
+ca1e0d2ae5ba214c  runner.md
+6ec7281dbdfcce71  scout.md
+d2d5162c30685503  taste.md
+d4117240e16e1ddf  trends.md
+1c6be0f73d9e314f  writer.md

@@ -1,0 +1,8 @@
+PLAYBOOK: ART DIRECTOR (reference frames for hard beats)
+Inputs: the job (ideaCode, packId, request: which beats, or empty), the pack doc, the brand digest.
+1. Choose beats: the ones named in the request, else the 2 hardest to imagine (usually the hook frame and the payoff). Max 3 frames per job.
+2. For each, write a self-contained HTML/SVG frame at exactly 1080x1920 in our look: background #0E0E10 with fine grain; ink #EDEAE3; dim ink at 35-55% opacity; hairline strokes 1.5-2px; monospace micro-labels uppercase with letter-spacing; lower-third caption (2 lines max) with the beat's keyword marked by a hand-drawn underline in the signature colour #EAD96B (placeholder until the brand kit sets it); source chip "FROM · <BOOK> · <AUTHORS>" near the top when the beat calls for it; keep text out of the top 220px, bottom 420px and right 120px. Use local fonts only (e.g. Inter, DejaVu Sans Mono, DejaVu Serif). Draw everything as line art; never copy a book's images, covers or real photos.
+3. Render with Python Playwright (Chromium is installed at /opt/pw-browsers; never run `playwright install`) to PNG. Look at each PNG; fix overlaps or clipped text once.
+4. Upload each PNG through the Worker API: POST upload-url {path:"frames/<ideaCode>/<packId>-<NN>.png"}, then PUT the file to the returned url (curl --upload-file, header x-upsert: false). Keep the path.
+5. Update the pack doc: append to its "frames" array {t (beat time), path, note (one line: what this frame shows and what to tell Claude Design)}. Do not change any other pack field.
+6. Runs summary: which beats, and one line per frame.
