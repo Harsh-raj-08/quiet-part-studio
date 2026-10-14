@@ -1,1 +1,110 @@
-[]
+[
+  {
+    "id": "run-writer-ah04",
+    "data": {
+      "node": "writer",
+      "target": "AH-04",
+      "summary": "Drafting production pack v1",
+      "status": "running",
+      "startedAt": "2026-10-11T11:58:48.000Z",
+      "at": "2026-10-11T11:58:48.000Z",
+      "jobId": "writer-AH-04-1"
+    }
+  },
+  {
+    "id": "run-research-cd",
+    "data": {
+      "node": "research",
+      "target": "CD",
+      "summary": "Reading chapter 6 of 13",
+      "status": "running",
+      "startedAt": "2026-10-11T11:51:20.000Z",
+      "at": "2026-10-11T11:51:20.000Z",
+      "jobId": "research-the-courage-to-be-disliked-1"
+    }
+  },
+  {
+    "id": "run-qa-tfs01",
+    "data": {
+      "node": "qa",
+      "target": "TFS-01",
+      "summary": "Fix verdict: loudness, caption safe zone",
+      "status": "done",
+      "startedAt": "2026-10-11T09:13:12.000Z",
+      "finishedAt": "2026-10-11T09:14:00.000Z",
+      "at": "2026-10-11T09:14:00.000Z"
+    }
+  },
+  {
+    "id": "run-art-ftw05",
+    "data": {
+      "node": "art",
+      "target": "FTW-05",
+      "summary": "Six reference frames generated",
+      "status": "done",
+      "startedAt": "2026-10-11T08:48:55.000Z",
+      "finishedAt": "2026-10-11T08:51:00.000Z",
+      "at": "2026-10-11T08:51:00.000Z"
+    }
+  },
+  {
+    "id": "run-scout-w41",
+    "data": {
+      "node": "scout",
+      "target": "",
+      "summary": "Weekly report: nine candidates",
+      "status": "done",
+      "startedAt": "2026-10-05T05:56:29.000Z",
+      "finishedAt": "2026-10-05T06:00:00.000Z",
+      "at": "2026-10-05T06:00:00.000Z"
+    }
+  },
+  {
+    "id": "run-trends-w41",
+    "data": {
+      "node": "trends",
+      "target": "",
+      "summary": "Weekly trends report",
+      "status": "done",
+      "startedAt": "2026-10-05T06:03:02.000Z",
+      "finishedAt": "2026-10-05T06:05:00.000Z",
+      "at": "2026-10-05T06:05:00.000Z"
+    }
+  },
+  {
+    "id": "run-review-w40",
+    "data": {
+      "node": "review",
+      "target": "",
+      "summary": "Weekly review written",
+      "status": "done",
+      "startedAt": "2026-10-04T20:58:50.000Z",
+      "finishedAt": "2026-10-04T21:00:00.000Z",
+      "at": "2026-10-04T21:00:00.000Z"
+    }
+  },
+  {
+    "id": "run-writer-sh01",
+    "data": {
+      "node": "writer",
+      "target": "SH-01",
+      "summary": "Pack v4 after prompt edit",
+      "status": "done",
+      "startedAt": "2026-10-10T16:18:58.000Z",
+      "finishedAt": "2026-10-10T16:20:00.000Z",
+      "at": "2026-10-10T16:20:00.000Z"
+    }
+  },
+  {
+    "id": "run-art-pm02",
+    "data": {
+      "node": "art",
+      "target": "PM-02",
+      "summary": "Frame 03 rejected by safety filter",
+      "status": "failed",
+      "startedAt": "2026-10-09T11:06:38.000Z",
+      "finishedAt": "2026-10-09T11:07:00.000Z",
+      "at": "2026-10-09T11:07:00.000Z"
+    }
+  }
+]

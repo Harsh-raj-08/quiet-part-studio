@@ -598,7 +598,9 @@
       "posted": {
         "date": "2026-10-03",
         "link": "https://example.com/reel-demo"
-      }
+      },
+      "hookStyle": "contrarian",
+      "format": "Reel"
     }
   },
   {
@@ -655,7 +657,7 @@
         }
       ],
       "format": "Reel",
-      "hookStyle": "contrarian",
+      "hookStyle": "direct-you",
       "sources": [
         {
           "title": "Implementation intentions, a review (demo)",
@@ -710,6 +712,372 @@
         }
       ],
       "dropReason": "the hook doesn't earn a second read."
+    }
+  },
+  {
+    "id": "FTW-01",
+    "data": {
+      "code": "FTW-01",
+      "bookId": "four-thousand-weeks",
+      "rank": 18,
+      "hook": "Your inbox will outlive you. That's fine.",
+      "quietPart": "Unfinished is the normal state of a life.",
+      "why": "Relief, not advice.",
+      "tryThis": "Leave one email unanswered on purpose.",
+      "visual": "An inbox counter that never reaches zero.",
+      "evidence": "PHILOSOPHY",
+      "evidenceNote": "Burkeman's argument.",
+      "pages": "61–64",
+      "scores": {
+        "hook": 4,
+        "visual": 4,
+        "truth": 4,
+        "send": 4
+      },
+      "total": 16,
+      "status": "Posted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "QA passed",
+          "at": "2026-10-10T12:00:00.000Z"
+        },
+        {
+          "status": "Posted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "posted": {
+        "date": "2026-10-09",
+        "link": "https://example.com/reel-demo"
+      },
+      "hookStyle": "contrarian",
+      "format": "Reel"
+    }
+  },
+  {
+    "id": "TFS-05",
+    "data": {
+      "code": "TFS-05",
+      "bookId": "thinking-fast-and-slow",
+      "rank": 19,
+      "hook": "Your memory of a holiday is mostly the last day.",
+      "quietPart": "We remember peaks and endings, not the average.",
+      "why": "Everyone has a holiday that ended badly.",
+      "tryThis": "Plan the last hour of your next trip.",
+      "visual": "A timeline with only the peak and the end lit.",
+      "evidence": "SUPPORTED",
+      "evidenceNote": "Peak-end rule, well replicated.",
+      "pages": "380–385",
+      "scores": {
+        "hook": 5,
+        "visual": 4,
+        "truth": 5,
+        "send": 4
+      },
+      "total": 18,
+      "status": "Posted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "QA passed",
+          "at": "2026-10-10T12:00:00.000Z"
+        },
+        {
+          "status": "Posted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "posted": {
+        "date": "2026-09-24",
+        "link": "https://example.com/reel-demo"
+      },
+      "hookStyle": "number",
+      "format": "Reel"
+    }
+  },
+  {
+    "id": "EN-02",
+    "data": {
+      "code": "EN-02",
+      "bookId": "enchiridion",
+      "rank": 20,
+      "hook": "You can't be insulted without your permission.",
+      "quietPart": "The sting comes from the judgement you add.",
+      "why": "Short and quotable.",
+      "tryThis": "Notice the sentence you add to the next insult.",
+      "visual": "Two speech bubbles; one is crossed out.",
+      "evidence": "PHILOSOPHY",
+      "evidenceNote": "Stoic teaching.",
+      "pages": "§20",
+      "scores": {
+        "hook": 3,
+        "visual": 4,
+        "truth": 4,
+        "send": 3
+      },
+      "total": 14,
+      "status": "Posted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "QA passed",
+          "at": "2026-10-10T12:00:00.000Z"
+        },
+        {
+          "status": "Posted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "posted": {
+        "date": "2026-09-20",
+        "link": "https://example.com/reel-demo"
+      },
+      "hookStyle": "direct-you",
+      "format": "Reel"
+    }
+  },
+  {
+    "id": "SH-02",
+    "data": {
+      "code": "SH-02",
+      "bookId": "stumbling-on-happiness",
+      "rank": 21,
+      "hook": "You'll adapt to almost anything faster than you think.",
+      "quietPart": "We underestimate how quickly the new normal arrives.",
+      "why": "Comforting and surprising.",
+      "tryThis": "Write down what you dread; check it in a month.",
+      "visual": "A line that rises, then flattens.",
+      "evidence": "SUPPORTED",
+      "evidenceNote": "Hedonic adaptation is well supported.",
+      "pages": "160–170",
+      "scores": {
+        "hook": 4,
+        "visual": 4,
+        "truth": 4,
+        "send": 4
+      },
+      "total": 16,
+      "status": "Posted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "QA passed",
+          "at": "2026-10-10T12:00:00.000Z"
+        },
+        {
+          "status": "Posted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "posted": {
+        "date": "2026-09-16",
+        "link": "https://example.com/reel-demo"
+      },
+      "hookStyle": "number",
+      "format": "Reel"
+    }
+  },
+  {
+    "id": "AH-06",
+    "data": {
+      "code": "AH-06",
+      "bookId": "atomic-habits",
+      "rank": 22,
+      "hook": "The two-minute rule, and why it isn't about two minutes.",
+      "quietPart": "Starting is the habit; the length is a detail.",
+      "why": "Corrects a popular rule.",
+      "tryThis": "Make the first step take two minutes.",
+      "visual": "A stopwatch that stops at 0:02.",
+      "evidence": "MIXED",
+      "evidenceNote": "The rule is a heuristic, not a finding.",
+      "pages": "162–165",
+      "scores": {
+        "hook": 4,
+        "visual": 3,
+        "truth": 3,
+        "send": 4
+      },
+      "total": 14,
+      "status": "Posted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "QA passed",
+          "at": "2026-10-10T12:00:00.000Z"
+        },
+        {
+          "status": "Posted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "posted": {
+        "date": "2026-09-12",
+        "link": "https://example.com/reel-demo"
+      },
+      "hookStyle": "myth-bust",
+      "format": "Reel"
+    }
+  },
+  {
+    "id": "PM-03",
+    "data": {
+      "code": "PM-03",
+      "bookId": "the-psychology-of-money",
+      "rank": 23,
+      "hook": "Nobody's crazy. Everyone's money story makes sense to them.",
+      "quietPart": "Money choices follow the money you grew up with.",
+      "why": "Kind framing.",
+      "tryThis": "Ask someone older what money meant when they were young.",
+      "visual": "Two family trees of coins.",
+      "evidence": "STORY",
+      "evidenceNote": "A framing illustrated with stories.",
+      "pages": "9–20",
+      "scores": {
+        "hook": 4,
+        "visual": 4,
+        "truth": 3,
+        "send": 4
+      },
+      "total": 15,
+      "status": "Posted",
+      "updatedAt": "2026-10-11T12:00:00.000Z",
+      "history": [
+        {
+          "status": "Idea",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Approved",
+          "at": "2026-10-01T12:00:00.000Z"
+        },
+        {
+          "status": "Scripted",
+          "at": "2026-10-04T12:00:00.000Z"
+        },
+        {
+          "status": "Voiced",
+          "at": "2026-10-06T12:00:00.000Z"
+        },
+        {
+          "status": "Produced",
+          "at": "2026-10-08T12:00:00.000Z"
+        },
+        {
+          "status": "QA passed",
+          "at": "2026-10-10T12:00:00.000Z"
+        },
+        {
+          "status": "Posted",
+          "at": "2026-10-11T12:00:00.000Z"
+        }
+      ],
+      "posted": {
+        "date": "2026-09-12",
+        "link": "https://example.com/reel-demo"
+      },
+      "hookStyle": "contrarian",
+      "format": "Reel"
     }
   }
 ]

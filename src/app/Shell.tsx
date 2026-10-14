@@ -3,6 +3,8 @@ import { MONO, SANS, EASE } from '../design/fonts';
 import { segPill, StatusDot, Wordmark } from '../design/primitives';
 import { TAB_NAMES, NAV } from './route';
 import { useApp } from './context';
+import { useSettings } from '../data/hooks';
+import { idleSince, workerOnline } from '../lib/worker';
 import { CommandSearch, UtilSearch } from './Search';
 
 export interface NavMeta { discover: string; library: string; ideas: string; studio: string; insights: string }
@@ -25,11 +27,14 @@ function ThemeToggle() {
 }
 
 function StatusLine({ side }: { side?: boolean }) {
-  const { running, mode } = useApp();
-  const text = side ? (running ? `Worker online · ${running} running` : 'Worker idle') : running ? `${running} running` : 'Idle';
+  const { running } = useApp();
+  const { workerSeenAt } = useSettings();
+  const on = workerOnline(workerSeenAt);
+  const w = on ? 'Worker online' : `Worker ${idleSince(workerSeenAt)}`;
+  const text = side ? (running ? `${w} · ${running} running` : w) : running ? `${running} running` : on ? 'Idle' : idleSince(workerSeenAt);
   return (
     <div data-status style={{ display: 'flex', alignItems: 'center', gap: 8, font: `400 11px/${side ? 1.3 : 1} ${MONO}`, letterSpacing: '.06em', color: 'var(--dim)' }}>
-      <StatusDot on={running > 0 || mode !== 'supabase'} />
+      <StatusDot on={on} />
       <span style={{ whiteSpace: side ? undefined : 'nowrap' }}>{text}</span>
     </div>
   );

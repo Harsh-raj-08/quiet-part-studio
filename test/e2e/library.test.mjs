@@ -17,9 +17,9 @@ test('shelf: headline, 4 columns at 1440, code chip, topic, title/author type, c
   assert.equal(await page.locator('#shelf').evaluate((e) => getComputedStyle(e).gridTemplateColumns.split(' ').length), 4);
   assert.equal(await page.locator('[data-book]').count(), 8);
   const tfs = page.locator('#book-thinking-fast-and-slow');
-  assert.match(await tfs.innerText(), /^TFS\nMIND\nThinking, Fast and Slow\nDaniel Kahneman\n[\s\S]*38 notes\s+3 ideas\s+0 posted\s+Open notes/);
+  assert.match(await tfs.innerText(), /^TFS\nMIND\nThinking, Fast and Slow\nDaniel Kahneman\n[\s\S]*38 notes\s+4 ideas\s+1 posted\s+Open notes/);
   assert.deepEqual(await tfs.locator('h3').evaluate((e) => { const s = getComputedStyle(e); return [s.fontSize, s.fontWeight]; }), ['27px', '300']);
-  assert.match(await page.locator('#book-atomic-habits').innerText(), /1 posted/);
+  assert.match(await page.locator('#book-atomic-habits').innerText(), /2 posted/);
   const cd = page.locator('#book-the-courage-to-be-disliked');
   assert.match(await cd.locator('[data-research-live]').innerText(), /RESEARCH · READING CHAPTER 6 OF 13/);
   assert.equal(await page.locator('#research-running-the-courage-to-be-disliked').isDisabled(), true);
@@ -92,7 +92,7 @@ test('chapter notes: two columns, digest, counts, first chapter open, summary li
   await page.waitForSelector('#chapters');
   assert.deepEqual(await page.locator('[role=group][aria-label=Book] button').allInnerTexts(), ['TFS', 'AH', 'EN', 'FTW', 'PM', 'SH'], 'only researched books');
   assert.match(await page.locator('#bd-digest').innerText(), /^Two systems run your thinking/);
-  assert.match(await page.locator('#bd-counts').innerText(), /4 chapters\s+3 ideas\s+Researched 2 Oct/);
+  assert.match(await page.locator('#bd-counts').innerText(), /4 chapters\s+4 ideas\s+Researched 2 Oct/);
   assert.equal(await page.locator('[id^=chap-body-]').count(), 1);
   const ch1 = page.locator('#chap-thinking-fast-and-slow-01');
   assert.match(await ch1.innerText(), /01\nTwo systems\n2 notes · 1 idea\n–\n+Fast thinking runs on its own/);
@@ -122,16 +122,16 @@ test('chapter notes: empty state for a researched book without chapter docs', as
 test('idea bank: the design table ranked by score, stamps, stage, evidence/stage filters, row opens the drawer', async () => {
   const { page, ctx } = await open('#library/bank/atomic-habits');
   await page.waitForSelector('#bank');
-  assert.deepEqual(await page.locator('[data-bank-row]').evaluateAll((l) => l.map((e) => e.getAttribute('data-bank-row'))), ['AH-01', 'AH-04', 'AH-02', 'AH-09']);
+  assert.deepEqual(await page.locator('[data-bank-row]').evaluateAll((l) => l.map((e) => e.getAttribute('data-bank-row'))), ['AH-01', 'AH-04', 'AH-02', 'AH-06', 'AH-09']);
   assert.match(await page.locator('[data-bank-row="AH-01"]').innerText(), /^01\nAH-01\nYou don't rise to your goals\. You fall to your systems\.\nREEL\nSUPPORTED\nPosted\n18$/);
   await page.selectOption('#bank-ev', 'MIXED');
-  assert.deepEqual(await page.locator('[data-bank-row]').allInnerTexts().then((l) => l.length), 1);
+  assert.deepEqual(await page.locator('[data-bank-row]').evaluateAll((l) => l.map((e) => e.getAttribute('data-bank-row'))), ['AH-02', 'AH-06']);
   await page.selectOption('#bank-ev', 'all');
   await page.selectOption('#bank-st', 'Idea');
   assert.deepEqual(await page.locator('[data-bank-row]').evaluateAll((l) => l.map((e) => e.getAttribute('data-bank-row'))), ['AH-09']);
   await page.selectOption('#bank-st', 'Posted');
   await page.selectOption('#bank-fmt', 'Reel');
-  assert.equal(await page.locator('[data-bank-row]').count(), 1);
+  assert.equal(await page.locator('[data-bank-row]').count(), 2);
   await page.selectOption('#bank-st', 'Approved');
   await page.waitForSelector('#bank-empty');
   await page.selectOption('#bank-st', 'all'); await page.selectOption('#bank-fmt', 'all');

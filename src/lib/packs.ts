@@ -23,9 +23,11 @@ export function postDesignText(p: Post): string {
 }
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
-/** The lit beat: the one that carries the idea's quiet part, else the second-to-last beat. */
-export function litBeat(beats: Pick<Beat, 'vo'>[], quietPart: string): number {
+/** The lit beat: one marked `lit`, else the one that carries the idea's quiet part, else the second-to-last beat. */
+export function litBeat(beats: Pick<Beat, 'vo' | 'lit'>[], quietPart: string): number {
   if (!beats.length) return -1;
+  const marked = beats.findIndex((b) => b.lit === true);
+  if (marked >= 0) return marked;
   const q = norm(quietPart);
   if (q.length >= 8) {
     const k = beats.findIndex((b) => { const v = norm(b.vo); return v.length >= 8 && (v.includes(q) || q.includes(v)); });

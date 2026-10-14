@@ -23,6 +23,29 @@
     }
   },
   {
+    "id": "art-AH-04-1",
+    "data": {
+      "node": "art",
+      "ideaCode": "AH-04",
+      "request": "Reference frames · waits on writer",
+      "status": "queued",
+      "createdAt": "2026-10-11T11:59:00.000Z"
+    }
+  },
+  {
+    "id": "scout-chat-1",
+    "data": {
+      "node": "scout",
+      "kind": "chat",
+      "chatId": "scout-1",
+      "request": "What's a fresh angle on decision fatigue that we could source from the shelf?",
+      "status": "done",
+      "createdAt": "2026-10-11T10:40:00.000Z",
+      "startedAt": "2026-10-11T10:40:30.000Z",
+      "finishedAt": "2026-10-11T10:42:00.000Z"
+    }
+  },
+  {
     "id": "research-the-courage-to-be-disliked-1",
     "data": {
       "node": "research",

@@ -153,21 +153,22 @@ test('theme toggle sets body[data-theme], not <html>, and is remembered', async 
   await ctx.close();
 });
 
-test('hash routing: Ideas is the default; tabs, sub-tabs and ids; Discover/Insights/System still show hero + "Arrives in the next build"', async () => {
+test('hash routing: Ideas is the default; every tab, sub-tabs and ids', async () => {
   const { page, ctx } = await openApp(browser, srv.url);
   assert.equal(await page.locator('[data-board]').count(), 1);
   await page.click('#sidebar [data-nav=discover]');
   await page.waitForSelector('[data-screen=discover]');
   assert.equal(await page.evaluate(() => location.hash), '#discover');
-  assert.match(await page.locator('h1').innerText(), /Scout found three candidates this week\. Three aren't on the shelf yet\./);
-  assert.match(await page.locator('[data-arrives]').innerText(), /Arrives in the next build/);
+  assert.match(await page.locator('h1').innerText(), /Scout found six candidates this week\. Five aren't on the shelf yet\./);
+  assert.equal(await page.locator('[data-arrives]').count(), 0, 'no placeholders left');
+  await page.evaluate(() => { location.hash = '#discover/reports/scout-2026-09-29'; }); await page.waitForFunction(() => /manual run/i.test(document.getElementById('rep-head')?.textContent || ''));
   await page.goto(`${srv.url}/#studio/script`); await page.waitForSelector('[data-screen=studio] [data-pack-grid]');
   assert.match(await page.locator('h1').innerText(), /Six packs in production\./);
   await page.evaluate(() => { location.hash = '#studio/qa/TFS-01-v5'; }); await page.waitForSelector('[data-pack="TFS-01-v5"] #qa-report');
   await page.evaluate(() => { location.hash = '#packs'; }); await page.waitForSelector('[data-pack-grid]');
   await page.evaluate(() => { location.hash = '#insights'; }); await page.waitForSelector('[data-screen=insights]');
   await page.evaluate(() => { location.hash = '#system'; }); await page.waitForSelector('[data-screen=system]');
-  assert.match(await page.locator('h1').innerText(), /Two jobs running\. Nothing has failed today\./);
+  assert.match(await page.locator('h1').innerText(), /Worker online, two jobs running\. Nothing has failed today\./);
   await page.evaluate(() => { location.hash = '#library'; }); await page.waitForSelector('[data-screen=library]');
   assert.match(await page.locator('h1').innerText(), /Eight books on the shelf\. Two still need research\./);
   await page.evaluate(() => { location.hash = '#nonsense'; }); await page.waitForSelector('[data-board]');
@@ -177,7 +178,7 @@ test('hash routing: Ideas is the default; tabs, sub-tabs and ids; Discover/Insig
 test('nav counts in the sidebar', async () => {
   const { page, ctx } = await openApp(browser, srv.url);
   const t = (n) => page.locator(`#sidebar [data-nav=${n}]`).innerText().then((x) => x.replace(/\s+/g, ' '));
-  assert.match(await t('discover'), /3 new/); assert.match(await t('library'), /8$/); assert.match(await t('ideas'), /16$/); assert.match(await t('studio'), /6$/);
+  assert.match(await t('discover'), /5 new/); assert.match(await t('library'), /8$/); assert.match(await t('ideas'), /22$/); assert.match(await t('studio'), /6$/);
   await ctx.close();
 });
 

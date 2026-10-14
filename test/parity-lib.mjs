@@ -14,6 +14,9 @@ export const TOL = 16;
 export const SHOTS_3B = {
   'studio-grid': '#studio', 'studio-script': '#studio/script/FTW-05-v3', 'studio-frames': '#studio/frames/FTW-05-v3', 'studio-qa': '#studio/qa/TFS-01-v5',
   'studio-posts': '#studio/posts/FTW-05-v3', 'library-shelf': '#library', 'library-notes': '#library/notes', 'library-bank': '#library/bank',
+  'discover-ask': '#discover', 'discover-reports': '#discover/reports', 'discover-trends': '#discover/trends',
+  'insights-log': '#insights', 'insights-review': '#insights/review', 'insights-works': '#insights/works',
+  'system-runs': '#system', 'system-jobs': '#system/jobs', 'system-settings': '#system/settings',
 };
 export async function captureScreens(browser, base, theme) {
   const shots = {}; const errors = [];
@@ -92,3 +95,35 @@ export async function compare(browser, designPng, appPng, mask = []) {
 
 export function saveSheet(name, base64) { fs.writeFileSync(path.join(OUT, `parity-${name}.png`), Buffer.from(base64, 'base64')); }
 export const readDesign = (name) => fs.readFileSync(path.join(PARITY_DIR, `design-${name}.png`));
+
+/**
+ * Below-the-hero figure: when a data-driven headline wraps to a different number of lines, everything under it
+ * shifts. This compares the frame below `y0` after finding the vertical offset (within ±range px) that lines the
+ * two images up best. Reported next to the full-frame figure, never instead of it.
+ */
+export async function compareAligned(browser, designPng, appPng, y0 = 380, range = 90) {
+  const page = await browser.newPage();
+  try {
+    return await page.evaluate(async ({ a, b, tol, y0, range }) => {
+      const load = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+      const A = await load(`data:image/png;base64,${a}`); const B = await load(`data:image/png;base64,${b}`);
+      const w = Math.min(A.width, B.width), h = Math.min(A.height, B.height);
+      const px = (img) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0); return x.getImageData(0, 0, w, h).data; };
+      const da = px(A), db = px(B);
+      const score = (dy, step) => {
+        let diff = 0, total = 0;
+        for (let y = y0; y < h - range; y += step) {
+          const yb = y + dy; if (yb < 0 || yb >= h) continue;
+          for (let x = 0; x < w; x += step) {
+            const i = (y * w + x) * 4, j = (yb * w + x) * 4; total++;
+            if (Math.max(Math.abs(da[i] - db[j]), Math.abs(da[i + 1] - db[j + 1]), Math.abs(da[i + 2] - db[j + 2])) > tol) diff++;
+          }
+        }
+        return total ? (diff / total) * 100 : 100;
+      };
+      let best = 0, bestS = Infinity;
+      for (let dy = 0; dy <= range; dy++) { const s = score(dy, 4); if (s < bestS) { bestS = s; best = dy; } }
+      return { pct: score(best, 1), dy: best };
+    }, { a: designPng.toString('base64'), b: appPng.toString('base64'), tol: TOL, y0, range });
+  } finally { await page.close(); }
+}

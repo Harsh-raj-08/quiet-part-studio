@@ -35,6 +35,7 @@ test('lit beat: the one with the quiet part, else the second-to-last', () => {
   assert.equal(litBeat(beats.slice(0, 2), ''), 0);
   assert.equal(litBeat(beats, 'Four.'), 2, 'too short to match: falls back');
   assert.equal(litBeat([], 'x'), -1);
+  assert.equal(litBeat([{ vo: 'a' }, { vo: 'b', lit: true }, { vo: 'c' }], 'c'), 1, 'an explicit lit flag wins');
 });
 
 test('timestamps: m:ss, decimals, h:mm:ss, seconds, ranges (start) and ends', () => {

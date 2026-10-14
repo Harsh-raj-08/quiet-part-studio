@@ -236,7 +236,7 @@ function PromptBox({ cur }: { cur: Pack }) {
   const send = () => {
     const req = text.trim().slice(0, 2000);
     if (!req) { toast('Describe the change first'); document.getElementById('prompt-input')?.focus(); return; }
-    void S.queue(key, { node: 'writer', ideaCode: cur.ideaCode, packId: cur.id, request: req, ...(lane === 'edit' ? { kind: 'edit' } : {}) }).then((ok) => { if (ok) setText(''); });
+    void S.queue(key, { node: 'writer', ideaCode: cur.ideaCode, packId: cur.id, request: req, lane: lane === 'edit' ? 'quick' : 'deep', ...(lane === 'edit' ? { kind: 'edit' } : {}) }).then((ok) => { if (ok) setText(''); });
   };
   return (
     <section id="prompt-panel" aria-label="Ask Claude to change this pack" style={{ display: 'grid', gap: 12 }}>
@@ -250,7 +250,7 @@ function PromptBox({ cur }: { cur: Pack }) {
       </div>
       {job && (
         <JobRow id="deep-card" node={job.kind === 'edit' ? 'edit' : 'writer'} note={job.request} status={job.status} at={job.createdAt} error={job.error}
-          extra={newer ? <div><Btn id="deep-open" h={32} style={{ padding: '0 14px', font: `400 12.5px/1 ${SANS}` }} onClick={() => S.open(newer.id, 'script')}>Open v{newer.version}</Btn></div> : undefined} />
+          extra={newer ? <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><span id="deep-ready" style={{ font: `italic 400 16px/1.4 ${SERIF}`, color: 'var(--grow)' }}>New version v{newer.version} ready</span><Btn id="deep-open" h={32} style={{ padding: '0 14px', font: `400 12.5px/1 ${SANS}` }} onClick={() => S.open(newer.id, 'script')}>Open v{newer.version}</Btn></div> : undefined} />
       )}
     </section>
   );

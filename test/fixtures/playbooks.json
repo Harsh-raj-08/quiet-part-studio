@@ -1,1 +1,34 @@
-[]
+[
+  {
+    "id": "learnings",
+    "data": {
+      "node": "learnings",
+      "at": "2026-09-28T09:00:00.000Z",
+      "text": "- [medium] Supported claims get more sends than philosophy posts.\n- [early] Lit-line reels hold attention without music."
+    }
+  },
+  {
+    "id": "learnings-proposed",
+    "data": {
+      "node": "learnings",
+      "at": "2026-10-04T21:00:00.000Z",
+      "basedOn": "review-2026-10-05",
+      "text": "- [medium] Supported claims get about twice the sends of philosophy posts.\n- [early] Lit-line reels hold attention without music.\n- [early] Put the source chip after the first beat."
+    }
+  },
+  {
+    "id": "taste-profile",
+    "data": {
+      "node": "taste-profile",
+      "at": "2026-10-01T09:00:00.000Z",
+      "text": "- [medium] Prefers endings that hand the viewer one small action.\n- [early] Marks down hooks that open on a statistic.\n- calibration: scores run about one point under the Critic."
+    }
+  },
+  {
+    "id": "brand",
+    "data": {
+      "node": "brand",
+      "text": "Calm, evidence-led, one quiet line per reel. (Demo brand digest.)"
+    }
+  }
+]

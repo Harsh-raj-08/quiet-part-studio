@@ -194,12 +194,13 @@ test('prompt box: Quick edit -> writer job kind "edit"; Needs research -> writer
   await page.keyboard.press('Enter');
   await page.waitForSelector('#deep-card[data-job="queued"]');
   let j = (await jobs(page)).find((x) => x.node === 'writer' && x.ideaCode === 'SH-01');
-  assert.deepEqual([j.kind, j.packId, j.request], ['edit', 'SH-01-v4', 'Tighten beat 3']);
+  assert.deepEqual([j.kind, j.lane, j.packId, j.request], ['edit', 'quick', 'SH-01-v4', 'Tighten beat 3']);
   assert.equal(await page.locator('#prompt-input-send').isDisabled(), true, 'one at a time');
   // The worker runs it and writes v5.
   await mock(page, (m, id) => { m.put('jobs', id, { status: 'running' }); }, j.id);
   await page.waitForSelector('#deep-card[data-job="running"]');
   await mock(page, (m, id) => { m.put('packs', 'SH-01-v5', { ...m.get('packs', 'SH-01-v4').data, version: 5, createdAt: new Date(Date.now() + 1000).toISOString() }); m.put('jobs', id, { status: 'done' }); }, j.id);
+  assert.equal(await page.locator('#deep-ready').innerText(), 'New version v5 ready');
   await page.click('#deep-open');
   await page.waitForSelector('[data-pack="SH-01-v5"]');
   // research lane
@@ -208,7 +209,7 @@ test('prompt box: Quick edit -> writer job kind "edit"; Needs research -> writer
   await page.click('#prompt-input-send');
   await page.waitForFunction(() => document.querySelector('#deep-card')?.textContent.includes('Check the presentism source'));
   j = (await jobs(page)).find((x) => x.request === 'Check the presentism source');
-  assert.equal(j.kind, undefined); assert.equal(j.node, 'writer'); assert.equal(j.packId, 'SH-01-v5');
+  assert.equal(j.kind, undefined); assert.equal(j.lane, 'deep'); assert.equal(j.node, 'writer'); assert.equal(j.packId, 'SH-01-v5');
   await ctx.close();
 });
 
@@ -220,7 +221,7 @@ test('frames: a placeholder tile per beat; real frames land on their beat; overl
   await page.fill('#frames-beats', '0:22');
   await page.click('#frames-beats-send');
   await page.waitForSelector('#frames-job');
-  const j = (await jobs(page)).find((x) => x.node === 'art');
+  const j = (await jobs(page)).find((x) => x.node === 'art' && x.packId === 'FTW-05-v3');
   assert.deepEqual([j.ideaCode, j.packId, j.request], ['FTW-05', 'FTW-05-v3', 'Make reference frames for beats: 0:22']);
   await page.click('#pcode-SH-01');
   await page.waitForSelector('#frame-0 img');

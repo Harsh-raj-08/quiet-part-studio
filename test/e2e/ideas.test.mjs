@@ -13,7 +13,7 @@ const idea = (page, code) => mock(page, (m, c) => m.get('ideas', c)?.data ?? m.l
 test('counts, headline and strip', async () => {
   const { page, ctx, errors } = await openApp(browser, srv.url);
   const counts = await page.locator('[data-strip-stage]').evaluateAll((l) => l.map((e) => [e.getAttribute('data-strip-stage'), e.querySelector('[data-strip-count]').textContent]));
-  assert.deepEqual(counts, [['Idea', '5'], ['Approved', '3'], ['Scripted', '2'], ['Voiced', '2'], ['Produced', '1'], ['QA passed', '1'], ['Posted', '2']]);
+  assert.deepEqual(counts, [['Idea', '5'], ['Approved', '3'], ['Scripted', '2'], ['Voiced', '2'], ['Produced', '1'], ['QA passed', '1'], ['Posted', '8']]);
   assert.match(await page.locator('h1').innerText(), /waiting on you\./);
   assert.match(await page.locator('h1').innerText(), /^Fourteen ideas in motion across six books\. Eleven are waiting/);
   assert.deepEqual(await page.locator('[data-column]').evaluateAll((l) => l.map((e) => e.getAttribute('data-column'))), ['Idea', 'Approved', 'Scripted', 'Voiced', 'Produced', 'QA passed', 'Posted']);
@@ -36,11 +36,11 @@ test('book and evidence filters, "Showing X of Y", Dropped toggle', async () => 
   const chips = page.locator('[aria-label="Filter by book"] button');
   assert.ok(await chips.count() >= 7);
   await chips.nth(1).click();
-  assert.match(await page.locator('[data-showing]').innerText(), /^Showing \d+ of 16$/);
+  assert.match(await page.locator('[data-showing]').innerText(), /^Showing \d+ of 22$/);
   const n = await page.locator('[data-card]').count();
   assert.ok(n > 0 && n < 16);
   await chips.nth(0).click();
-  assert.equal(await page.locator('[data-card]').count(), 16);
+  assert.equal(await page.locator('[data-card]').count(), 22);
   await page.selectOption('select[aria-label=Evidence]', { index: 1 });
   assert.ok(await page.locator('[data-card]').count() < 16);
   await page.selectOption('select[aria-label=Evidence]', { index: 0 });
@@ -101,7 +101,7 @@ test('keyboard: "m" opens the move menu, arrows pick, Enter moves, Escape closes
 
 test('list view shows the same rows', async () => {
   const { page, ctx } = await openApp(browser, srv.url, { view: 'list' });
-  assert.equal(await page.locator('[data-row]').count(), 16);
+  assert.equal(await page.locator('[data-row]').count(), 22);
   await ctx.close();
 });
 

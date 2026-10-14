@@ -1,5 +1,6 @@
 import type { Book, Idea, Job, Metric, Report } from '../data/types';
 import { isToday, kfmt, longDate, nw, slugOf, str } from './format';
+import { idleSince, workerOnline } from './worker';
 
 export type TabId = 'discover' | 'library' | 'ideas' | 'studio' | 'insights' | 'system';
 
@@ -14,6 +15,8 @@ export interface HeadlineData {
   metrics: Metric[];
   reports: Report[];
   ratings: number;
+  /** settings/studio.workerSeenAt (heartbeat). */
+  workerSeenAt?: string;
   now?: Date;
 }
 
@@ -92,7 +95,9 @@ export function headlines(t: TabId, D: HeadlineData): Headline {
     const fr = D.runs.filter((r) => r.status === 'failed' && !ids.has(r.jobId) && isToday(r.finishedAt || r.at, now)).length;
     const f = fj.length + fr;
     o.eb = 'System · Worker, queue and settings';
-    o.g = rn ? `${nw(rn, true)}${rn > 1 ? ' jobs' : ' job'} running.` : 'Worker idle.';
+    const on = workerOnline(D.workerSeenAt ?? '', now.getTime());
+    const running = rn ? `${nw(rn)}${rn > 1 ? ' jobs' : ' job'} running` : 'nothing running';
+    o.g = on ? `Worker online, ${running}.` : D.workerSeenAt ? `Worker ${idleSince(D.workerSeenAt, now)}.` : rn ? `${nw(rn, true)}${rn > 1 ? ' jobs' : ' job'} running.` : 'Worker idle.';
     o.l = f ? `${nw(f, true)} failed today.` : 'Nothing has failed today.';
   }
   return o;

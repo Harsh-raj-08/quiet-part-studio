@@ -55,7 +55,7 @@ export async function uploadMedia(store: Store, idea: { id: string; code: string
 
 const sane = (s: string) => s.replace(/[^A-Za-z0-9_.-]/g, '_');
 
-export interface QueueJob { node: string; request: string; ideaCode?: string; bookId?: string; packId?: string; videoAssetId?: string; kind?: string }
+export interface QueueJob { node: string; request: string; ideaCode?: string; bookId?: string; packId?: string; videoAssetId?: string; kind?: string; chatId?: string; files?: string[]; lane?: 'quick' | 'deep' }
 
 export const BOOK_EXTS = { pdf: 'application/pdf', epub: 'application/epub+zip' } as const;
 export function checkBookFile(f: File): string | null {
@@ -71,14 +71,17 @@ export async function uploadBookFile(store: Store, bookId: string, file: File, n
 }
 
 export async function queueJob(store: Store, o: QueueJob, now: () => string = () => new Date().toISOString()): Promise<string> {
-  const target = o.ideaCode || o.bookId || 'x';
-  const id = sane(`${o.node}-${target}${o.kind ? `-${o.kind}` : ''}-${Date.now()}`);
+  const target = o.ideaCode || o.bookId || o.chatId || 'x';
+  const id = sane(`${o.node}-${target}${o.kind ? `-${o.kind}` : ''}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`);
   const data: Record<string, unknown> = { node: o.node, request: o.request.slice(0, 1200), status: 'queued', createdAt: now() };
   if (o.ideaCode) data.ideaCode = o.ideaCode;
   if (o.bookId) data.bookId = o.bookId;
   if (o.packId) data.packId = o.packId;
   if (o.kind) data.kind = o.kind;
   if (o.videoAssetId) data.videoAssetId = o.videoAssetId;
+  if (o.chatId) data.chatId = o.chatId;
+  if (o.lane) data.lane = o.lane;
+  if (o.files?.length) data.files = o.files.slice(0, 12);
   await store.set('jobs', id, data);
   return id;
 }

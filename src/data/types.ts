@@ -3,7 +3,7 @@ import { z } from 'zod';
 /** The 14 document collections (one Postgres table each). */
 export const COLLECTIONS = [
   'books', 'booknotes', 'ideas', 'packs', 'posts', 'jobs', 'runs',
-  'reports', 'qa', 'metrics', 'chats', 'ratings', 'playbooks', 'settings',
+  'reports', 'qa', 'metrics', 'chats', 'ratings', 'playbooks', 'settings', 'account',
 ] as const;
 export type CollectionName = (typeof COLLECTIONS)[number];
 
@@ -99,7 +99,7 @@ export const GenericDoc = Loose;
 
 export const SCHEMAS: Record<CollectionName, z.ZodTypeAny> = {
   books: BookDoc, booknotes: BookNoteDoc, ideas: IdeaDoc, packs: PackDoc, posts: PostDoc, jobs: JobDoc, runs: GenericDoc,
-  reports: ReportDoc, qa: QaDoc, metrics: MetricDoc, chats: GenericDoc, ratings: RatingDoc, playbooks: GenericDoc, settings: GenericDoc,
+  reports: ReportDoc, qa: QaDoc, metrics: MetricDoc, chats: GenericDoc, ratings: RatingDoc, playbooks: GenericDoc, settings: GenericDoc, account: GenericDoc,
 };
 
 // ---------------------------------------------------------------- normalised domain types
@@ -116,7 +116,7 @@ export interface Idea {
   voiceAssetId: string; voiceFileName: string; voiceUploadedAt: string; videoAssetId: string; videoFileName: string; videoSize: number; videoUploadedAt: string;
   hookStyle: string; qaLast: { qaId: string; verdict: 'GO' | 'FIX' | 'NO-GO'; at: string } | null;
 }
-export interface Beat { t: string; vo: string; onscreen: string; visual: string }
+export interface Beat { t: string; vo: string; onscreen: string; visual: string; lit?: boolean }
 export interface Frame { t: string; path: string; note: string }
 export interface HookOpt { style: string; vo: string; onscreen: string; why: string }
 export interface Pack {
@@ -127,7 +127,7 @@ export interface Pack {
   critic: { total: number | null; scores: Record<string, number | null>; predictedOwnerScore: number | null; notes: string } | null;
 }
 export interface Job {
-  id: string; node: string; ideaCode: string; bookId: string; packId: string; request: string; status: string; error: string; kind: string;
+  id: string; node: string; ideaCode: string; bookId: string; packId: string; chatId: string; request: string; status: string; error: string; kind: string;
   createdAt: string; startedAt: string; finishedAt: string; progress: { step: number | null; of: number | null; label: string } | null;
 }
 export interface BookNote {
@@ -136,7 +136,19 @@ export interface BookNote {
   claims: { claim: string; pages: string }[]; lines: { text: string; page: string }[];
 }
 export interface Report { id: string; type: string; at: string; d: Record<string, unknown> }
-export interface Metric { id: string; ideaCode: string; postedAt: string; latest: Record<string, number | null> | null }
+export const METRIC_FIELDS = [['views', 'Views'], ['reach', 'Reach'], ['avgWatchSec', 'Avg watch (s)'], ['watchThroughPct', 'Watch-through %'], ['likes', 'Likes'], ['comments', 'Comments'],
+  ['saves', 'Saves'], ['shares', 'Shares'], ['follows', 'Follows'], ['profileVisits', 'Profile visits'], ['skipRatePct', 'Skip rate %']] as const;
+export type MetricField = (typeof METRIC_FIELDS)[number][0];
+export type Snap = Record<MetricField, number | null> & { at: string; day: number | null; source: string; note: string };
+export interface Metric { id: string; ideaCode: string; postedAt: string; latest: Snap | null; snapshots: Snap[]; screenshots: { path: string; fileName: string; at: string }[]; updatedAt: string }
+export interface ChatTurn { role: 'user' | 'assistant'; content: string; at: string; sources: string[]; ideas: { bookTitle: string; hook: string }[]; books: { title: string; author: string; year: string; lane: string; why: string }[] }
+export interface Chat { id: string; title: string; createdAt: string; updatedAt: string; jobs: string[]; turns: ChatTurn[] }
+export interface Run { id: string; node: string; jobId: string; summary: string; at: string; status: string; startedAt: string; finishedAt: string; target: string }
+export interface Account { id: string; at: string; followers: number | null; source: string }
+export interface StudioSettings {
+  workerSchedule: string; workerSeenAt: string; triggerSet: boolean;
+  writerLane: 'careful' | 'quick'; cadence: string; autoArt: boolean; notifyQa: boolean; spacePhilosophy: boolean;
+}
 export interface QaCheck { name: string; status: 'pass' | 'warn' | 'fail'; detail: string; t: string }
 export interface QaRec {
   id: string; ideaCode: string; packId: string; videoAssetId: string; verdict: string; at: string; summary: string;
@@ -198,7 +210,7 @@ export function normPack(d: Doc): Pack {
   const st = isO(x.story) ? x.story : null;
   const cr = isO(x.critic) ? x.critic : null;
   return { id: d.id, ideaCode: str(x.ideaCode), version: numOr(x.version, 1) as number, title: str(x.title) || d.id, intro: str(x.intro), durationSec: numOr(x.durationSec, 0) as number,
-    beats: arr(x.beats).filter(isO).map((b) => ({ t: str(b.t), vo: str(b.vo), onscreen: str(b.onscreen), visual: str(b.visual) })),
+    beats: arr(x.beats).filter(isO).map((b) => ({ t: str(b.t), vo: str(b.vo), onscreen: str(b.onscreen), visual: str(b.visual), ...(b.lit === true ? { lit: true } : {}) })),
     voiceover: str(x.voiceover), designPrompt: str(x.designPrompt), cover: str(x.cover), caption: str(x.caption), captionFinal: str(x.captionFinal),
     watchouts: Array.isArray(wo) ? wo.map(str).filter(Boolean) : str(wo).split('\n').map((l) => l.replace(/^\s*[-•]\s*/, '').trim()).filter(Boolean),
     createdBy: str(x.createdBy), createdAt: str(x.createdAt), basedOn: str(x.basedOn), changeNote: str(x.changeNote),
@@ -212,7 +224,7 @@ export function normPack(d: Doc): Pack {
 
 export function normJob(d: Doc): Job {
   const x = d.data;
-  return { id: d.id, node: str(x.node), ideaCode: str(x.ideaCode), bookId: str(x.bookId), packId: str(x.packId), request: str(x.request), status: str(x.status),
+  return { id: d.id, node: str(x.node), ideaCode: str(x.ideaCode), bookId: str(x.bookId), packId: str(x.packId), chatId: str(x.chatId), request: str(x.request), status: str(x.status),
     error: str(x.error), kind: str(x.kind), createdAt: str(x.createdAt), startedAt: str(x.startedAt), finishedAt: str(x.finishedAt),
     progress: isO(x.progress) ? { step: numOr(x.progress.step, null), of: numOr(x.progress.of, null), label: str(x.progress.label) } : null };
 }
@@ -231,11 +243,46 @@ export function normReport(d: Doc): Report {
   return { id: d.id, type: str(d.data.type), at: str(d.data.at), d: d.data };
 }
 
+export function normSnap(x: Record<string, unknown>): Snap {
+  const o = { at: str(x.at), day: numOr(x.day, null), source: str(x.source), note: str(x.note) } as Snap;
+  for (const [k] of METRIC_FIELDS) o[k] = numOr(x[k], null);
+  return o;
+}
 export function normMetric(d: Doc): Metric {
   const x = d.data;
-  const l = isO(x.latest) ? x.latest : null;
-  const latest = l ? Object.fromEntries(Object.entries(l).map(([k, v]) => [k, typeof v === 'number' ? v : null])) : null;
-  return { id: d.id, ideaCode: str(x.ideaCode) || d.id, postedAt: str(x.postedAt), latest };
+  const snapshots = arr(x.snapshots).filter(isO).map(normSnap);
+  const latest = isO(x.latest) ? normSnap(x.latest) : snapshots.length ? snapshots[snapshots.length - 1]! : null;
+  return { id: d.id, ideaCode: str(x.ideaCode) || d.id, postedAt: str(x.postedAt), latest, snapshots,
+    screenshots: arr(x.screenshots).filter(isO).map((s) => ({ path: str(s.path ?? s.assetId), fileName: str(s.fileName), at: str(s.at) })).filter((s) => s.path),
+    updatedAt: str(x.updatedAt) };
+}
+
+export function normChat(d: Doc): Chat {
+  const x = d.data;
+  const turns: ChatTurn[] = arr(x.turns).filter(isO).filter((t) => t.role === 'user' || t.role === 'assistant').map((t) => ({
+    role: t.role as ChatTurn['role'], content: str(t.content), at: str(t.at),
+    sources: arr(t.sources).map((s) => (isO(s) ? str(s.title || s.url) : str(s))).filter(Boolean),
+    ideas: arr(t.ideas).filter(isO).map((i) => ({ bookTitle: str(i.bookTitle), hook: str(i.hook) })).filter((i) => i.hook),
+    books: arr(t.books).filter(isO).map((b) => ({ title: str(b.title), author: str(b.author), year: str(b.year), lane: str(b.lane), why: str(b.why) })).filter((b) => b.title),
+  }));
+  return { id: d.id, title: str(x.title) || 'Untitled chat', createdAt: str(x.createdAt), updatedAt: str(x.updatedAt), jobs: arr(x.jobs).map(str).filter(Boolean), turns };
+}
+
+export function normRun(d: Doc): Run {
+  const x = d.data;
+  return { id: d.id, node: str(x.node), jobId: str(x.jobId), summary: str(x.summary), at: str(x.at), status: str(x.status), startedAt: str(x.startedAt), finishedAt: str(x.finishedAt), target: str(x.target) };
+}
+export function normAccount(d: Doc): Account {
+  return { id: d.id, at: str(d.data.at), followers: numOr(d.data.followers, null), source: str(d.data.source) };
+}
+export function normSettings(docs: Doc[]): StudioSettings {
+  const x = docs.find((d) => d.id === 'studio')?.data ?? {};
+  const lane = str(x.writerLane).toLowerCase();
+  return {
+    workerSchedule: str(x.workerSchedule), workerSeenAt: str(x.workerSeenAt), triggerSet: !!str(x.workerTriggerId).trim(),
+    writerLane: lane === 'quick' ? 'quick' : 'careful', cadence: str(x.cadence) || '4 per week',
+    autoArt: x.autoArt == null ? true : !!x.autoArt, notifyQa: x.notifyQa == null ? true : !!x.notifyQa, spacePhilosophy: !!x.spacePhilosophy,
+  };
 }
 
 export function normQa(d: Doc): QaRec {

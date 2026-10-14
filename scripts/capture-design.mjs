@@ -44,10 +44,22 @@ export const STEPS_3B = [
   ['library-shelf', ['02 · Library']],
   ['library-notes', ['02 · Library', 'Chapter notes']],
   ['library-bank', ['02 · Library', 'Idea bank']],
+  // Phase 3c
+  ['discover-ask', ['01 · Discover']],
+  ['discover-reports', ['01 · Discover', 'Scout reports']],
+  ['discover-trends', ['01 · Discover', 'Trends']],
+  ['insights-log', ['05 · Insights']],
+  ['insights-review', ['05 · Insights', 'Weekly review']],
+  ['insights-works', ['05 · Insights', 'What works']],
+  ['system-runs', ['System']],
+  ['system-jobs', ['System', 'Jobs']],
+  ['system-settings', ['System', 'Settings']],
 ];
+// --only=<prefix> re-captures just the matching screens (e.g. --only=discover).
+const ONLY = (process.argv.find((a) => a.startsWith('--only=')) ?? '').slice(7);
 const shot = (pg, name) => pg.screenshot({ path: path.join(OUT, `design-${name}.png`) });
 
-for (const theme of ['night', 'paper']) {
+for (const theme of ONLY ? [] : ['night', 'paper']) {
   const pg = await page();
   if (theme === 'paper') { await pg.getByText('Paper', { exact: true }).first().click(); await pg.waitForTimeout(600); }
   await shot(pg, `${theme}-sidebar`);
@@ -64,7 +76,7 @@ for (const theme of ['night', 'paper']) {
 // Phase 3b: Studio and Library, in the owner's Command bar layout.
 const click = async (pg, text) => { await pg.getByText(text, { exact: true }).first().click(); await pg.waitForTimeout(500); };
 for (const theme of ['night', 'paper']) {
-  for (const [name, steps] of STEPS_3B) {
+  for (const [name, steps] of STEPS_3B.filter(([n]) => !ONLY || ONLY.split(',').some((o) => n.startsWith(o)))) {
     const pg = await page();
     if (theme === 'paper') { await pg.getByText('Paper', { exact: true }).first().click(); await pg.waitForTimeout(600); }
     await pg.keyboard.press('Control+\\'); await pg.waitForTimeout(900);

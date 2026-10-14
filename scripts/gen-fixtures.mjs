@@ -57,7 +57,26 @@ const SEED = [
   ['AH-01', 'AH', 'Posted', [5, 4, 4, 5], 'SUPPORTED', "You don't rise to your goals. You fall to your systems.", 'Goals pick the direction. Systems decide whether you get there.', "The book's best-known line, with a fresh visual.", 'Write the system behind one goal. Just the daily part.', 'A summit drawn faint; the staircase below in solid ink.', 'Supported by research on implementation intentions.', '23–27'],
   ['SH-06', 'SH', 'Dropped', [3, 2, 2, 3], 'MYTH', "Money can't buy happiness. Or can it?", 'The cliché is wrong in both directions.', "Too familiar; the hook doesn't earn the second read.", '—', '—', "The popular version of this claim isn't supported. Dropped before scripting.", '210–215'],
 ];
-const POSTED = { 'PM-01': { date: '2026-10-03', views: 12400 }, 'AH-01': { date: '2026-09-28', views: 31000 } };
+// Six more reels that went out in September/October (the design's Insights rows). Invented hooks, no book text.
+SEED.push(
+  ['FTW-01', 'FTW', 'Posted', [4, 4, 4, 4], 'PHILOSOPHY', "Your inbox will outlive you. That's fine.", 'Unfinished is the normal state of a life.', 'Relief, not advice.', 'Leave one email unanswered on purpose.', 'An inbox counter that never reaches zero.', "Burkeman's argument.", '61–64'],
+  ['TFS-05', 'TFS', 'Posted', [5, 4, 5, 4], 'SUPPORTED', 'Your memory of a holiday is mostly the last day.', 'We remember peaks and endings, not the average.', 'Everyone has a holiday that ended badly.', 'Plan the last hour of your next trip.', 'A timeline with only the peak and the end lit.', 'Peak-end rule, well replicated.', '380–385'],
+  ['EN-02', 'EN', 'Posted', [3, 4, 4, 3], 'PHILOSOPHY', "You can't be insulted without your permission.", 'The sting comes from the judgement you add.', 'Short and quotable.', 'Notice the sentence you add to the next insult.', 'Two speech bubbles; one is crossed out.', 'Stoic teaching.', '§20'],
+  ['SH-02', 'SH', 'Posted', [4, 4, 4, 4], 'SUPPORTED', "You'll adapt to almost anything faster than you think.", 'We underestimate how quickly the new normal arrives.', 'Comforting and surprising.', 'Write down what you dread; check it in a month.', 'A line that rises, then flattens.', 'Hedonic adaptation is well supported.', '160–170'],
+  ['AH-06', 'AH', 'Posted', [4, 3, 3, 4], 'MIXED', "The two-minute rule, and why it isn't about two minutes.", 'Starting is the habit; the length is a detail.', 'Corrects a popular rule.', 'Make the first step take two minutes.', 'A stopwatch that stops at 0:02.', 'The rule is a heuristic, not a finding.', '162–165'],
+  ['PM-03', 'PM', 'Posted', [4, 4, 3, 4], 'STORY', "Nobody's crazy. Everyone's money story makes sense to them.", 'Money choices follow the money you grew up with.', 'Kind framing.', 'Ask someone older what money meant when they were young.', 'Two family trees of coins.', 'A framing illustrated with stories.', '9–20'],
+);
+// [date, views, watch %, sends (shares), saves, follows, day-7 views, hook style]
+const POSTED = {
+  'FTW-01': ['2026-10-09', 9800, 64, 210, 380, 90, null, 'contrarian'],
+  'PM-01': ['2026-10-03', 12400, 71, 380, 520, 140, 11200, 'contrarian'],
+  'AH-01': ['2026-09-28', 31000, 78, 1240, 1610, 360, 27900, 'direct-you'],
+  'TFS-05': ['2026-09-24', 18600, 69, 820, 900, 210, 16100, 'number'],
+  'EN-02': ['2026-09-20', 8100, 58, 190, 240, 60, 7300, 'direct-you'],
+  'SH-02': ['2026-09-16', 14200, 66, 610, 700, 150, 12800, 'number'],
+  'AH-06': ['2026-09-12', 10900, 61, 330, 410, 90, 9600, 'myth-bust'],
+  'PM-03': ['2026-09-12', 13000, 67, 450, 520, 80, 11700, 'contrarian'],
+};
 const EXTRA = {
   'AH-01': { format: 'Reel', hookStyle: 'contrarian', sources: [{ title: 'Implementation intentions, a review (demo)', url: 'https://example.com/implementation-intentions' }, { title: 'A source with an unsafe link', url: 'http://example.com/not-https' }] },
   'SH-01': { voiceAssetId: 'media/SH-01/demo-voice.m4a', voiceFileName: 'voice-demo.m4a', voiceUploadedAt: iso(9) },
@@ -80,7 +99,7 @@ const ideas = SEED.map(([code, b, status, sc, evidence, hook, quietPart, why, tr
     scores: { hook: sc[0], visual: sc[1], truth: sc[2], send: sc[3] }, total: sc.reduce((a, c) => a + c, 0),
     status, updatedAt: hist[hist.length - 1].at, history: hist, ...(EXTRA[code] ?? {}),
   };
-  if (POSTED[code]) data.posted = { date: POSTED[code].date, link: 'https://example.com/reel-demo' };
+  if (POSTED[code]) { data.posted = { date: POSTED[code][0], link: 'https://example.com/reel-demo' }; data.hookStyle = POSTED[code][7]; data.format = data.format || 'Reel'; }
   if (status === 'Dropped') data.dropReason = "the hook doesn't earn a second read.";
   return { id: code, data };
 });
@@ -131,6 +150,8 @@ write('packs', packs);
 write('jobs', [
   { id: 'writer-AH-04-1', data: { node: 'writer', ideaCode: 'AH-04', request: 'Write production pack', status: 'running', createdAt: iso(11), startedAt: iso(11) } },
   { id: 'writer-FTW-05-0', data: { node: 'writer', ideaCode: 'FTW-05', request: 'Write production pack', status: 'done', createdAt: iso(5), startedAt: iso(5), finishedAt: iso(5) } },
+  { id: 'art-AH-04-1', data: { node: 'art', ideaCode: 'AH-04', request: 'Reference frames · waits on writer', status: 'queued', createdAt: '2026-10-11T11:59:00.000Z' } },
+  { id: 'scout-chat-1', data: { node: 'scout', kind: 'chat', chatId: 'scout-1', request: "What's a fresh angle on decision fatigue that we could source from the shelf?", status: 'done', createdAt: '2026-10-11T10:40:00.000Z', startedAt: '2026-10-11T10:40:30.000Z', finishedAt: '2026-10-11T10:42:00.000Z' } },
   { id: 'research-the-courage-to-be-disliked-1', data: { node: 'research', bookId: 'the-courage-to-be-disliked', request: 'full', status: 'running', createdAt: iso(11), startedAt: iso(11), progress: { step: 6, of: 13, label: 'Reading chapter 6 of 13' } } },
 ]);
 
@@ -150,7 +171,23 @@ write('qa', [
     measurements: { durationSec: 34, lufs: -14.0, safeZonePct: 100, firstWordSec: 0.2 },
     checks: [{ name: 'Hook lands in the first second.', status: 'pass' }, { name: 'Source chip appears before 0:05.', status: 'pass' }, { name: 'Captions clear of UI.', status: 'pass' }, { name: 'Loudness on target.', status: 'pass' }, { name: 'One lilac mark per frame.', status: 'pass' }] } },
 ]);
-write('metrics', Object.entries(POSTED).map(([code, p]) => ({ id: code, data: { ideaCode: code, postedAt: p.date, latest: { views: p.views, avgWatchSec: 19, saves: 410, shares: 220, follows: 35, day: 7 } } })));
+const dayMs = 864e5;
+write('metrics', Object.entries(POSTED).map(([code, [date, views, watch, sends, saves, follows, d7]]) => {
+  const t0 = Date.parse(`${date}T18:00:00.000Z`);
+  const latestDay = Math.round((Date.parse('2026-10-11T12:00:00.000Z') - t0) / dayMs);
+  const snap = (day, f, source = 'screenshot') => ({ at: new Date(t0 + day * dayMs).toISOString(), day, views: Math.round(views * f), reach: Math.round(views * f * 0.82), avgWatchSec: 19, watchThroughPct: watch, likes: Math.round(saves * 1.8 * f), comments: Math.round(sends / 9 * f), saves: Math.round(saves * f), shares: Math.round(sends * f), follows: Math.round(follows * f), profileVisits: Math.round(follows * 4 * f), skipRatePct: 100 - watch - 10, source, note: '' });
+  const snapshots = [snap(1, 0.4)];
+  if (d7) snapshots.push({ ...snap(7, d7 / views) });
+  if (latestDay > 7) snapshots.push(snap(latestDay, 1));
+  else snapshots.push(snap(latestDay, 1));
+  return { id: code, data: { ideaCode: code, postedAt: date, snapshots, latest: snapshots[snapshots.length - 1], screenshots: code === 'PM-01' ? [{ path: 'stats/PM-01/demo-day7.png', fileName: 'day7.png', at: '2026-10-10T09:00:00.000Z' }] : [], updatedAt: snapshots[snapshots.length - 1].at } };
+}));
+// Followers read from profile screenshots (the account collection).
+write('account', [
+  { id: 'acct-2026-08-11', data: { at: '2026-08-11T09:00:00.000Z', followers: 9000, source: 'screenshot' } },
+  { id: 'acct-2026-09-11', data: { at: '2026-09-11T09:00:00.000Z', followers: 10280, source: 'screenshot' } },
+  { id: 'acct-2026-10-11', data: { at: '2026-10-11T09:00:00.000Z', followers: 11460, source: 'screenshot' } },
+]);
 
 // ---------------------------------------------------------------- book notes (the design's chapters; invented summaries, no book text)
 // [chapterNo, title, pages, summary, notes[]] - "Became" chips come from page overlap with the book's ideas.
@@ -187,15 +224,85 @@ Object.assign(notes.find((x) => x.id === 'atomic-habits-02').data, {
 write('booknotes', notes);
 
 // ---------------------------------------------------------------- reports: a Scout report with three candidates that are not on the shelf
+const cand = (title, author, year, lane, why, hooks, risk) => ({ title, author, year, lane, why, hooks, ...(risk ? { risk } : {}) });
 write('reports', [
-  { id: 'scout-2026-10-06', data: { type: 'scout', at: iso(6), summary: 'Three demo candidates.', candidates: [
-    { title: 'Slow Mornings', author: 'Marta Vell', year: '2021', lane: 'Hidden gem', why: 'Invented demo entry.' },
-    { title: 'The Cost of Attention', author: 'R. Ono', year: '2019', lane: 'Trending', why: 'Invented demo entry.' },
-    { title: 'Small Hours', author: 'J. Aldren', year: '2017', lane: 'Well known', why: 'Invented demo entry.' },
+  { id: 'scout-2026-10-06', data: { type: 'scout', mode: 'weekly', at: '2026-10-06T06:00:00.000Z', summary: "Attention and choice dominate this week. Six books surfaced; three fit the shelf's lanes without overlapping what we already cover, and one is already on the shelf.",
+    sources: ['Publisher catalogues', 'bestseller lists (UK, US)', 'Goodreads lists', 'our Insights'], candidates: [
+      cand('The Courage to Be Disliked', 'Ichiro Kishimi & Fumitake Koga', '2013', 'Trending', 'Dialogue between a philosopher and a young man. Each exchange is a self-contained reel with two voices.', ["You're not shy. You've decided it's safer not to try.", "Other people's opinions are their task, not yours."], 'Long dialogue; needs a two-voice script template.'),
+      cand('Thinking in Bets', 'Annie Duke', '2018', 'Well known', 'Judging decisions by outcomes is a mistake everyone makes. Pairs naturally with Kahneman.', ["A bad outcome doesn't mean it was a bad decision.", "You're 'resulting' and you don't know it."]),
+      cand('The Scout Mindset', 'Julia Galef', '2021', 'Hidden gem', "Why some people see clearly and others defend. Very on-brand for 'the quiet part'.", ['Being right feels good. Seeing clearly feels better.', 'You argue like a soldier. Try thinking like a scout.']),
+      cand('Range', 'David Epstein', '2019', 'Well known', 'Generalists in a specialist world. Good counter-narrative to the 10,000-hour rule.', ['The 10,000-hour rule only works in tidy worlds.', "Late starters aren't behind. They're sampling."]),
+      cand('How to Do Nothing', 'Jenny Odell', '2019', 'Trending', 'Attention as something to protect. Calm tone matches the night look.', ['Doing nothing is harder than it looks.', "Your attention is the thing they're selling."], 'Political chapters; stay on the attention material.'),
+      cand('Stolen Focus', 'Johann Hari', '2022', 'Trending', 'Big audience, strong hooks on attention and phones.', ["You didn't lose your focus. It was taken.", 'Multitasking is mostly switching, badly.'], 'Several claims are contested; most would need a MIXED stamp.'),
+    ] } },
+  { id: 'scout-2026-10-03-brief', data: { type: 'scout', mode: 'briefs', at: '2026-10-03T15:00:00.000Z', request: "Books about regret that aren't self-help.", summary: 'Two strong options. Both are research-led and avoid the advice-list format, and both have short chapters that map to single reels.',
+    sources: ['Publisher catalogues', 'author interviews'], candidates: [
+      cand('The Power of Regret', 'Daniel H. Pink', '2022', 'Well known', 'Built on a large regret survey; four regret types make a natural series.', ["Most regrets are about what you didn't do.", 'Regret is information, not a verdict.']),
+      cand('Being Mortal', 'Atul Gawande', '2014', 'Well known', 'A surgeon on what matters at the end. Handle with care; the tone guide applies.', ["The question isn't how long. It's how well.", 'Ask what a good day looks like.'], 'Sensitive subject; needs the tone guide before any script.'),
+    ] } },
+  { id: 'scout-2026-09-29', data: { type: 'scout', mode: 'manual', at: '2026-09-29T10:00:00.000Z', summary: 'Quick run on money and motivation. One overlap with the shelf, one hidden gem worth a look.',
+    sources: ['Bestseller lists', 'our Insights'], candidates: [
+      cand('Four Thousand Weeks', 'Oliver Burkeman', '2021', 'Well known', 'Already on the shelf. Listed because it scored highest on fit.', ["You'll never get it all done."]),
+      cand('The Molecule of More', 'Daniel Z. Lieberman & Michael E. Long', '2018', 'Hidden gem', 'Dopamine and wanting; strong visual metaphors.', ['Wanting and having use different chemistry.', 'The chase feels better than the catch.'], 'Pop neuroscience; check every claim against primary studies.'),
+    ] } },
+  { id: 'trends-2026-10-05', data: { type: 'trends', at: '2026-10-05T06:05:00.000Z', weekOf: '2026-10-05',
+    summary: 'Calm, evidence-led content is saving well, while hustle-framed productivity is losing shares. Money anxiety is rising; Housel and Burkeman are the right books to lean on this week.',
+    actions: [{ ideaCode: 'FTW-05', action: 'Post Thursday evening. Calm time content is saving well this week.' }, { ideaCode: 'TFS-01', action: 'Fix loudness and the 0:14 caption, then post Saturday morning.' }, { ideaCode: 'EN-04', action: 'Test a paper-style carousel version alongside the reel.' }, { action: 'Retire hustle-adjacent hooks for two weeks.' }],
+    platformUpdates: [{ title: 'Trial reels', detail: 'Share a reel with non-followers first. Useful for testing two hooks on the same pack.', source: 'Instagram creators account' }, { title: 'Captions in search', detail: 'Caption text is searchable. Front-load the book title and the core idea.', source: { title: 'Instagram creators account', url: 'https://creators.instagram.com/' } }],
+    formats: [{ name: 'Lit-line reel', why: 'One line in full ink against a ghost page holds attention without music.', howWeUseIt: 'Default for hooks and closers. One lit line per frame.' }, { name: 'Paper carousel', why: 'Slow, swipeable explainers are saving more than reels this month.', howWeUseIt: 'Inside pages on paper, cover and close at night.' }],
+    hooks: [{ pattern: 'Myth-bust', example: 'Everyone says twenty-one days. The study says sixty-six.' }, { pattern: 'Number', example: 'Four thousand weeks. Count yours.' }, { pattern: 'Direct-you', example: "You're not tired of deciding. You're answering easier questions." }],
+    hashtags: { core: ['booksummary', 'psychology', 'stoicism', 'habits', 'bookstagram'], rotating: ['moneymindset', 'decisionmaking'], note: 'Keep to five. Swap one rotating tag each week.' },
+    audio: [{ name: 'Low piano, slow', artist: 'Library pick', mood: 'calm', howToUse: 'Under voiceover at about −28 LUFS. Fade out before the last line.' }, { name: 'Room tone and vinyl', artist: 'Library pick', mood: 'warm', howToUse: 'Use on paper carousels. No melody.' }],
+    postingTimes: { guidance: 'Tuesday to Thursday, 7–9 pm local. Saturday 9 am for longer reels.', source: 'Our last eight posts (Insights)' },
+    sources: ['Instagram creators account · 2 Oct', 'Our Insights · last 30 days', 'Trends worker · hashtag sample, 1,200 posts'] } },
+  { id: 'trends-2026-09-28', data: { type: 'trends', at: '2026-09-28T06:05:00.000Z', weekOf: '2026-09-28', summary: 'Stoic content is steady; future-self framing is up. Keep philosophy posts spaced apart.',
+    actions: [{ ideaCode: 'PM-01', action: 'Post Friday; future-self framing is trending.' }, { action: 'Space philosophy posts at least one apart.' }],
+    formats: [{ name: 'Lit-line reel', why: 'Still the strongest format for us.', howWeUseIt: 'Default for hooks.' }], hashtags: { core: ['booksummary', 'psychology', 'stoicism', 'habits', 'bookstagram'], rotating: ['futureself'], note: 'Keep to five.' },
+    postingTimes: { guidance: 'Tuesday to Thursday evenings.', source: 'Our Insights' }, sources: ['Our Insights · last 30 days'] } },
+  { id: 'review-2026-10-05', data: { type: 'review', at: '2026-10-04T21:00:00.000Z', weekOf: '2026-10-05',
+    headline: 'The systems line carried the week. The money post found a quieter audience.', note: 'sends > views. keep the stamp visible.',
+    scorecard: { posted: 2, medianViews: 21700, avgWatchPct: 74, saveRate: 5.4, shareRate: 3.9, followsPer1k: 11.2 },
+    wins: [{ ideaCode: 'AH-01', metric: '31k views · 1,240 sends', why: "AH-01 did 31k views and 1,240 sends. The hook is the book's best-known line, but the staircase visual gave it a second read. Sends were well above views-weighted average, which is the signal we care about." }],
+    patterns: [{ pattern: 'Supported claims got twice the sends.', confidence: 'medium', evidence: 'Supported claims averaged roughly twice the sends of philosophy posts. The evidence stamp on screen seems to give people permission to share.' }],
+    misses: [{ ideaCode: 'EN-02', metric: '8.1k views', why: 'EN-02 underperformed. The line is familiar, and the reel spent four seconds on the source before the hook landed. Move the source chip after the first beat.' }],
+    nextActions: [{ action: "Ship TFS-01 after the two QA fixes, then EN-04. Hold FTW-05 until Thursday so the two philosophy posts don't run back to back.", ideaCode: 'TFS-01' }] } },
+  { id: 'review-2026-09-28', data: { type: 'review', at: '2026-09-27T21:00:00.000Z', weekOf: '2026-09-28', summary: 'A quiet week: two reels, both above the median.', wins: [{ ideaCode: 'TFS-05', why: 'TFS-05 held attention to the end.' }] } },
+]);
+
+// ---------------------------------------------------------------- chats (Ask Scout): the design's three conversations
+write('chats', [
+  { id: 'scout-1', data: { node: 'scout', title: 'Angles on decision fatigue', createdAt: '2026-10-11T10:40:00.000Z', updatedAt: '2026-10-11T10:42:00.000Z', jobs: ['scout-chat-1'], turns: [
+    { role: 'user', content: "What's a fresh angle on decision fatigue that we could source from the shelf?", at: '2026-10-11T10:40:00.000Z' },
+    { role: 'assistant', at: '2026-10-11T10:42:00.000Z', content: "Decision fatigue itself has a shaky replication record, so I'd avoid leading with it. The stronger angle on the shelf is that hard choices get quietly swapped for easier ones. That's well supported and lands the same feeling. Three candidates:",
+      ideas: [{ bookTitle: 'Thinking, Fast and Slow', hook: "You're not tired of deciding. You've been answering easier questions all day." }, { bookTitle: 'Atomic Habits', hook: 'The best decision is the one you made last week and never have to make again.' }, { bookTitle: 'Four Thousand Weeks', hook: "You'll never clear the choices. Pick which ones get your attention." }],
+      sources: ['Kahneman ch. 9', 'Clear ch. 12', 'Hagger et al. 2016 (replication)'] },
+  ] } },
+  { id: 'scout-2', data: { node: 'scout', title: 'Is the 21-day habit thing real?', createdAt: '2026-10-10T15:00:00.000Z', updatedAt: '2026-10-10T15:02:00.000Z', jobs: [], turns: [
+    { role: 'user', content: "Is the '21 days to form a habit' claim real?", at: '2026-10-10T15:00:00.000Z' },
+    { role: 'assistant', content: 'No. It traces back to a 1960 observation about patients adjusting to surgery, not habit research. The best study we have found a median of about 66 days, with a very wide range. Good material for a MYTH stamp.', at: '2026-10-10T15:02:00.000Z', sources: ['Lally et al. 2010'] },
+  ] } },
+  { id: 'scout-3', data: { node: 'scout', title: "Stoic ideas that aren't clichés", createdAt: '2026-10-07T09:00:00.000Z', updatedAt: '2026-10-07T09:01:00.000Z', jobs: [], turns: [
+    { role: 'user', content: "Stoic ideas that haven't been done to death?", at: '2026-10-07T09:00:00.000Z' },
+    { role: 'assistant', content: "Skip 'the obstacle is the way'. Epictetus on roles is underused: you're a sibling, a friend, a citizen, and each role carries its own duties. It reframes conflict well.", at: '2026-10-07T09:01:00.000Z',
+      books: [{ title: 'Meditations', author: 'Marcus Aurelius', year: '180', lane: 'Well known', why: 'The other Stoic source, for contrast.' }, { title: 'Enchiridion', author: 'Epictetus', year: '125', lane: 'Well known', why: 'Already on the shelf.' }] },
   ] } },
 ]);
 
-write('settings', [{ id: 'studio', data: { workerSchedule: 'every 30 minutes' } }]);
+// ---------------------------------------------------------------- runs (System): the design's log
+const R = (id, node, target, summary, status, start, secs, extra = {}) => ({ id, data: { node, target, summary, status, startedAt: start, ...(status === 'running' ? {} : { finishedAt: new Date(Date.parse(start) + secs * 1000).toISOString() }), at: status === 'running' ? start : new Date(Date.parse(start) + secs * 1000).toISOString(), ...extra } });
+write('runs', [
+  R('run-writer-ah04', 'writer', 'AH-04', 'Drafting production pack v1', 'running', '2026-10-11T11:58:48.000Z', 0, { jobId: 'writer-AH-04-1' }),
+  R('run-research-cd', 'research', 'CD', 'Reading chapter 6 of 13', 'running', '2026-10-11T11:51:20.000Z', 0, { jobId: 'research-the-courage-to-be-disliked-1' }),
+  R('run-qa-tfs01', 'qa', 'TFS-01', 'Fix verdict: loudness, caption safe zone', 'done', '2026-10-11T09:13:12.000Z', 48),
+  R('run-art-ftw05', 'art', 'FTW-05', 'Six reference frames generated', 'done', '2026-10-11T08:48:55.000Z', 125),
+  R('run-scout-w41', 'scout', '', 'Weekly report: nine candidates', 'done', '2026-10-05T05:56:29.000Z', 211),
+  R('run-trends-w41', 'trends', '', 'Weekly trends report', 'done', '2026-10-05T06:03:02.000Z', 118),
+  R('run-review-w40', 'review', '', 'Weekly review written', 'done', '2026-10-04T20:58:50.000Z', 70),
+  R('run-writer-sh01', 'writer', 'SH-01', 'Pack v4 after prompt edit', 'done', '2026-10-10T16:18:58.000Z', 62),
+  R('run-art-pm02', 'art', 'PM-02', 'Frame 03 rejected by safety filter', 'failed', '2026-10-09T11:06:38.000Z', 22),
+]);
+
+write('settings', [{ id: 'studio', data: { workerSchedule: 'every 30 minutes', workerSeenAt: '2026-10-11T11:40:00.000Z', writerLane: 'careful', cadence: '4 per week', autoArt: true, notifyQa: true, spacePhilosophy: false } }]);
 // ---------------------------------------------------------------- posts: a story set and a carousel for FTW-05
 write('posts', [
   { id: 'FTW-05-story-v1', data: { ideaCode: 'FTW-05', kind: 'story', version: 1, createdAt: iso(9), designPrompt: 'Paper stories, Newsreader, one lilac mark. (Demo.)', frames: [
@@ -212,5 +319,10 @@ write('posts', [
 ]);
 // ---------------------------------------------------------------- ratings: four scripts rated, so the fifth queues Taste
 write('ratings', ['PM-02-v2', 'SH-01-v4', 'AH-02-v2', 'TFS-01-v5'].map((packId, k) => ({ id: packId, data: { packId, ideaCode: packId.replace(/-v\d+$/, ''), version: +packId.split('-v')[1], score: [7, 8, 6, 8][k], note: '', at: iso(3 + k) } })));
-for (const c of ['runs', 'chats', 'playbooks']) write(c, []);
+write('playbooks', [
+  { id: 'learnings', data: { node: 'learnings', at: '2026-09-28T09:00:00.000Z', text: '- [medium] Supported claims get more sends than philosophy posts.\n- [early] Lit-line reels hold attention without music.' } },
+  { id: 'learnings-proposed', data: { node: 'learnings', at: '2026-10-04T21:00:00.000Z', basedOn: 'review-2026-10-05', text: '- [medium] Supported claims get about twice the sends of philosophy posts.\n- [early] Lit-line reels hold attention without music.\n- [early] Put the source chip after the first beat.' } },
+  { id: 'taste-profile', data: { node: 'taste-profile', at: '2026-10-01T09:00:00.000Z', text: '- [medium] Prefers endings that hand the viewer one small action.\n- [early] Marks down hooks that open on a statistic.\n- calibration: scores run about one point under the Critic.' } },
+  { id: 'brand', data: { node: 'brand', text: 'Calm, evidence-led, one quiet line per reel. (Demo brand digest.)' } },
+]);
 console.log('fixtures written to', OUT);

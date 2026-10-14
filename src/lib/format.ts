@@ -27,13 +27,15 @@ export function isToday(t: string, now: Date = new Date()): boolean {
 }
 
 /** "3 Oct", or "3 Oct 2025" when the year differs from now. */
+export const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** "8 Oct", or "8 Oct 2025" in another year (three-letter months: "Sep", not "Sept"). */
 export function fmtDay(s: string, now: Date = new Date()): string {
   if (!s) return '';
   const t = Date.parse(s);
   if (!Number.isFinite(t)) return str(s);
   const d = new Date(t);
-  const o: Intl.DateTimeFormatOptions = d.getFullYear() === now.getFullYear() ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' };
-  return d.toLocaleDateString('en-GB', o);
+  const base = `${d.getDate()} ${MON[d.getMonth()]}`;
+  return d.getFullYear() === now.getFullYear() ? base : `${base} ${d.getFullYear()}`;
 }
 
 export function fmtRel(s: string, now: number = Date.now()): string {
@@ -106,4 +108,26 @@ export function fmtWhen(s: string, now: Date = new Date()): string {
   if (diff === 0) return `today, ${hm}`;
   if (diff === 1) return `yesterday, ${hm}`;
   return fmtDay(s, now);
+}
+
+/** Chat list dates as designed: "Today, 10:42" / "Yesterday" / "7 Oct". */
+export function fmtChatWhen(s: string, now: Date = new Date()): string {
+  const w = fmtWhen(s, now);
+  if (w.startsWith('today')) return `T${w.slice(1)}`;
+  if (w.startsWith('yesterday')) return 'Yesterday';
+  return w;
+}
+/** "2026-10-05" -> "5 October". */
+export function dayMonth(s: string): string {
+  const t = Date.parse(s);
+  if (!Number.isFinite(t)) return str(s);
+  const d = new Date(t);
+  return `${d.getUTCDate()} ${d.toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' })}`;
+}
+/** "6 Oct 2026". */
+export function dayMonYear(s: string): string {
+  const t = Date.parse(s);
+  if (!Number.isFinite(t)) return str(s);
+  const d = new Date(t);
+  return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }

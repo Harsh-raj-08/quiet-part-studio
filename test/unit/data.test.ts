@@ -52,7 +52,7 @@ test('mock adapter: subscribe delivers the list then changes; set refuses an exi
 test('queueJob writes a queued job doc', async () => {
   const { adapter, handle } = createMockAdapter({}, 'mock');
   const id = await queueJob(new Store(adapter), { node: 'writer', request: 'Write production pack', ideaCode: 'A-1' });
-  assert.match(id, /^writer-A-1-\d+$/);
+  assert.match(id, /^writer-A-1-\d+-[a-z0-9]{1,4}$/);
   const j = handle.get('jobs', id)!;
   assert.equal(j.data.status, 'queued');
   assert.equal(j.data.ideaCode, 'A-1');

@@ -3,29 +3,369 @@
     "id": "scout-2026-10-06",
     "data": {
       "type": "scout",
-      "at": "2026-10-06T12:00:00.000Z",
-      "summary": "Three demo candidates.",
+      "mode": "weekly",
+      "at": "2026-10-06T06:00:00.000Z",
+      "summary": "Attention and choice dominate this week. Six books surfaced; three fit the shelf's lanes without overlapping what we already cover, and one is already on the shelf.",
+      "sources": [
+        "Publisher catalogues",
+        "bestseller lists (UK, US)",
+        "Goodreads lists",
+        "our Insights"
+      ],
       "candidates": [
         {
-          "title": "Slow Mornings",
-          "author": "Marta Vell",
+          "title": "The Courage to Be Disliked",
+          "author": "Ichiro Kishimi & Fumitake Koga",
+          "year": "2013",
+          "lane": "Trending",
+          "why": "Dialogue between a philosopher and a young man. Each exchange is a self-contained reel with two voices.",
+          "hooks": [
+            "You're not shy. You've decided it's safer not to try.",
+            "Other people's opinions are their task, not yours."
+          ],
+          "risk": "Long dialogue; needs a two-voice script template."
+        },
+        {
+          "title": "Thinking in Bets",
+          "author": "Annie Duke",
+          "year": "2018",
+          "lane": "Well known",
+          "why": "Judging decisions by outcomes is a mistake everyone makes. Pairs naturally with Kahneman.",
+          "hooks": [
+            "A bad outcome doesn't mean it was a bad decision.",
+            "You're 'resulting' and you don't know it."
+          ]
+        },
+        {
+          "title": "The Scout Mindset",
+          "author": "Julia Galef",
           "year": "2021",
           "lane": "Hidden gem",
-          "why": "Invented demo entry."
+          "why": "Why some people see clearly and others defend. Very on-brand for 'the quiet part'.",
+          "hooks": [
+            "Being right feels good. Seeing clearly feels better.",
+            "You argue like a soldier. Try thinking like a scout."
+          ]
         },
         {
-          "title": "The Cost of Attention",
-          "author": "R. Ono",
+          "title": "Range",
+          "author": "David Epstein",
+          "year": "2019",
+          "lane": "Well known",
+          "why": "Generalists in a specialist world. Good counter-narrative to the 10,000-hour rule.",
+          "hooks": [
+            "The 10,000-hour rule only works in tidy worlds.",
+            "Late starters aren't behind. They're sampling."
+          ]
+        },
+        {
+          "title": "How to Do Nothing",
+          "author": "Jenny Odell",
           "year": "2019",
           "lane": "Trending",
-          "why": "Invented demo entry."
+          "why": "Attention as something to protect. Calm tone matches the night look.",
+          "hooks": [
+            "Doing nothing is harder than it looks.",
+            "Your attention is the thing they're selling."
+          ],
+          "risk": "Political chapters; stay on the attention material."
         },
         {
-          "title": "Small Hours",
-          "author": "J. Aldren",
-          "year": "2017",
+          "title": "Stolen Focus",
+          "author": "Johann Hari",
+          "year": "2022",
+          "lane": "Trending",
+          "why": "Big audience, strong hooks on attention and phones.",
+          "hooks": [
+            "You didn't lose your focus. It was taken.",
+            "Multitasking is mostly switching, badly."
+          ],
+          "risk": "Several claims are contested; most would need a MIXED stamp."
+        }
+      ]
+    }
+  },
+  {
+    "id": "scout-2026-10-03-brief",
+    "data": {
+      "type": "scout",
+      "mode": "briefs",
+      "at": "2026-10-03T15:00:00.000Z",
+      "request": "Books about regret that aren't self-help.",
+      "summary": "Two strong options. Both are research-led and avoid the advice-list format, and both have short chapters that map to single reels.",
+      "sources": [
+        "Publisher catalogues",
+        "author interviews"
+      ],
+      "candidates": [
+        {
+          "title": "The Power of Regret",
+          "author": "Daniel H. Pink",
+          "year": "2022",
           "lane": "Well known",
-          "why": "Invented demo entry."
+          "why": "Built on a large regret survey; four regret types make a natural series.",
+          "hooks": [
+            "Most regrets are about what you didn't do.",
+            "Regret is information, not a verdict."
+          ]
+        },
+        {
+          "title": "Being Mortal",
+          "author": "Atul Gawande",
+          "year": "2014",
+          "lane": "Well known",
+          "why": "A surgeon on what matters at the end. Handle with care; the tone guide applies.",
+          "hooks": [
+            "The question isn't how long. It's how well.",
+            "Ask what a good day looks like."
+          ],
+          "risk": "Sensitive subject; needs the tone guide before any script."
+        }
+      ]
+    }
+  },
+  {
+    "id": "scout-2026-09-29",
+    "data": {
+      "type": "scout",
+      "mode": "manual",
+      "at": "2026-09-29T10:00:00.000Z",
+      "summary": "Quick run on money and motivation. One overlap with the shelf, one hidden gem worth a look.",
+      "sources": [
+        "Bestseller lists",
+        "our Insights"
+      ],
+      "candidates": [
+        {
+          "title": "Four Thousand Weeks",
+          "author": "Oliver Burkeman",
+          "year": "2021",
+          "lane": "Well known",
+          "why": "Already on the shelf. Listed because it scored highest on fit.",
+          "hooks": [
+            "You'll never get it all done."
+          ]
+        },
+        {
+          "title": "The Molecule of More",
+          "author": "Daniel Z. Lieberman & Michael E. Long",
+          "year": "2018",
+          "lane": "Hidden gem",
+          "why": "Dopamine and wanting; strong visual metaphors.",
+          "hooks": [
+            "Wanting and having use different chemistry.",
+            "The chase feels better than the catch."
+          ],
+          "risk": "Pop neuroscience; check every claim against primary studies."
+        }
+      ]
+    }
+  },
+  {
+    "id": "trends-2026-10-05",
+    "data": {
+      "type": "trends",
+      "at": "2026-10-05T06:05:00.000Z",
+      "weekOf": "2026-10-05",
+      "summary": "Calm, evidence-led content is saving well, while hustle-framed productivity is losing shares. Money anxiety is rising; Housel and Burkeman are the right books to lean on this week.",
+      "actions": [
+        {
+          "ideaCode": "FTW-05",
+          "action": "Post Thursday evening. Calm time content is saving well this week."
+        },
+        {
+          "ideaCode": "TFS-01",
+          "action": "Fix loudness and the 0:14 caption, then post Saturday morning."
+        },
+        {
+          "ideaCode": "EN-04",
+          "action": "Test a paper-style carousel version alongside the reel."
+        },
+        {
+          "action": "Retire hustle-adjacent hooks for two weeks."
+        }
+      ],
+      "platformUpdates": [
+        {
+          "title": "Trial reels",
+          "detail": "Share a reel with non-followers first. Useful for testing two hooks on the same pack.",
+          "source": "Instagram creators account"
+        },
+        {
+          "title": "Captions in search",
+          "detail": "Caption text is searchable. Front-load the book title and the core idea.",
+          "source": {
+            "title": "Instagram creators account",
+            "url": "https://creators.instagram.com/"
+          }
+        }
+      ],
+      "formats": [
+        {
+          "name": "Lit-line reel",
+          "why": "One line in full ink against a ghost page holds attention without music.",
+          "howWeUseIt": "Default for hooks and closers. One lit line per frame."
+        },
+        {
+          "name": "Paper carousel",
+          "why": "Slow, swipeable explainers are saving more than reels this month.",
+          "howWeUseIt": "Inside pages on paper, cover and close at night."
+        }
+      ],
+      "hooks": [
+        {
+          "pattern": "Myth-bust",
+          "example": "Everyone says twenty-one days. The study says sixty-six."
+        },
+        {
+          "pattern": "Number",
+          "example": "Four thousand weeks. Count yours."
+        },
+        {
+          "pattern": "Direct-you",
+          "example": "You're not tired of deciding. You're answering easier questions."
+        }
+      ],
+      "hashtags": {
+        "core": [
+          "booksummary",
+          "psychology",
+          "stoicism",
+          "habits",
+          "bookstagram"
+        ],
+        "rotating": [
+          "moneymindset",
+          "decisionmaking"
+        ],
+        "note": "Keep to five. Swap one rotating tag each week."
+      },
+      "audio": [
+        {
+          "name": "Low piano, slow",
+          "artist": "Library pick",
+          "mood": "calm",
+          "howToUse": "Under voiceover at about −28 LUFS. Fade out before the last line."
+        },
+        {
+          "name": "Room tone and vinyl",
+          "artist": "Library pick",
+          "mood": "warm",
+          "howToUse": "Use on paper carousels. No melody."
+        }
+      ],
+      "postingTimes": {
+        "guidance": "Tuesday to Thursday, 7–9 pm local. Saturday 9 am for longer reels.",
+        "source": "Our last eight posts (Insights)"
+      },
+      "sources": [
+        "Instagram creators account · 2 Oct",
+        "Our Insights · last 30 days",
+        "Trends worker · hashtag sample, 1,200 posts"
+      ]
+    }
+  },
+  {
+    "id": "trends-2026-09-28",
+    "data": {
+      "type": "trends",
+      "at": "2026-09-28T06:05:00.000Z",
+      "weekOf": "2026-09-28",
+      "summary": "Stoic content is steady; future-self framing is up. Keep philosophy posts spaced apart.",
+      "actions": [
+        {
+          "ideaCode": "PM-01",
+          "action": "Post Friday; future-self framing is trending."
+        },
+        {
+          "action": "Space philosophy posts at least one apart."
+        }
+      ],
+      "formats": [
+        {
+          "name": "Lit-line reel",
+          "why": "Still the strongest format for us.",
+          "howWeUseIt": "Default for hooks."
+        }
+      ],
+      "hashtags": {
+        "core": [
+          "booksummary",
+          "psychology",
+          "stoicism",
+          "habits",
+          "bookstagram"
+        ],
+        "rotating": [
+          "futureself"
+        ],
+        "note": "Keep to five."
+      },
+      "postingTimes": {
+        "guidance": "Tuesday to Thursday evenings.",
+        "source": "Our Insights"
+      },
+      "sources": [
+        "Our Insights · last 30 days"
+      ]
+    }
+  },
+  {
+    "id": "review-2026-10-05",
+    "data": {
+      "type": "review",
+      "at": "2026-10-04T21:00:00.000Z",
+      "weekOf": "2026-10-05",
+      "headline": "The systems line carried the week. The money post found a quieter audience.",
+      "note": "sends > views. keep the stamp visible.",
+      "scorecard": {
+        "posted": 2,
+        "medianViews": 21700,
+        "avgWatchPct": 74,
+        "saveRate": 5.4,
+        "shareRate": 3.9,
+        "followsPer1k": 11.2
+      },
+      "wins": [
+        {
+          "ideaCode": "AH-01",
+          "metric": "31k views · 1,240 sends",
+          "why": "AH-01 did 31k views and 1,240 sends. The hook is the book's best-known line, but the staircase visual gave it a second read. Sends were well above views-weighted average, which is the signal we care about."
+        }
+      ],
+      "patterns": [
+        {
+          "pattern": "Supported claims got twice the sends.",
+          "confidence": "medium",
+          "evidence": "Supported claims averaged roughly twice the sends of philosophy posts. The evidence stamp on screen seems to give people permission to share."
+        }
+      ],
+      "misses": [
+        {
+          "ideaCode": "EN-02",
+          "metric": "8.1k views",
+          "why": "EN-02 underperformed. The line is familiar, and the reel spent four seconds on the source before the hook landed. Move the source chip after the first beat."
+        }
+      ],
+      "nextActions": [
+        {
+          "action": "Ship TFS-01 after the two QA fixes, then EN-04. Hold FTW-05 until Thursday so the two philosophy posts don't run back to back.",
+          "ideaCode": "TFS-01"
+        }
+      ]
+    }
+  },
+  {
+    "id": "review-2026-09-28",
+    "data": {
+      "type": "review",
+      "at": "2026-09-27T21:00:00.000Z",
+      "weekOf": "2026-09-28",
+      "summary": "A quiet week: two reels, both above the median.",
+      "wins": [
+        {
+          "ideaCode": "TFS-05",
+          "why": "TFS-05 held attention to the end."
         }
       ]
     }
