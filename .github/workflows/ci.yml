@@ -13,4 +13,7 @@ jobs:
         env: { STUDIO_MODE: demo }
       - run: npx playwright install --with-deps chromium
       - run: npm test
-        env: { PARITY_ASSERT: '0' }
+        env: { PARITY_ASSERT: '0', TZ: 'Asia/Kolkata', LANG: 'en_GB.UTF-8' }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: test-output, path: test/output, retention-days: 7 }

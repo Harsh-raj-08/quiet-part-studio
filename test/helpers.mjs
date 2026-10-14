@@ -36,7 +36,7 @@ export const FIXED_NOW = '2026-10-11T12:00:00Z'; // "Sunday 11 October", the des
  */
 export async function openApp(browser, base, opts = {}) {
   const ctx = await browser.newContext({
-    viewport: { width: opts.width ?? 1440, height: opts.height ?? 1000 },
+    viewport: { width: opts.width ?? 1440, height: opts.height ?? 1000 }, deviceScaleFactor: 1,
     reducedMotion: opts.reducedMotion ? 'reduce' : 'no-preference',
     timezoneId: 'UTC', locale: 'en-GB', acceptDownloads: true,
   });

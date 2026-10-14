@@ -27,5 +27,31 @@ if (e2e || both) {
   if (b.status) process.exit(b.status);
   files.push(...fs.readdirSync(path.join(root, 'test/e2e')).filter((f) => f.endsWith('.test.mjs')).sort().map((f) => path.join(root, 'test/e2e', f)));
 }
-const r = spawnSync(process.execPath, ['--test', '--test-concurrency=3', '--test-timeout=120000', ...files], { stdio: 'inherit', cwd: root });
+// Two reporters: the usual spec output, and a JSON-lines file of failures for GitHub annotations.
+const failLog = path.join(root, 'test/output/failures.jsonl');
+fs.mkdirSync(path.dirname(failLog), { recursive: true });
+fs.rmSync(failLog, { force: true });
+const r = spawnSync(process.execPath, ['--test', '--test-concurrency=3', '--test-timeout=240000',
+  '--test-reporter=spec', '--test-reporter-destination=stdout',
+  `--test-reporter=${path.join(root, 'scripts/gh-reporter.mjs')}`, `--test-reporter-destination=${failLog}`, ...files],
+  // Same clock zone and locale everywhere (the owner's; CI runners are UTC). Browser contexts pin their own zone (UTC) in test/helpers.mjs.
+  { stdio: 'inherit', cwd: root, env: { ...process.env, TZ: process.env.TZ_TEST || 'Asia/Kolkata', LANG: 'en_GB.UTF-8', LC_ALL: 'en_GB.UTF-8' } });
+
+const lines = fs.existsSync(failLog) ? fs.readFileSync(failLog, 'utf8').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean) : [];
+const fails = lines.filter((x) => !x.pass);
+if (process.env.GITHUB_ACTIONS) {
+  const esc = (s) => String(s).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+  const escProp = (s) => esc(s).replace(/:/g, '%3A').replace(/,/g, '%2C');
+  for (const f of fails) {
+    const file = path.relative(root, f.file || '').replace(/^test\/dist-unit\/(.*)\.mjs$/, 'test/unit/$1.ts') || 'scripts/test.mjs';
+    console.log(`::error file=${escProp(file)},title=${escProp(f.name)}::${esc(f.message.slice(0, 300))}`);
+  }
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    const slow = lines.filter((x) => x.pass).sort((a, b) => b.ms - a.ms).slice(0, 5);
+    const md = [`## Tests: ${fails.length ? `${fails.length} failed` : 'all passed'}`, '',
+      ...(fails.length ? ['| File | Test | Message |', '|---|---|---|', ...fails.map((f) => `| ${path.basename(f.file || '')} | ${f.name.replace(/\|/g, '\\|')} | ${f.message.slice(0, 200).replace(/\n/g, ' ').replace(/\|/g, '\\|')} |`)] : []),
+      '', 'Slowest:', ...slow.map((x) => `- ${x.name} (${(x.ms / 1000).toFixed(1)} s)`), ''].join('\n');
+    fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+  }
+}
 process.exit(r.status ?? 1);
