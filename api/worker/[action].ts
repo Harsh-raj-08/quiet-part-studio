@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { bearer, serviceClient } from '../_lib/auth';
-import { handleWorker, MAX_BODY, type WorkerDb } from '../_lib/worker-core';
-import { supabaseWorkerDb } from '../_lib/worker-db';
+import { bearer, serviceClient } from '../_lib/auth.js';
+import { handleWorker, MAX_BODY, type WorkerDb } from '../_lib/worker-core.js';
+import { supabaseWorkerDb } from '../_lib/worker-db.js';
 
 /** Read the raw body ourselves (never via req.body) so the 1 MB cap holds before any parsing. */
 function readBody(req: VercelRequest): Promise<string | null> {

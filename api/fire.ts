@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { bearer, serviceClient, verifyOwner } from './_lib/auth';
-import { handleFire } from './_lib/fire-core';
+import { bearer, serviceClient, verifyOwner } from './_lib/auth.js';
+import { handleFire } from './_lib/fire-core.js';
 
 /** POST /api/fire (owner only): fires the Claude routine so queued jobs run now. Tokens are never returned or logged. */
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {

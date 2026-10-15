@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { ConflictError, type Op, type WDoc, type WorkerDb } from './worker-core';
+import { ConflictError, type Op, type WDoc, type WorkerDb } from './worker-core.js';
 
 const col = (f: string) => (f === 'id' ? 'id' : `data->>${f}`);
 
