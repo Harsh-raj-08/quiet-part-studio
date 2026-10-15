@@ -40,7 +40,11 @@ export function ScriptTab({ cur, idea }: { cur: Pack; idea: Idea | null }) {
 }
 
 // ---------------------------------------------------------------- writer notes (story + critic)
-const CRIT: [string, string][] = [['hook', 'Hook'], ['gap', 'Gap'], ['scene', 'Scene'], ['turn', 'Turn'], ['rhythm', 'Rhythm'], ['truth', 'Truth'], ['ending', 'Ending']];
+/** Writer v3 rubric (critic.md). Older packs were scored on the v2 rubric; show whichever the pack has. */
+const CRIT_V3: [string, string][] = [['hook', 'Hook'], ['anchor', 'Anchor'], ['flow', 'Flow'], ['shift', 'Shift'], ['emotion', 'Emotion'], ['conclusion', 'Ending'], ['truth', 'Truth']];
+const CRIT_V2: [string, string][] = [['hook', 'Hook'], ['gap', 'Gap'], ['scene', 'Scene'], ['turn', 'Turn'], ['rhythm', 'Rhythm'], ['truth', 'Truth'], ['ending', 'Ending']];
+export const critRubric = (scores: Record<string, number | null | undefined>): [string, string][] =>
+  ['gap', 'scene', 'turn', 'rhythm'].some((k) => scores[k] != null) && !['anchor', 'flow', 'shift', 'emotion', 'conclusion'].some((k) => scores[k] != null) ? CRIT_V2 : CRIT_V3;
 const card: CSSProperties = { display: 'grid', gap: 14, alignContent: 'start', padding: 22, border: '1px solid var(--line)', borderRadius: 16, background: 'var(--sf)', minWidth: 0 };
 
 function WriterNotes({ cur }: { cur: Pack }) {
@@ -65,7 +69,7 @@ function WriterNotes({ cur }: { cur: Pack }) {
             <span style={{ font: `400 11px/1 ${MONO}`, color: 'var(--dim)' }}>{cr.total == null ? '—' : cr.total}/35{cr.predictedOwnerScore != null ? ` · predicts you'd rate it ${cr.predictedOwnerScore}` : ''}</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(58px,1fr))', gap: 12, padding: '14px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
-            {CRIT.map(([k, l]) => {
+            {critRubric(cr.scores).map(([k, l]) => {
               const v = cr.scores[k];
               return (
                 <div key={k} style={{ display: 'grid', gap: 8 }}>

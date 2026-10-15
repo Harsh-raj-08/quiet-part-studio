@@ -79,3 +79,12 @@ test('hash routes carry an id for Studio packs and Library books', () => {
   assert.equal(formatHash({ tab: 'studio', sub: 'frames', id: 'FTW-05-v3' }), '#studio/frames/FTW-05-v3');
   assert.equal(formatHash({ tab: 'library', sub: 'shelf', id: '' }), '#library');
 });
+
+import { critRubric } from '../../src/screens/studio/ScriptTab';
+test('critic panel uses the v3 rubric for v3 scores and the v2 rubric for old packs', () => {
+  const v3 = critRubric({ hook: 5, anchor: 4, flow: 4, shift: 4, emotion: 4, conclusion: 5, truth: 4 }).map(([k]) => k);
+  assert.deepEqual(v3, ['hook', 'anchor', 'flow', 'shift', 'emotion', 'conclusion', 'truth']);
+  const v2 = critRubric({ hook: 4, gap: 3, scene: 4, turn: 3, rhythm: 4, truth: 5, ending: 3 }).map(([k]) => k);
+  assert.deepEqual(v2, ['hook', 'gap', 'scene', 'turn', 'rhythm', 'truth', 'ending']);
+  assert.equal(critRubric({}).length, 7);
+});
