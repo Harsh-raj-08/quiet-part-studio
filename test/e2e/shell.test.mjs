@@ -14,6 +14,15 @@ const state = (page) => page.evaluate(() => {
     xscroll: document.documentElement.scrollWidth > document.documentElement.clientWidth };
 });
 
+/** Wait (without a wall-clock guess) until the shell has reached a state and no CSS transition is still running. */
+async function settled(page, hidden) {
+  await page.waitForFunction(([h]) => {
+    const w = document.getElementById('sidebar').getBoundingClientRect().width;
+    const running = document.getAnimations().some((a) => a.constructor.name === 'CSSTransition' && a.playState === 'running');
+    return !running && (h ? w <= 1 : w === 264);
+  }, [hidden], { timeout: 5000 });
+}
+
 test('Sidebar is the default; Command bar is hidden', async () => {
   const { page, ctx } = await openApp(browser, srv.url);
   const s = await state(page);
@@ -30,7 +39,7 @@ test('Sidebar is the default; Command bar is hidden', async () => {
 
 test('Ctrl+\\ hides the sidebar and shows the command bar, and back; the collapse buttons do the same', async () => {
   const { page, ctx } = await openApp(browser, srv.url);
-  await page.keyboard.press('Control+\\'); await page.waitForTimeout(700);
+  await page.keyboard.press('Control+\\'); await settled(page, true);
   let s = await state(page);
   assert.ok(s.asideW <= 1, `sidebar width ${s.asideW}`);
   assert.ok(s.cmdH > 100 && s.cmdH < 130, `command bar height ${s.cmdH}`);
@@ -38,35 +47,37 @@ test('Ctrl+\\ hides the sidebar and shows the command bar, and back; the collaps
   assert.ok(s.mainLeft <= 1);
   assert.equal(s.sideHidden, true);
   assert.notEqual(await page.locator('#sidebar').getAttribute('inert'), null);
-  await page.keyboard.press('Meta+\\'); await page.waitForTimeout(700);
+  await page.keyboard.press('Meta+\\'); await settled(page, false);
   s = await state(page);
   assert.equal(s.asideW, 264); assert.equal(s.cmdH, 0);
-  await page.click('#side-hide'); await page.waitForTimeout(700);
+  await page.click('#side-hide'); await settled(page, true);
   assert.ok((await state(page)).asideW <= 1);
-  await page.click('#side-show'); await page.waitForTimeout(700);
+  await page.click('#side-show'); await settled(page, false);
   assert.equal((await state(page)).asideW, 264);
   await ctx.close();
 });
 
-// Sample the layout every animation frame during the transition.
+// Drive the transition deterministically: once the shell's CSS transitions exist, pause them all and step their
+// currentTime from 0 to the end in 10 ms steps, measuring the layout at each step (no wall-clock sampling).
 async function sampleTransition(page, press) {
-  await page.evaluate(() => {
-    window.__frames = [];
-    const t0 = performance.now();
-    const tick = () => {
-      const t = performance.now() - t0;
-      const r = (s) => document.querySelector(s).getBoundingClientRect();
+  await press();
+  await page.waitForFunction(() => document.getAnimations().some((a) => a.constructor.name === 'CSSTransition' && a.transitionProperty === 'grid-template-columns'), null, { timeout: 5000 });
+  return page.evaluate(() => {
+    const ts = document.getAnimations().filter((a) => a.constructor.name === 'CSSTransition');
+    ts.forEach((a) => a.pause());
+    const end = Math.max(...ts.map((a) => { const t = a.effect.getComputedTiming(); return t.delay + t.activeDuration; }));
+    const frames = [];
+    const r = (s) => document.querySelector(s).getBoundingClientRect();
+    for (let t = 0; t <= end + 20; t += 10) {
+      ts.forEach((a) => { a.currentTime = Math.min(t, a.effect.getComputedTiming().delay + a.effect.getComputedTiming().activeDuration); });
       const aside = r('#sidebar'), cmd = r('#cmdbar'), main = r('#main'), h1 = r('h1');
       const hit = document.elementFromPoint(main.left + 24, 520);
-      window.__frames.push({ t, asideW: aside.width, asideRight: aside.right, cmdH: cmd.height, cmdBottom: cmd.bottom, mainLeft: main.left, mainTop: main.top, h1Left: h1.left, h1Top: h1.top,
+      frames.push({ t, asideW: aside.width, asideRight: aside.right, cmdH: cmd.height, cmdBottom: cmd.bottom, mainLeft: main.left, mainTop: main.top, h1Left: h1.left, h1Top: h1.top,
         hitInMain: !!(hit && hit.closest('#main')), xscroll: document.documentElement.scrollWidth > document.documentElement.clientWidth });
-      if (t < 800) requestAnimationFrame(tick);
-    };
-    window.__t0 = t0; requestAnimationFrame(tick);
+    }
+    ts.forEach((a) => a.finish());
+    return frames;
   });
-  await press();
-  await page.waitForTimeout(900);
-  return page.evaluate(() => window.__frames);
 }
 const near = (frames, ms) => frames.reduce((a, b) => (Math.abs(b.t - ms) < Math.abs(a.t - ms) ? b : a));
 
@@ -87,6 +98,7 @@ for (const dir of ['hide', 'show']) {
     const [a, b, c, d] = [0, 150, 300, 500].map((ms) => near(frames, ms));
     const w = dir === 'hide' ? [a.asideW, b.asideW, c.asideW, d.asideW] : [-a.asideW, -b.asideW, -c.asideW, -d.asideW];
     assert.ok(w[0] >= w[1] && w[1] >= w[2] && w[2] >= w[3] && w[0] > w[3], `width should move monotonically: ${w.join(', ')}`);
+    assert.ok(b.asideW > 1 && b.asideW < 264 && c.asideW > 1 && c.asideW < 264, `150/300 ms are mid-transition: ${b.asideW}, ${c.asideW}`);
     const last = frames.at(-1);
     assert.ok(dir === 'hide' ? last.asideW <= 1 : last.asideW === 264);
     await ctx.close();
@@ -95,11 +107,11 @@ for (const dir of ['hide', 'show']) {
 
 test('the collapsed state is remembered', async () => {
   const { page, ctx } = await openApp(browser, srv.url);
-  await page.keyboard.press('Control+\\'); await page.waitForTimeout(700);
+  await page.keyboard.press('Control+\\'); await settled(page, true);
   await page.reload(); await page.waitForSelector('[data-board]');
   let s = await state(page);
   assert.ok(s.asideW <= 1, `sidebar width ${s.asideW}`); assert.ok(s.cmdH > 100);
-  await page.keyboard.press('Control+\\'); await page.waitForTimeout(700);
+  await page.keyboard.press('Control+\\'); await settled(page, false);
   await page.reload(); await page.waitForSelector('[data-board]');
   s = await state(page);
   assert.equal(s.asideW, 264); assert.equal(s.cmdH, 0);
@@ -147,7 +159,7 @@ test('theme toggle sets body[data-theme], not <html>, and is remembered', async 
   assert.equal(await page.evaluate(() => getComputedStyle(document.body).getPropertyValue('--lilac').trim()), '#6B52CC');
   await page.reload(); await page.waitForSelector('[data-board]');
   assert.equal(await page.evaluate(() => document.body.dataset.theme), 'paper');
-  await page.keyboard.press('Control+\\'); await page.waitForTimeout(700);
+  await page.keyboard.press('Control+\\'); await settled(page, true);
   await page.click('#cmdbar [data-theme-btn=night]');
   assert.equal(await bg(), '#121110');
   await ctx.close();
@@ -193,7 +205,7 @@ test('global search: sidebar and command bar, keyboard, groups, 560 wide panel',
   await page.waitForSelector('[data-drawer-idea]');
   assert.equal(await page.locator('#gs-pop').count(), 0);
   await page.keyboard.press('Escape');
-  await page.keyboard.press('Control+\\'); await page.waitForTimeout(700);
+  await page.keyboard.press('Control+\\'); await settled(page, true);
   await page.keyboard.press('Meta+k');
   assert.equal(await page.evaluate(() => document.activeElement && document.activeElement.id), 'global-search');
   await page.keyboard.type('atomic');
