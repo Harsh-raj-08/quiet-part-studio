@@ -39,7 +39,7 @@ Migration `0002_account.sql` adds the `account` table (same shape, RLS, realtime
 
 **Time zone.** Every date and clock time renders in the viewer's local zone (`src/lib/format.ts`: `parseWhen` reads date-only strings as local midnight; `hhmm`, `fmtWhen`, `whenText`, `shortDay` use local getters). Stored values stay ISO UTC. Tests pin `TZ=Asia/Kolkata` (scripts/test.mjs, CI) and the browser `timezoneId`; the fixed clock is 2026-10-11 12:00 IST. Fixture generators write IST wall-clock times and convert to UTC.
 
-**Worker API** (`api/worker/[action].ts` → `api/_lib/worker-core.ts`, DB adapter `api/_lib/worker-db.ts`). The only way the scheduled worker touches the Studio. POST only, `Content-Type: application/json`, body ≤ 1 MB, `Authorization: Bearer $WORKER_TOKEN` (constant-time compare; 401 on mismatch, 503 when `WORKER_TOKEN` or the service role is not configured). Runs server-side with the service role key; responses are `no-store`. Errors are `{ok:false, error}`.
+**Worker API** (`api/worker/[action].ts` → `api/_lib/worker-core.ts`, DB adapter `api/_lib/worker-db.ts`). The only way the scheduled worker touches the Studio. POST only, `Content-Type: application/json`, body ≤ 1 MB, `Authorization: Bearer $WORKER_TOKEN` (constant-time compare). 503 when `WORKER_TOKEN` is unset or shorter than 32 characters; otherwise 401 on a wrong token before anything else (including a missing service role, 503) is revealed. Runs server-side with the service role key; responses are `no-store`. Errors are `{ok:false, error}`.
 
 | Action | Body | Returns |
 |---|---|---|
@@ -48,14 +48,17 @@ Migration `0002_account.sql` adds the `account` table (same shape, RLS, realtime
 | `get` | `{table, id}` | `{doc}` (`{id, version, data}` or null) |
 | `query` | `{table, where?:[[field, op, value]], orderBy?:{field, dir}, limit?}` | `{docs}`; ops `eq neq gt gte lt lte in`; limit ≤ 100 (default 50) |
 | `write` | `{table, id, data, ifVersion?, merge?, runId?}` | `{id, version}`; 409 on version conflict or when the doc exists and neither `ifVersion` nor `merge` is given |
-| `file-url` | `{path}` | 10-minute signed download URL from bucket `studio` |
+| `file-url` | `{path}` | 10-minute signed download URL from bucket `studio`; path under `books/`, `media/`, `frames/`, `stats/` or `exports/` |
 | `upload-url` | `{path}` | signed upload URL; path must match `^(media\|frames\|exports)/[A-Za-z0-9._/-]+$`, no `..` |
 
 Readable tables: books, booknotes, ideas, packs, posts, jobs, runs, reports, qa, metrics, chats, ratings, playbooks, settings, account. Write rules (nothing is ever deleted; there is no delete action):
 
-- ideas, packs, posts, reports, qa, runs, booknotes, account: free (use `ifVersion` or `merge`).
+- reports, qa, runs, account: free (use `ifVersion` or `merge` for existing docs).
+- packs: new versions are inserts; an existing pack takes only merges of `hooks`, `frames`, `critic`. `captionFinal` is never writable.
+- ideas: inserts allowed (research). An existing idea takes only merges of `packCurrent`, `hookStyle`, `qaLast`, `updatedAt`, `status` (only Approved → Scripted) and an append-only `history`. Never `posted` or `dropReason`.
+- posts, booknotes: inserts; existing docs are merge-only.
 - metrics: append-only. A new doc is fine; an existing doc may only grow: `snapshots` and `screenshots` keep every existing entry as a prefix; `latest`, `updatedAt` may change.
-- jobs: only the job this run claimed (`runId` must match and status must be `running`), only `status/progress/result/error/finishedAt`, merge. The only job a worker may create is an auto-art job: a plain insert with `node:"art"`, `status:"queued"`, `createdBy:"worker"`, a `packId` that exists, `settings/studio.autoArt` not false, and no queued/running art job for that pack (the server stamps `createdAt`).
+- jobs: only the job this run claimed (`runId` must match and status must be `running`), only `status/progress/result/error/finishedAt`, merge. The only job a worker may create is an auto-art job: a plain insert with `node:"art"`, `status:"queued"`, `createdBy:"worker"`, a `packId` that exists, `settings/studio.autoArt` not false, and no queued/running art job for that pack (the server sets `createdAt`, `request` = "Frames for <packId>" and `ideaCode` from the pack, ignoring what the worker sent).
 - books: only `topic/status/summary/digest/notesCount/researchedAt/updatedAt`, merged.
 - chats: only append to `turns` (new turns must be `role:"assistant"`), plus `updatedAt`.
 - playbooks: only `learnings-proposed` and `taste-proposed`.
@@ -77,7 +80,7 @@ api heartbeat
 
 `playbooks/runner.md` is the worker's contract for all jobs. Unit tests (`test/unit/worker.test.ts`) run the core against an in-memory DB.
 
-**Fire** (`api/fire.ts`): owner only (Supabase JWT → `auth.getUser` → `studio_owner` row). Rate limit: refuses (429) if `settings/studio.lastFireAt` is under 60 s old, otherwise stores the new `lastFireAt` (versioned merge) and POSTs `{"text": …}` to `ROUTINE_FIRE_URL` with `Authorization: Bearer ROUTINE_FIRE_TOKEN`, `anthropic-beta: experimental-cc-routine-2026-04-01`, `anthropic-version: 2023-06-01`.
+**Fire** (`api/fire.ts`): owner only (Supabase JWT → `auth.getUser` → `studio_owner` row). Checks the caller before revealing configuration (503 `not_configured` only to the owner). Rate limit: refuses (429) if `settings/studio.lastFireAt` is under 60 s old, otherwise claims the slot with a versioned `write_doc` at the version it read (a lost race is 429; any database error is 503, so it never fails open) and POSTs `{"text": …}` to `ROUTINE_FIRE_URL` with `Authorization: Bearer ROUTINE_FIRE_TOKEN`, `anthropic-beta: experimental-cc-routine-2026-04-01`, `anthropic-version: 2023-06-01`.
 
 **Playbooks** live in `playbooks/*.md` (brand, runner, scout, trends, research, writer, critic, art, qa, review, taste). Owner data (`taste-profile`, `learnings`) stays in the database. `node scripts/hash-playbooks.mjs` rewrites `playbooks/HASHES.txt` (first 16 hex of sha256 per file); a test fails when they differ (`--check` to verify).
 

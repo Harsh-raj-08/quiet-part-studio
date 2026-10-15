@@ -30,7 +30,8 @@ test('no secrets or service-role key in the repo', () => {
   const bad = /service_role|sk-[A-Za-z0-9]{20,}|eyJhbGciOi/;
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (['node_modules', 'dist', 'output', '.git'].includes(e.name) ? [] : e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
   for (const f of walk(root).filter((f) => /\.(ts|tsx|mjs|json|md|sql|yml|example|html)$/.test(f) && !f.endsWith('BUILD-SPEC.md') && !f.endsWith('build.test.mjs'))) {
-    const t = fs.readFileSync(f, 'utf8');
+    // A migration may grant to the service_role database role by name; that is not a key.
+    const t = fs.readFileSync(f, 'utf8').replace(/^grant execute on function [^;]+ to service_role;$/gm, '');
     const m = t.match(bad);
     if (m && !/SUPABASE_SERVICE_ROLE_KEY/.test(m[0])) assert.fail(`${f} mentions ${m[0]}`);
   }
@@ -77,4 +78,49 @@ test('import-artifact-export reads both document shapes, keeps ids, skips unknow
   const out = spawnSync(process.execPath, [path.join(root, 'scripts/import-artifact-export.mjs'), d, '--dry-run', '--files', path.join(d, 'files')], { encoding: 'utf8', env: { ...process.env, SUPABASE_URL: '', SUPABASE_SERVICE_ROLE_KEY: '' } });
   assert.equal(out.status, 0, out.stderr);
   assert.match(out.stdout, /ideas\s+2 docs[\s\S]*files\s+1 under[\s\S]*dry run: nothing written/);
+});
+
+test('vercel.json: security headers with the CSP hash of the inline theme script; installs without scripts', async () => {
+  const { inlineScriptHashes, securityHeaders } = await import('../../scripts/csp.mjs');
+  const cfg = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
+  assert.equal(cfg.installCommand, 'npm install --ignore-scripts');
+  const hs = inlineScriptHashes();
+  assert.equal(hs.length, 1, 'one inline script (theme bootstrap)');
+  const h = Object.fromEntries(cfg.headers.find((x) => x.source === '/(.*)').headers.map((x) => [x.key, x.value]));
+  assert.ok(h['Content-Security-Policy'].includes(`script-src 'self' ${hs[0]}`), 'run node scripts/csp.mjs after editing the inline script');
+  assert.match(h['Content-Security-Policy'], /frame-ancestors 'none'.*base-uri 'none'.*object-src 'none'/);
+  assert.deepEqual(cfg.headers[0].headers, securityHeaders());
+  assert.equal(h['X-Content-Type-Options'], 'nosniff');
+  // Assets are relative so the demo also works under /quiet-part-studio/ on GitHub Pages.
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.ok(!/(src|href)="\/(?!\/)/.test(html), 'no root-absolute asset paths in index.html');
+});
+
+test('only a publishable or anon key may go into the browser bundle', async () => {
+  const { isPublicAnonKey } = await import('../../scripts/anon-key.mjs');
+  const jwt = (p) => ['eyJhbGciOiJIUzI1NiJ9', Buffer.from(JSON.stringify(p)).toString('base64url'), 'sig'].join('.');
+  assert.equal(isPublicAnonKey('sb_publishable_abcDEF123_x'), true);
+  assert.equal(isPublicAnonKey(jwt({ role: 'anon', iss: 'supabase' })), true);
+  assert.equal(isPublicAnonKey(jwt({ role: 'service_role' })), false);
+  assert.equal(isPublicAnonKey('sb_secret_abc'), false);
+  assert.equal(isPublicAnonKey('not-a-key'), false);
+  const { spawnSync } = await import('node:child_process');
+  const r = spawnSync(process.execPath, [path.join(root, 'scripts/build.mjs')], { encoding: 'utf8', env: { ...process.env, STUDIO_MODE: 'supabase', SUPABASE_URL: 'https://x.invalid', SUPABASE_ANON_KEY: jwt({ role: 'service_role' }) } });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /Refusing/);
+  assert.ok(!r.stderr.includes('service_role'), 'the key is never printed');
+});
+
+test('pages workflow: write permissions only on the deploy job; hardening migration is idempotent SQL', () => {
+  const y = fs.readFileSync(path.join(root, '.github/workflows/pages.yml'), 'utf8');
+  const [top, jobs] = y.split(/^jobs:/m);
+  assert.match(top, /permissions:\s*\n\s*contents: read\s*\n/);
+  assert.ok(!/pages: write|id-token: write/.test(top));
+  const [build, deploy] = jobs.split(/^  deploy:/m);
+  assert.ok(!/pages: write|id-token: write/.test(build));
+  assert.match(deploy, /pages: write[\s\S]*id-token: write/);
+  const sql = fs.readFileSync(path.join(root, 'supabase/migrations/0003_hardening.sql'), 'utf8');
+  assert.match(sql, /revoke execute on function public\.write_doc\(text, text, jsonb, int, boolean\) from anon/);
+  assert.match(sql, /revoke all on all tables in schema public from anon/);
+  assert.ok(!/\b(drop|delete|truncate)\b/i.test(sql.replace(/--.*$/gm, '')));
 });

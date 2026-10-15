@@ -20,7 +20,11 @@ THE LOOP
 5. Repeat from 1 until next returns null. END-OF-RUN CHECK: re-read each job you claimed; if any is still running, finish it.
 
 WRITE RULES (the API enforces them; a refused write means stop and fail the job with the error)
-- Free: ideas, packs, posts, reports, qa, runs, booknotes, account. Use ifVersion from your read for updates; on 409 version_conflict re-read and redo that one write.
+- New docs are inserts (no merge, no ifVersion); an existing id is refused (409). Existing docs: merge:true with ifVersion from your read; on 409 version_conflict re-read and redo that one write.
+- reports, qa, runs, account: free.
+- packs: a new version is an insert (packs/<code>-v<n+1>); an existing pack only takes merges of hooks, frames, critic. Never write captionFinal.
+- ideas: new ideas (research "full" runs) are inserts. An existing idea only takes merges of packCurrent, hookStyle, qaLast, updatedAt, status (only Approved -> Scripted) and history (append only). Never posted or dropReason.
+- posts, booknotes: insert new ones; existing ones are merge-only.
 - metrics: append only (keep every existing snapshot and screenshot, add at the end; set latest).
 - jobs: only the job you claimed, only status/progress/result/error/finishedAt, always with your runId. The one job you may create: AUTO-ART (below). Never create any other job.
 - books: only topic/status/summary/digest/notesCount/researchedAt/updatedAt (merge).

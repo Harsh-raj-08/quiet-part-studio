@@ -59,14 +59,14 @@ test('queueJob writes a queued job doc', async () => {
 });
 
 const deps = (o: Partial<FireDeps> = {}): FireDeps => ({
-  token: 't', verifyOwner: async () => true, getLastFire: async () => null, setLastFire: async () => {}, post: async () => ({ ok: true, body: { claude_code_session_url: 'https://claude.ai/code/session_1' } }), now: () => 1_000_000, ...o,
+  token: 't', verifyOwner: async () => true, configured: true, readSettings: async () => ({ version: 3, lastFireAt: null }), writeLastFire: async () => 'ok', post: async () => ({ ok: true, body: { claude_code_session_url: 'https://claude.ai/code/session_1' } }), now: () => 1_000_000, ...o,
 });
 
 test('api/fire: auth, owner, debounce, success, failure', async () => {
   assert.equal((await handleFire(deps({ token: null }))).status, 401);
   assert.equal((await handleFire(deps({ verifyOwner: async () => false }))).status, 403);
-  assert.equal((await handleFire(deps({ getLastFire: async () => 1_000_000 - 59_000 }))).status, 429);
-  const ok = await handleFire(deps({ getLastFire: async () => 1_000_000 - 61_000 }));
+  assert.equal((await handleFire(deps({ readSettings: async () => ({ version: 3, lastFireAt: 1_000_000 - 59_000 }) }))).status, 429);
+  const ok = await handleFire(deps({ readSettings: async () => ({ version: 3, lastFireAt: 1_000_000 - 61_000 }) }));
   assert.deepEqual(ok, { status: 200, body: { ok: true, sessionUrl: 'https://claude.ai/code/session_1' } });
   assert.equal((await handleFire(deps({ post: async () => ({ ok: false, body: null }) }))).status, 502);
   assert.equal((await handleFire(deps({ post: async () => { throw new Error('secret-token-xyz'); } }))).body.error, 'fire_failed');
@@ -95,4 +95,26 @@ test('supabase adapter: a missing optional table (account before 0002) reads as 
   assert.equal(ideas[0].id, 'A-1');
   assert.equal(isMissingTable({ code: '42P01', message: 'relation "public.account" does not exist' }), true);
   assert.equal(isMissingTable({ code: '42501', message: 'permission denied' }), false);
+});
+
+test('api/fire: who is asking is checked before config is revealed; the rate limit is versioned and fails closed', async () => {
+  // Missing service client: 401 without a token, 503 with one (nobody can be verified).
+  assert.equal((await handleFire(deps({ token: null, verifyOwner: null }))).status, 401);
+  assert.equal((await handleFire(deps({ verifyOwner: null }))).body.error, 'not_configured');
+  // Routine not configured: only the owner learns that.
+  assert.equal((await handleFire(deps({ configured: false, verifyOwner: async () => false }))).status, 403);
+  assert.equal((await handleFire(deps({ configured: false }))).body.error, 'not_configured');
+  // Versioned claim: the write uses the version that was read; losing the race is 429; any other failure is 503 and nothing is posted.
+  let seen: number | null | undefined; let posted = 0;
+  const post = async () => { posted++; return { ok: true, body: {} }; };
+  assert.equal((await handleFire(deps({ writeLastFire: async (_iso, v) => { seen = v; return 'ok'; }, post }))).status, 200);
+  assert.equal(seen, 3);
+  assert.equal((await handleFire(deps({ readSettings: async () => null, writeLastFire: async (_iso, v) => { seen = v; return 'ok'; }, post }))).status, 200);
+  assert.equal(seen, null, 'no settings doc yet: insert');
+  posted = 0;
+  assert.deepEqual((await handleFire(deps({ writeLastFire: async () => 'conflict', post }))).body, { ok: false, error: 'too_soon' });
+  assert.equal((await handleFire(deps({ writeLastFire: async () => 'error', post }))).status, 503);
+  assert.equal((await handleFire(deps({ writeLastFire: async () => { throw new Error('x'); }, post }))).status, 503);
+  assert.equal((await handleFire(deps({ readSettings: async () => { throw new Error('db down'); }, post }))).status, 503);
+  assert.equal(posted, 0);
 });

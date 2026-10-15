@@ -19,8 +19,17 @@ export interface WorkerEnv { workerToken: string | undefined; db: WorkerDb | nul
 export interface WorkerOut { status: number; body: Record<string, unknown> }
 
 export const MAX_BODY = 1024 * 1024;
+/** A shorter WORKER_TOKEN is treated as not configured. */
+export const MIN_TOKEN = 32;
 export const READ_TABLES = new Set(['books', 'booknotes', 'ideas', 'packs', 'posts', 'jobs', 'runs', 'reports', 'qa', 'metrics', 'chats', 'ratings', 'playbooks', 'settings', 'account']);
-const FREE_WRITE = new Set(['ideas', 'packs', 'posts', 'reports', 'qa', 'runs', 'booknotes', 'account']);
+const FREE_WRITE = new Set(['reports', 'qa', 'runs', 'account']);
+/** Insert freely; once a doc exists, only merges (no full replace). */
+const MERGE_ONLY = new Set(['posts', 'booknotes']);
+/** Existing packs: the fields a hooks/art/critic pass adds. Everything else goes in a new version (insert). */
+const PACK_MERGE_FIELDS = new Set(['hooks', 'frames', 'critic']);
+/** Existing ideas: what the writer and QA set. Never posted/dropReason (the owner's). */
+const IDEA_MERGE_FIELDS = new Set(['packCurrent', 'hookStyle', 'qaLast', 'updatedAt', 'status', 'history']);
+const IDEA_NEVER = ['posted', 'dropReason'];
 const JOB_FIELDS = new Set(['status', 'progress', 'result', 'error', 'finishedAt']);
 const BOOK_FIELDS = new Set(['topic', 'status', 'summary', 'digest', 'notesCount', 'researchedAt', 'updatedAt']);
 const METRIC_FIELDS = new Set(['snapshots', 'screenshots', 'latest', 'updatedAt', 'ideaCode', 'postedAt']);
@@ -29,7 +38,7 @@ const OPS = new Set<Op>(['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'in']);
 const ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/;
 const FIELD_RE = /^[A-Za-z_][A-Za-z0-9_]{0,63}$/;
 /** Any studio file the worker may read (download URL). */
-export const READ_PATH_RE = /^[A-Za-z0-9][A-Za-z0-9._/-]{0,400}$/;
+export const READ_PATH_RE = /^(books|media|frames|stats|exports)\/[A-Za-z0-9._/-]+$/;
 /** Where the worker may upload. */
 export const UPLOAD_PATH_RE = /^(media|frames|exports)\/[A-Za-z0-9._/-]+$/;
 
@@ -115,6 +124,22 @@ export function writeRule(table: string, id: string, data: Record<string, unknow
   const keys = Object.keys(data);
   if (table === 'ratings') return 'table_not_writable';
   if (FREE_WRITE.has(table)) return null;
+  if (MERGE_ONLY.has(table)) return cur && !merge ? 'merge_required' : null;
+  if (table === 'packs') {
+    if ('captionFinal' in data) return 'field_not_writable';
+    if (!cur) return null;
+    if (!merge) return 'merge_required';
+    return keys.some((k) => !PACK_MERGE_FIELDS.has(k)) ? 'field_not_writable' : null;
+  }
+  if (table === 'ideas') {
+    if (IDEA_NEVER.some((k) => k in data)) return 'field_not_writable';
+    if (!cur) return null;
+    if (!merge) return 'merge_required';
+    if (keys.some((k) => !IDEA_MERGE_FIELDS.has(k))) return 'field_not_writable';
+    if ('status' in data && data.status !== cur.data.status && !(cur.data.status === 'Approved' && data.status === 'Scripted')) return 'bad_status';
+    if ('history' in data && !appendOnly(cur.data.history, data.history)) return 'history_append_only';
+    return null;
+  }
   if (table === 'metrics') {
     if (!cur) return null;
     if (!merge) return 'metrics_append_only';
@@ -159,8 +184,10 @@ export function writeRule(table: string, id: string, data: Record<string, unknow
 
 export async function handleWorker(r: WorkerReq, env: WorkerEnv): Promise<WorkerOut> {
   if (r.method !== 'POST') return err(405, 'method_not_allowed');
-  if (!env.workerToken || !env.db) return err(503, 'not_configured');
+  // Without a usable token nothing can be compared (503). With one, the caller is checked before anything else is revealed.
+  if (!env.workerToken || env.workerToken.length < MIN_TOKEN) return err(503, 'not_configured');
   if (!tokenOk(r.token, env.workerToken)) return err(401, 'unauthorized');
+  if (!env.db) return err(503, 'not_configured');
   if (!/^application\/json\b/i.test(r.contentType || '')) return err(415, 'json_only');
   if (r.body != null && Buffer.byteLength(r.body) > MAX_BODY) return err(413, 'too_large');
   let b: Record<string, unknown> = {};
@@ -223,7 +250,9 @@ export async function handleWorker(r: WorkerReq, env: WorkerEnv): Promise<Worker
           if (merge || ifv != null) return err(403, 'job_not_found');
           const whyArt = await artJobRule(db, b.data);
           if (whyArt) return err(403, whyArt);
-          const w = await db.write(t, id, { ...b.data, createdAt: new Date(now).toISOString() }, null, false);
+          const pack = await db.get('packs', String(b.data.packId));
+          const job = { node: 'art', status: 'queued', packId: String(b.data.packId), ideaCode: pack?.data.ideaCode ?? null, createdBy: 'worker', request: `Frames for ${String(b.data.packId)}`, createdAt: new Date(now).toISOString() };
+          const w = await db.write(t, id, job, null, false);
           return { status: 200, body: { ok: true, id: w.id, version: w.version } };
         }
         const why = writeRule(t, id, b.data, cur, merge, b.runId);
