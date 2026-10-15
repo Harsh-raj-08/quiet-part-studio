@@ -23,7 +23,7 @@ WRITE RULES (the API enforces them; a refused write means stop and fail the job 
 - Free: ideas, packs, posts, reports, qa, runs, booknotes, account. Use ifVersion from your read for updates; on 409 version_conflict re-read and redo that one write.
 - metrics: append only (keep every existing snapshot and screenshot, add at the end; set latest).
 - jobs: only the job you claimed, only status/progress/result/error/finishedAt, always with your runId. Never create jobs.
-- books: only topic/status/summary (merge).
+- books: only topic/status/summary/digest/notesCount/researchedAt/updatedAt (merge).
 - chats: only append assistant turns to turns (plus updatedAt).
 - settings: only studio.workerSeenAt. Never ratings.
 
