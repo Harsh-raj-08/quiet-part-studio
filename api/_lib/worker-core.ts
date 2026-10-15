@@ -63,6 +63,53 @@ async function heartbeat(db: WorkerDb, now: number): Promise<void> {
   }
 }
 
+const ART_JOB_FIELDS = new Set(['node', 'status', 'packId', 'ideaCode', 'createdBy', 'createdAt', 'request']);
+export const WEEKLY_NODES = ['scout', 'trends', 'review'] as const;
+const DAY = 86_400_000;
+const IST = 330 * 60_000;
+/** Today's date and weekday in Asia/Kolkata (fixed +05:30, no DST). */
+export function istDay(now: number): { date: string; weekday: number } {
+  const d = new Date(now + IST);
+  return { date: d.toISOString().slice(0, 10), weekday: d.getUTCDay() };
+}
+
+/** Monday (IST): queue the weekly scout/trends/review runs the old worker used to create, unless one was created in the last 6 days. Insert-only. */
+export async function ensureWeekly(db: WorkerDb, now: number): Promise<string[]> {
+  const { date, weekday } = istDay(now);
+  if (weekday !== 1) return [];
+  const since = new Date(now - 6 * DAY).toISOString();
+  const made: string[] = [];
+  for (const node of WEEKLY_NODES) {
+    const recent = await db.query('jobs', [['node', 'eq', node], ['createdAt', 'gte', since]], null, 1);
+    if (recent.length) continue;
+    const id = `${node}-${date}`;
+    try {
+      await db.write('jobs', id, { node, request: node === 'review' ? 'Weekly review' : 'Weekly run', status: 'queued', createdAt: new Date(now).toISOString(), createdBy: 'schedule' }, null, false);
+      made.push(id);
+    } catch (e) { if (!(e instanceof ConflictError)) throw e; }
+  }
+  return made;
+}
+
+/** Claim order: oldest first, but review and taste jobs after everything else (they read what the others write). */
+export function claimOrder(jobs: WDoc[]): WDoc[] {
+  const late = (j: WDoc) => (j.data.node === 'review' || j.data.node === 'taste' ? 1 : 0);
+  return [...jobs].sort((a, b) => late(a) - late(b) || String(a.data.createdAt ?? '').localeCompare(String(b.data.createdAt ?? '')) || a.id.localeCompare(b.id));
+}
+
+/** The one job a worker may create: an art job for an existing pack, when auto-art is on and none is pending for that pack. */
+export async function artJobRule(db: WorkerDb, data: Record<string, unknown>): Promise<string | null> {
+  if (Object.keys(data).some((k) => !ART_JOB_FIELDS.has(k))) return 'field_not_writable';
+  if (data.node !== 'art' || data.status !== 'queued' || data.createdBy !== 'worker') return 'only_art_jobs';
+  if (typeof data.packId !== 'string' || !ID_RE.test(data.packId)) return 'bad_pack';
+  if (!(await db.get('packs', data.packId))) return 'pack_not_found';
+  const set = await db.get('settings', 'studio');
+  if (set && set.data.autoArt === false) return 'auto_art_off';
+  const pending = await db.query('jobs', [['node', 'eq', 'art'], ['packId', 'eq', data.packId]], null, 100);
+  if (pending.some((j) => j.data.status === 'queued' || j.data.status === 'running')) return 'art_job_pending';
+  return null;
+}
+
 /** The per-table write rules. Returns an error string, or null when the write is allowed. */
 export function writeRule(table: string, id: string, data: Record<string, unknown>, cur: WDoc | null, merge: boolean, runId: unknown): string | null {
   const keys = Object.keys(data);
@@ -130,7 +177,8 @@ export async function handleWorker(r: WorkerReq, env: WorkerEnv): Promise<Worker
       }
       case 'next': {
         await heartbeat(db, now);
-        const queued = await db.query('jobs', [['status', 'eq', 'queued']], { field: 'createdAt', dir: 'asc' }, 10);
+        await ensureWeekly(db, now);
+        const queued = claimOrder(await db.query('jobs', [['status', 'eq', 'queued']], { field: 'createdAt', dir: 'asc' }, 100));
         for (const j of queued) {
           const runId = env.runId ? env.runId() : `run-${now}-${Math.random().toString(36).slice(2, 8)}`;
           try {
@@ -170,6 +218,14 @@ export async function handleWorker(r: WorkerReq, env: WorkerEnv): Promise<Worker
         const ifv = b.ifVersion == null ? null : Number(b.ifVersion);
         if (ifv != null && !Number.isInteger(ifv)) return err(400, 'bad_version');
         const cur = await db.get(t, id);
+        if (t === 'jobs' && !cur) {
+          // Creating a job: only an auto-art job, as a plain insert, stamped with the server time.
+          if (merge || ifv != null) return err(403, 'job_not_found');
+          const whyArt = await artJobRule(db, b.data);
+          if (whyArt) return err(403, whyArt);
+          const w = await db.write(t, id, { ...b.data, createdAt: new Date(now).toISOString() }, null, false);
+          return { status: 200, body: { ok: true, id: w.id, version: w.version } };
+        }
         const why = writeRule(t, id, b.data, cur, merge, b.runId);
         if (why) return err(403, why);
         if (cur && ifv != null && ifv !== cur.version) return err(409, 'version_conflict');

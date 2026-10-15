@@ -13,7 +13,7 @@ SAFETY (non-negotiable)
 - Never store a book's full text anywhere. Notes and one-line quotes only.
 
 THE LOOP
-1. POST next. It returns {job, runId} or {job:null}; it also records your heartbeat (settings/studio.workerSeenAt). No job: POST heartbeat and stop.
+1. POST next. It returns {job, runId} or {job:null}; it also records your heartbeat (settings/studio.workerSeenAt). On Mondays (Asia/Kolkata) the server first queues the weekly scout, trends and review jobs (createdBy:"schedule"); don't create them yourself. Jobs come oldest first, with review and taste last. No job: POST heartbeat and stop.
 2. Do the job with the node playbook (job.node: writer, research, art, qa, scout, trends, review, taste).
 3. Progress (long jobs): write jobs/<id> {progress:{step, of, label}} with merge:true and your runId. The Library shows the label ("Reading chapter 6 of 13").
 4. Finish: write jobs/<id> {status:"done"|"failed", finishedAt, error?, result?} with merge:true and runId. Then write one runs doc: runs/<node>-<jobId> {node, jobId, target, summary (3-5 lines), status, startedAt, finishedAt, at}.
@@ -22,13 +22,14 @@ THE LOOP
 WRITE RULES (the API enforces them; a refused write means stop and fail the job with the error)
 - Free: ideas, packs, posts, reports, qa, runs, booknotes, account. Use ifVersion from your read for updates; on 409 version_conflict re-read and redo that one write.
 - metrics: append only (keep every existing snapshot and screenshot, add at the end; set latest).
-- jobs: only the job you claimed, only status/progress/result/error/finishedAt, always with your runId. Never create jobs.
+- jobs: only the job you claimed, only status/progress/result/error/finishedAt, always with your runId. The one job you may create: AUTO-ART (below). Never create any other job.
 - books: only topic/status/summary/digest/notesCount/researchedAt/updatedAt (merge).
 - chats: only append assistant turns to turns (plus updatedAt).
 - settings: only studio.workerSeenAt. Never ratings.
 
 JOB CONTRACTS (what the page queued -> what you write)
 - writer (no kind, no packId): production pack. packs/<code>-v<n> with beats[{t, vo, onscreen, visual, lit?}] (visual = one line saying what is drawn; lit:true on the one beat that carries the quiet part), voiceover, hooks, story, critic, designPrompt, cover, caption, watchouts. Never write captionFinal (that is the owner's edit). Then the idea: status Scripted (only from Approved), packCurrent, hookStyle, updatedAt, history append.
+- AUTO-ART: after any writer job that saved a new pack version, get settings/studio; unless autoArt is false, write jobs/art-<packId> {node:"art", status:"queued", packId, ideaCode, createdBy:"worker", request:"Frames for <packId>"} (plain insert: no merge, no ifVersion). The server refuses it if the pack doesn't exist, auto-art is off, or an art job for that pack is already queued or running; a refusal is fine, not a failure. If the id is taken (409), use jobs/art-<packId>-<n>. You will then claim and run it in this same loop.
 - writer kind:"edit" (lane:"quick") or no kind with a packId (lane:"deep"): change pack packId as job.request asks. quick = only from the idea card and booknotes; deep = you may research the book or the web first. Save as a NEW version packs/<code>-v<n+1> {..., basedOn, changeNote, createdBy:"writer"} and set idea.packCurrent. Never overwrite a version.
 - writer kind:"hooks": write 3 hooks [{style, vo, onscreen, why}] into packs/<packId>.hooks (merge, ifVersion). Styles: myth-bust, question, number, contrarian, story, direct-you; all three different.
 - writer kind:"carousel" / "story": posts/<code>-carousel-v<n> / posts/<code>-story-v<n> (see the writer playbook).

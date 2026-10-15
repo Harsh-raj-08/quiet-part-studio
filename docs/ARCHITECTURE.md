@@ -43,7 +43,7 @@ Migration `0002_account.sql` adds the `account` table (same shape, RLS, realtime
 
 | Action | Body | Returns |
 |---|---|---|
-| `next` | `{}` | atomically claims the oldest queued job (versioned write; a lost race moves to the next one), sets `status:"running"`, `startedAt`, `runId`, records `settings/studio.workerSeenAt` → `{job, runId}` or `{job:null}` |
+| `next` | `{}` | on Mondays (Asia/Kolkata) first inserts `jobs/{scout,trends,review}-YYYY-MM-DD` (`createdBy:"schedule"`) for each node with no job created in the last 6 days; then atomically claims the oldest queued job (review and taste jobs last) (versioned write; a lost race moves to the next one), sets `status:"running"`, `startedAt`, `runId`, records `settings/studio.workerSeenAt` → `{job, runId}` or `{job:null}` |
 | `heartbeat` | `{}` | sets `settings/studio.workerSeenAt` |
 | `get` | `{table, id}` | `{doc}` (`{id, version, data}` or null) |
 | `query` | `{table, where?:[[field, op, value]], orderBy?:{field, dir}, limit?}` | `{docs}`; ops `eq neq gt gte lt lte in`; limit ≤ 100 (default 50) |
@@ -55,8 +55,8 @@ Readable tables: books, booknotes, ideas, packs, posts, jobs, runs, reports, qa,
 
 - ideas, packs, posts, reports, qa, runs, booknotes, account: free (use `ifVersion` or `merge`).
 - metrics: append-only. A new doc is fine; an existing doc may only grow: `snapshots` and `screenshots` keep every existing entry as a prefix; `latest`, `updatedAt` may change.
-- jobs: only the job this run claimed (`runId` must match and status must be `running`), only `status/progress/result/error/finishedAt`, merge. Workers cannot create jobs.
-- books: only `topic/status/summary`, merged.
+- jobs: only the job this run claimed (`runId` must match and status must be `running`), only `status/progress/result/error/finishedAt`, merge. The only job a worker may create is an auto-art job: a plain insert with `node:"art"`, `status:"queued"`, `createdBy:"worker"`, a `packId` that exists, `settings/studio.autoArt` not false, and no queued/running art job for that pack (the server stamps `createdAt`).
+- books: only `topic/status/summary/digest/notesCount/researchedAt/updatedAt`, merged.
 - chats: only append to `turns` (new turns must be `role:"assistant"`), plus `updatedAt`.
 - playbooks: only `learnings-proposed` and `taste-proposed`.
 - settings: only `studio.workerSeenAt`. ratings: never.

@@ -12,8 +12,15 @@ const toDoc = (r: Row): Doc => ({ id: r.id, data: (r.data ?? {}) as Record<strin
  *   One subscription per collection for the app's lifetime (the store enforces this).
  * - writes go through the write_doc() RPC so versions are checked in the database.
  */
-export function createSupabaseAdapter(cfg: QpConfig): Adapter {
-  const sb: SupabaseClient = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
+/** PostgREST / Postgres "no such table" (e.g. `account` before migration 0002 is applied). */
+export const isMissingTable = (e: { code?: string; message?: string } | null | undefined) =>
+  !!e && (e.code === '42P01' || e.code === 'PGRST205' || /does not exist|could not find the table/i.test(e.message ?? ''));
+
+/** Collections that may not exist yet in an older database; a missing one reads as empty instead of failing. */
+const OPTIONAL: ReadonlySet<CollectionName> = new Set<CollectionName>(['account']);
+
+export function createSupabaseAdapter(cfg: QpConfig, client?: SupabaseClient): Adapter {
+  const sb: SupabaseClient = client ?? createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
   const maps = new Map<CollectionName, Map<string, Doc>>();
   const cbs = new Map<CollectionName, Set<(d: Doc[]) => void>>();
   const started = new Set<CollectionName>();
@@ -45,15 +52,24 @@ export function createSupabaseAdapter(cfg: QpConfig): Adapter {
     if (started.has(c)) return;
     started.add(c);
     maps.set(c, new Map());
+    let missing = false;
     const load = async () => {
+      if (missing) return;
       const { data, error } = await sb.from(c).select('id,data,version');
+      if (error && OPTIONAL.has(c) && isMissingTable(error)) {
+        // Not migrated yet: behave as an empty collection and stop listening for it.
+        missing = true; loaded.add(c); emit(c);
+        void sb.removeChannel(channel);
+        return;
+      }
       if (error) { console.warn(`load ${c} failed`, error.message); return; }
       const m = new Map<string, Doc>();
       for (const r of (data ?? []) as Row[]) m.set(r.id, toDoc(r));
       maps.set(c, m); loaded.add(c); emit(c);
     };
+    const channel = sb.channel(`qps-${c}`);
     void load();
-    sb.channel(`qps-${c}`)
+    channel
       .on('postgres_changes', { event: '*', schema: 'public', table: c }, (raw) => {
         const p = raw as unknown as { eventType: string; new: Row; old: { id?: string } };
         const m = maps.get(c)!;

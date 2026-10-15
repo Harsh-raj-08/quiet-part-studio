@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useApp } from '../../app/context';
-import { checkFile, errMsg, fireAndDescribe, mediaFolder, MEDIA, moveIdea, queueJob, type MediaKind, type QueueJob } from '../../data/actions';
+import { checkFile, demoSays, errMsg, fireAndDescribe, mediaFolder, MEDIA, moveIdea, queueJob, type MediaKind, type QueueJob } from '../../data/actions';
 import { useBooks, useIdeas, useJobs, usePacks, usePosts, useQa, useRatings, useLoaded } from '../../data/hooks';
 import { useStore } from '../../data/store';
 import { isHttps, type Book, type Idea, type Job, type Pack, type Post, type QaRec, type Rating, type Status } from '../../data/types';
@@ -110,8 +110,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         ? { voiceAssetId: r.path, voiceFileName: file.name, voiceUploadedAt: at }
         : { videoAssetId: r.path, videoFileName: file.name, videoSize: file.size, videoUploadedAt: at }));
       const from: Status = kind === 'voice' ? 'Scripted' : 'Voiced';
-      if (idea.status === from) { await moveIdea(store, idea.id, MEDIA[kind].to, null); toast(`${kind === 'voice' ? 'Voiceover' : 'Video'} uploaded. Moved to ${MEDIA[kind].to}`); }
-      else toast(`${kind === 'voice' ? 'Voiceover' : 'Video'} uploaded`);
+      if (idea.status === from) { await moveIdea(store, idea.id, MEDIA[kind].to, null); toast(demoSays(store, `${kind === 'voice' ? 'Voiceover' : 'Video'} uploaded. Moved to ${MEDIA[kind].to}`)); }
+      else toast(demoSays(store, `${kind === 'voice' ? 'Voiceover' : 'Video'} uploaded`));
     });
   }, [run, store, toast]);
 

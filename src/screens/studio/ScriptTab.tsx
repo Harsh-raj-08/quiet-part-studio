@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useStore } from '../../data/store';
-import { queueJob } from '../../data/actions';
+import { demoSays, queueJob } from '../../data/actions';
 import type { Idea, Pack } from '../../data/types';
 import { MONO, SANS, SERIF } from '../../design/fonts';
 import { Btn, JobRow, Label, labelStyle, monoChip, PromptPill, useCopied } from '../../design/kit';
@@ -198,8 +198,8 @@ function RateBox({ cur }: { cur: Pack }) {
       const n = S.ratings.filter((r) => r.packId !== cur.id).length + 1;
       if (n % 5 === 0 && !S.jobs.some((j) => j.node === 'taste' && live(j))) {
         await queueJob(store, { node: 'taste', request: 'Update taste profile' });
-        void store.adapter.fireWorker();
-        toast('Saved. Updating your taste profile.');
+        if (store.adapter.mode !== 'demo') void store.adapter.fireWorker();
+        toast(demoSays(store, 'Saved. Updating your taste profile'));
       } else toast('Rating saved');
     });
   };

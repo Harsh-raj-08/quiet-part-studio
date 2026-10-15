@@ -8,6 +8,7 @@ import { MONO, SANS, SERIF, EASE } from '../../design/fonts';
 import { Btn, statusStyle, SubTabs } from '../../design/kit';
 import { Eyebrow, Headline } from '../../design/primitives';
 import { fmtWhen, whenText } from '../../lib/format';
+import { DEMO_NOTE } from '../../data/actions';
 import { idleSince, workerOnline } from '../../lib/worker';
 
 const SUBS = [['runs', 'Runs'], ['jobs', 'Jobs'], ['settings', 'Settings']] as const;
@@ -116,6 +117,7 @@ function WorkerBar({ st, setSt, shown, total }: { st: string; setSt: (s: string)
   const set = useSettings();
   const on = workerOnline(set.workerSeenAt);
   const fire = () => void R.run('fire', async () => {
+    if (R.store.adapter.mode === 'demo') { R.toast(DEMO_NOTE); return; }
     const r = await R.store.adapter.fireWorker();
     R.toast(r.ok ? 'Worker started. It picks up the queue now.' : r.error === 'too_soon' ? 'The worker was started a moment ago.' : 'Could not start the worker. It runs at the next scheduled check.', !r.ok && r.error !== 'too_soon');
   });

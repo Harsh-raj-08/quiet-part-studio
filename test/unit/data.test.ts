@@ -74,3 +74,25 @@ test('api/fire: auth, owner, debounce, success, failure', async () => {
   assert.equal(bearer({ headers: { authorization: 'Bearer abc' } }), 'abc');
   assert.equal(bearer({ headers: {} }), null);
 });
+
+test('supabase adapter: a missing optional table (account before 0002) reads as empty and stops listening', async () => {
+  const { createSupabaseAdapter, isMissingTable } = await import('../../src/data/supabaseAdapter');
+  const removed: string[] = [];
+  const chan = (name: string) => { const c = { name, on: () => c, subscribe: () => c }; return c; };
+  const fake = {
+    auth: { getSession: async () => ({ data: { session: null } }), onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }) },
+    from: (t: string) => ({ select: async () => (t === 'account'
+      ? { data: null, error: { code: 'PGRST205', message: "Could not find the table 'public.account' in the schema cache" } }
+      : { data: [{ id: 'A-1', data: { status: 'Idea' }, version: 2 }], error: null }) }),
+    channel: chan,
+    removeChannel: async (c: { name: string }) => { removed.push(c.name); },
+  };
+  const a = createSupabaseAdapter({ supabaseUrl: 'https://x.invalid', supabaseAnonKey: 'k' } as never, fake as never);
+  const acct = await new Promise<unknown[]>((res) => a.subscribe('account', res));
+  assert.deepEqual(acct, []);
+  assert.deepEqual(removed, ['qps-account']);
+  const ideas = await new Promise<{ id: string }[]>((res) => a.subscribe('ideas', res as never));
+  assert.equal(ideas[0].id, 'A-1');
+  assert.equal(isMissingTable({ code: '42P01', message: 'relation "public.account" does not exist' }), true);
+  assert.equal(isMissingTable({ code: '42501', message: 'permission denied' }), false);
+});

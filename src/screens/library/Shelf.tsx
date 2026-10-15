@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../../app/context';
-import { checkBookFile, errMsg, fireAndDescribe, queueJob, uploadBookFile } from '../../data/actions';
+import { checkBookFile, demoSays, errMsg, fireAndDescribe, queueJob, uploadBookFile } from '../../data/actions';
 import { useSignedUrl } from '../../data/files';
 import { useStore } from '../../data/store';
 import type { Book, BookNote, Idea, Job } from '../../data/types';
@@ -67,7 +67,7 @@ function BookCard({ b, notes, ideas, jobs, sel }: { b: Book; notes: BookNote[]; 
     if (!f) return;
     const bad = checkBookFile(f);
     if (bad) { toast(bad, true); return; }
-    void act('upload', async () => { await uploadBookFile(store, b.id, f); toast(`Uploaded ${f.name}`); });
+    void act('upload', async () => { await uploadBookFile(store, b.id, f); toast(demoSays(store, `Uploaded ${f.name}`)); });
   };
   const progress = job?.progress;
   const progressText = progress?.label || (progress?.step != null && progress?.of != null ? `Step ${progress.step} of ${progress.of}` : job?.status === 'running' ? 'Running' : 'Queued');

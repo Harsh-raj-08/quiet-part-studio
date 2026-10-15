@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useApp } from '../../app/context';
-import { checkFile, errMsg, fireAndDescribe, MEDIA, moveIdea, queueJob, uploadMedia, type MediaKind } from '../../data/actions';
+import { checkFile, demoSays, errMsg, fireAndDescribe, MEDIA, moveIdea, queueJob, uploadMedia, type MediaKind } from '../../data/actions';
 import { useBooks, useIdeas, useJobs, useMetrics, usePacks } from '../../data/hooks';
 import { useStore } from '../../data/store';
 import type { Book, Idea, Job, Metric, Pack, Status } from '../../data/types';
@@ -143,8 +143,8 @@ export function IdeaOps({ children }: { children: ReactNode }) {
     try {
       await uploadMedia(store, idea, kind, file);
       const fresh = await store.get('ideas', idea.id);
-      if (fresh && fresh.data.status === MEDIA[kind].to) { toast(kind === 'voice' ? 'Voiceover uploaded' : 'Video uploaded'); }
-      else await moveIdea(store, idea.id, MEDIA[kind].to, null).then(() => toast(kind === 'voice' ? 'Voiceover uploaded. Moved to Voiced' : 'Video uploaded. Moved to Produced'));
+      if (fresh && fresh.data.status === MEDIA[kind].to) { toast(demoSays(store, kind === 'voice' ? 'Voiceover uploaded' : 'Video uploaded')); }
+      else await moveIdea(store, idea.id, MEDIA[kind].to, null).then(() => toast(demoSays(store, kind === 'voice' ? 'Voiceover uploaded. Moved to Voiced' : 'Video uploaded. Moved to Produced')));
       setPending((p) => (p && p.id === idea.id ? null : p));
       return true;
     } catch (e) { toast(errMsg(e), true); return false; }

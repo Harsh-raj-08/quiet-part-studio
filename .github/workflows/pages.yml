@@ -1,0 +1,33 @@
+name: pages
+# Public demo: the studio built in demo mode (invented fixtures, in-memory, no Supabase, no /api calls).
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency: { group: pages, cancel-in-progress: true }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install
+      - run: npm run build
+        env: { STUDIO_MODE: demo, SUPABASE_URL: '', SUPABASE_ANON_KEY: '' }
+      - name: Check the demo bundle never talks to Supabase or the API
+        run: |
+          if grep -rlE "supabase\.co|/api/(fire|worker)|createSignedUrl" dist; then echo "::error::demo bundle references Supabase or /api"; exit 1; fi
+          touch dist/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: dist }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: '${{ steps.deployment.outputs.page_url }}' }
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

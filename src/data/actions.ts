@@ -86,8 +86,13 @@ export async function queueJob(store: Store, o: QueueJob, now: () => string = ()
   return id;
 }
 
+export const DEMO_NOTE = 'Demo, changes aren’t saved';
+/** In the public demo, say so after an action that would reach the server (worker, uploads). */
+export const demoSays = (store: Store, msg: string) => (store.adapter.mode === 'demo' ? `${msg}. ${DEMO_NOTE}` : msg);
+
 /** Fire the worker after queuing. Returns the toast to show. */
 export async function fireAndDescribe(store: Store): Promise<string> {
+  if (store.adapter.mode === 'demo') return `Queued. ${DEMO_NOTE}`;
   const r = await store.adapter.fireWorker();
   if (r.ok) return 'Sent to the studio worker. Results appear here in a few minutes.';
   if (r.error === 'too_soon') return 'Queued. The worker was just started and will pick this up.';
