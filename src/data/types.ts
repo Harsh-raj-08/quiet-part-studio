@@ -20,6 +20,9 @@ export interface Doc {
   id: string;
   data: Record<string, unknown>;
   version: number;
+  /** Row timestamps (created_at / updated_at columns); absent when the adapter has none. */
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ---------------------------------------------------------------- helpers
@@ -123,6 +126,8 @@ export interface Pack {
   id: string; ideaCode: string; version: number; title: string; intro: string; durationSec: number; beats: Beat[];
   voiceover: string; designPrompt: string; cover: string; caption: string; captionFinal: string; watchouts: string[];
   createdBy: string; createdAt: string; basedOn: string; changeNote: string; frames: Frame[]; hooks: HookOpt[];
+  /** Set by every owner edit from the app (ISO) and who made it. */
+  editedAt: string; editedBy: string; rowCreatedAt: string; rowUpdatedAt: string;
   story: { belief: string; truth: string; scene: string; turn: string; feeling: string } | null;
   critic: { total: number | null; scores: Record<string, number | null>; predictedOwnerScore: number | null; notes: string } | null;
 }
@@ -161,7 +166,7 @@ export interface Post {
   id: string; ideaCode: string; kind: 'carousel' | 'story'; version: number;
   slides: { n: number; headline: string; body: string; visual: string }[];
   frames: { n: number; text: string; visual: string; sticker: Sticker | null }[];
-  designPrompt: string; cover: string; caption: string; altText: string; createdAt: string; postedAt: string;
+  designPrompt: string; cover: string; caption: string; altText: string; createdAt: string; postedAt: string; editedAt: string; editedBy: string; rowCreatedAt: string;
 }
 export interface Rating { id: string; packId: string; ideaCode: string; version: number; score: number; note: string; at: string }
 
@@ -214,7 +219,8 @@ export function normPack(d: Doc): Pack {
     voiceover: str(x.voiceover), designPrompt: str(x.designPrompt), cover: str(x.cover), caption: str(x.caption), captionFinal: str(x.captionFinal),
     watchouts: Array.isArray(wo) ? wo.map(str).filter(Boolean) : str(wo).split('\n').map((l) => l.replace(/^\s*[-•]\s*/, '').trim()).filter(Boolean),
     createdBy: str(x.createdBy), createdAt: str(x.createdAt), basedOn: str(x.basedOn), changeNote: str(x.changeNote),
-    frames: arr(x.frames).filter(isO).map((f) => ({ t: str(f.t), path: str(f.path ?? f.assetId), note: str(f.note) })),
+    editedAt: str(x.editedAt), editedBy: str(x.editedBy), rowCreatedAt: str(d.createdAt), rowUpdatedAt: str(d.updatedAt),
+    frames: arr(x.frames).filter(isO).map((f) => ({ t: str(f.t), path: str(f.path || f.assetId || (isHttps(str(f.url)) ? f.url : "")), note: str(f.note) })),
     hooks: arr(x.hooks).filter(isO).map((h) => ({ style: str(h.style), vo: str(h.vo), onscreen: str(h.onscreen), why: str(h.why) })).filter((h) => h.vo.trim()),
     story: st ? { belief: str(st.belief), truth: str(st.truth), scene: str(st.scene), turn: str(st.turn), feeling: str(st.feeling) } : null,
     critic: cr ? { total: numOr(cr.total, null), scores: isO(cr.scores) ? Object.fromEntries(Object.entries(cr.scores).map(([k, v]) => [k, numOr(v, null)])) : {}, predictedOwnerScore: numOr(cr.predictedOwnerScore, null),
@@ -308,7 +314,7 @@ export function normPost(d: Doc): Post {
     slides: o(x.slides).map((s, k) => ({ n: numOr(s.n, k + 1) as number, headline: str(s.headline), body: str(s.body), visual: str(s.visual) })),
     frames: o(x.frames).map((f, k) => ({ n: numOr(f.n, k + 1) as number, text: str(f.text), visual: str(f.visual),
       sticker: isO(f.sticker) ? { type: str(f.sticker.type), prompt: str(f.sticker.prompt), options: arr(f.sticker.options).map(str) } : null })),
-    designPrompt: str(x.designPrompt), cover: str(x.cover), caption: str(x.caption), altText: str(x.altText), createdAt: str(x.createdAt), postedAt: str(x.postedAt),
+    designPrompt: str(x.designPrompt), cover: str(x.cover), caption: str(x.caption), altText: str(x.altText), createdAt: str(x.createdAt), postedAt: str(x.postedAt), editedAt: str(x.editedAt), editedBy: str(x.editedBy), rowCreatedAt: str(d.createdAt),
   };
 }
 

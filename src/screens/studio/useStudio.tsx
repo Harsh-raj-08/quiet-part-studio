@@ -5,7 +5,7 @@ import { useBooks, useIdeas, useJobs, usePacks, usePosts, useQa, useRatings, use
 import { useStore } from '../../data/store';
 import { isHttps, type Book, type Idea, type Job, type Pack, type Post, type QaRec, type Rating, type Status } from '../../data/types';
 import { useToast } from '../../design/primitives';
-import { versionId, PROD_STAGES } from '../../lib/packs';
+import { ownerStamp, versionId, PROD_STAGES } from '../../lib/packs';
 import { planMove } from '../../lib/stages';
 
 export const live = (j: Job) => j.status === 'queued' || j.status === 'running';
@@ -87,7 +87,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       const top = Math.max(cur.version, ...(packsByIdea.get(cur.ideaCode) ?? []).map((p) => p.version));
       const nv = top + 1;
       const id = versionId(cur.ideaCode, nv);
-      const doc: Record<string, unknown> = { ...base.data, ...patch, ideaCode: cur.ideaCode, version: nv, createdBy: by, basedOn: cur.id, createdAt: new Date().toISOString(), changeNote: note };
+      const doc: Record<string, unknown> = { ...base.data, ...patch, ideaCode: cur.ideaCode, version: nv, createdBy: by, basedOn: cur.id, createdAt: new Date().toISOString(), changeNote: note, ...ownerStamp() };
       if (Array.isArray(patch.beats)) doc.voiceover = (patch.beats as { vo: string }[]).map((b) => b.vo).join('\n');
       await store.set('packs', id, doc);
       const idea = ideaByCode.get(cur.ideaCode);

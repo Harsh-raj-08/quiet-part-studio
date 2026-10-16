@@ -57,11 +57,17 @@ export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { 
     },
   };
 
+  /** Row timestamps the real database keeps: faked from the document's own createdAt / updatedAt. */
+  function fakeTimes(data: Record<string, unknown>): { createdAt?: string; updatedAt?: string } {
+    const c = typeof data.createdAt === 'string' ? data.createdAt : typeof data.updatedAt === 'string' ? data.updatedAt : '';
+    const u = typeof data.updatedAt === 'string' ? data.updatedAt : c;
+    return { ...(c ? { createdAt: c } : {}), ...(u ? { updatedAt: u } : {}) };
+  }
   function load(f: Fixtures) {
     store.clear();
     for (const c of COLLECTIONS) {
       const m = new Map<string, Doc>();
-      for (const d of f[c] ?? []) m.set(d.id, { id: d.id, data: clone(d.data), version: d.version ?? 1 });
+      for (const d of f[c] ?? []) m.set(d.id, { id: d.id, data: clone(d.data), version: d.version ?? 1, ...fakeTimes(d.data) });
       store.set(c, m);
     }
   }
@@ -95,7 +101,8 @@ export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { 
       guard();
       const m = store.get(coll)!;
       if (m.has(id)) throw new VersionConflictError('exists');
-      const d: Doc = { id, data: clone(data), version: 1 };
+      const nowIso = new Date().toISOString();
+      const d: Doc = { id, data: clone(data), version: 1, createdAt: nowIso, updatedAt: nowIso };
       m.set(id, d);
       handle.writes.push({ op: 'set', coll, id, data: clone(data), at: Date.now() });
       emit(coll);
@@ -106,7 +113,7 @@ export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { 
       const cur = store.get(coll)?.get(id);
       if (!cur) throw new MissingDocError();
       checkVersion(cur, opts);
-      const d: Doc = { id, data: { ...cur.data, ...clone(patch) }, version: cur.version + 1 };
+      const d: Doc = { id, data: { ...cur.data, ...clone(patch) }, version: cur.version + 1, ...(cur.createdAt ? { createdAt: cur.createdAt } : {}), updatedAt: new Date().toISOString() };
       store.get(coll)!.set(id, d);
       handle.writes.push({ op: 'update', coll, id, data: clone(patch), ifVersion: opts?.ifVersion, at: Date.now() });
       emit(coll);
@@ -117,7 +124,7 @@ export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { 
       const cur = store.get(coll)?.get(id);
       if (!cur) throw new MissingDocError();
       checkVersion(cur, opts);
-      const d: Doc = { id, data: clone(data), version: cur.version + 1 };
+      const d: Doc = { id, data: clone(data), version: cur.version + 1, ...(cur.createdAt ? { createdAt: cur.createdAt } : {}), updatedAt: new Date().toISOString() };
       store.get(coll)!.set(id, d);
       handle.writes.push({ op: 'replace', coll, id, data: clone(data), ifVersion: opts?.ifVersion, at: Date.now() });
       emit(coll);

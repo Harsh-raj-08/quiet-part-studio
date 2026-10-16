@@ -2,7 +2,7 @@ import { useApp } from '../../app/context';
 import type { Pack } from '../../data/types';
 import { MONO, SANS, SERIF } from '../../design/fonts';
 import { Btn, monoChip, SubTabs, useCopied } from '../../design/kit';
-import { designText, fmtDur, voText } from '../../lib/packs';
+import { designText, fmtDur, stampLines, versionTitle, voText } from '../../lib/packs';
 import { FramesTab } from './FramesTab';
 import { MediaTab } from './MediaTab';
 import { PostsTab } from './PostsTab';
@@ -56,10 +56,11 @@ export function PackDetail({ pack: cur }: { pack: Pack }) {
               <span>Pack v{cur.version}</span>
               {vers.length > 1 && (
                 <span role="group" aria-label="Version" style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 6, letterSpacing: 0 }}>
-                  {vers.map((p) => <button key={p.id} id={`ver-${p.id}`} type="button" aria-pressed={p.id === cur.id} title={p.id === current?.id ? 'Current version' : undefined}
+                  {vers.map((p) => <button key={p.id} id={`ver-${p.id}`} type="button" aria-pressed={p.id === cur.id} title={versionTitle(p, p.id === current?.id)}
                     onClick={() => S.open(p.id, s)} style={monoChip(p.id === cur.id, { height: 28, padding: '0 10px' })}>v{p.version}</button>)}
                 </span>
               )}
+              {(() => { const l = stampLines(cur); return (l.written || l.edited) ? <span data-stamp style={{ letterSpacing: 0, textTransform: 'none', font: `400 11.5px/1 ${MONO}`, color: 'var(--faint)' }}>{[l.written, l.edited].filter(Boolean).join(' · ')}</span> : null; })()}
               {isOld && <span style={{ letterSpacing: 0, textTransform: 'none', display: 'inline-flex', gap: 10, alignItems: 'center' }}>
                 <span style={{ font: `italic 400 15px/1 ${SERIF}`, color: 'var(--dim)' }}>v{current!.version} is current.</span>
                 <Btn id="revert-btn" kind="quiet" h={28} disabled={busy} style={{ padding: '0 12px', font: `400 12px/1 ${SANS}`, border: '1px solid var(--line2)' }}

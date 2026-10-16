@@ -3,7 +3,7 @@ import { useStore } from '../../data/store';
 import type { Idea, Pack, Post } from '../../data/types';
 import { MONO, SANS, SERIF } from '../../design/fonts';
 import { Btn, JobRow, Label, PromptPill, useCopied } from '../../design/kit';
-import { captionText, postDesignText, stickerText } from '../../lib/packs';
+import { captionText, ownerStamp, postDesignText, stampLine, stickerText } from '../../lib/packs';
 import { fmtDay, fmtRel, todayISO } from '../../lib/format';
 import { live, useStudio } from './useStudio';
 
@@ -45,7 +45,7 @@ function CaptionEditor({ cur }: { cur: Pack }) {
   const save = () => {
     if (!dirty) return;
     const text = v.slice(0, 2200);
-    void S.run(`caption:${cur.id}`, async () => { await store.mutate('packs', cur.id, () => ({ captionFinal: text })); setDirty(false); setAt(new Date().toISOString()); });
+    void S.run(`caption:${cur.id}`, async () => { await store.mutate('packs', cur.id, () => ({ captionFinal: text, ...ownerStamp() })); setDirty(false); setAt(new Date().toISOString()); });
   };
   return (
     <>
@@ -106,7 +106,7 @@ function PostBlock({ idea, kind }: { idea: Idea; kind: 'story' | 'carousel' }) {
   const active = !!job && live(job);
   const wkey = `writer:${idea.code}:${kind}`;
   const write = () => void S.queue(wkey, { node: 'writer', kind, ideaCode: idea.code, request: `${K.write}${req.trim() ? `: ${req.trim().slice(0, 200)}` : ''}` }).then((ok) => { if (ok) setReq(''); });
-  const markPosted = (post: Post, d: string) => void S.run(`post:${post.id}`, async () => { await store.mutate('posts', post.id, () => ({ postedAt: d })); setPosting(null); });
+  const markPosted = (post: Post, d: string) => void S.run(`post:${post.id}`, async () => { await store.mutate('posts', post.id, () => ({ postedAt: d, ...ownerStamp() })); setPosting(null); });
 
   return (
     <section id={K.id} aria-labelledby={`${K.id}-h`} style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: 14, alignContent: 'start', minWidth: 0 }}>
@@ -119,7 +119,8 @@ function PostBlock({ idea, kind }: { idea: Idea; kind: 'story' | 'carousel' }) {
               style={{ height: 32, padding: '0 10px', borderRadius: 999, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 12px/1 ${MONO}`, color: 'var(--ink)' }}>
               {list.map((x) => <option key={x.id} value={x.id}>{`v${x.version}${x.postedAt ? ' · posted' : ''}`}</option>)}
             </select>
-          ) : p ? <span style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>v{p.version}{p.createdAt ? ` · ${fmtRel(p.createdAt)}` : ''}</span> : null}
+          ) : p ? <span style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>v{p.version}</span> : null}
+          {p && stampLine(p) && <span data-stamp style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>{stampLine(p)}</span>}
         </span>
       </div>
       {p ? (

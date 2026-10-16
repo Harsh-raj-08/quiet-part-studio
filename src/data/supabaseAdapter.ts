@@ -3,8 +3,9 @@ import type { Adapter, AuthState, FireResult, UploadResult, WriteOpts } from './
 import { MissingDocError, VersionConflictError } from './adapter';
 import type { CollectionName, Doc, QpConfig, StudioUser } from './types';
 
-interface Row { id: string; data: Record<string, unknown>; version: number }
-const toDoc = (r: Row): Doc => ({ id: r.id, data: (r.data ?? {}) as Record<string, unknown>, version: r.version ?? 1 });
+interface Row { id: string; data: Record<string, unknown>; version: number; created_at?: string | null; updated_at?: string | null }
+const COLS = 'id,data,version,created_at,updated_at';
+const toDoc = (r: Row): Doc => ({ id: r.id, data: (r.data ?? {}) as Record<string, unknown>, version: r.version ?? 1, ...(r.created_at ? { createdAt: r.created_at } : {}), ...(r.updated_at ? { updatedAt: r.updated_at } : {}) });
 
 /**
  * The one place that talks to Supabase.
@@ -55,7 +56,7 @@ export function createSupabaseAdapter(cfg: QpConfig, client?: SupabaseClient): A
     let missing = false;
     const load = async () => {
       if (missing) return;
-      const { data, error } = await sb.from(c).select('id,data,version');
+      const { data, error } = await sb.from(c).select(COLS);
       if (error && OPTIONAL.has(c) && isMissingTable(error)) {
         // Not migrated yet: behave as an empty collection and stop listening for it.
         missing = true; loaded.add(c); emit(c);
@@ -89,7 +90,8 @@ export function createSupabaseAdapter(cfg: QpConfig, client?: SupabaseClient): A
     const row = (Array.isArray(rows) ? rows[0] : rows) as { id: string; version: number } | undefined;
     if (!row) throw new MissingDocError();
     const cur = maps.get(coll)?.get(id);
-    const doc: Doc = { id, version: row.version, data: merge && cur ? { ...cur.data, ...data } : data };
+    const now = new Date().toISOString();
+    const doc: Doc = { id, version: row.version, data: merge && cur ? { ...cur.data, ...data } : data, createdAt: cur?.createdAt ?? now, updatedAt: now };
     // Reflect the write locally right away; the realtime event confirms it.
     if (!maps.has(coll)) maps.set(coll, new Map());
     maps.get(coll)!.set(id, doc);
@@ -98,7 +100,7 @@ export function createSupabaseAdapter(cfg: QpConfig, client?: SupabaseClient): A
   }
 
   async function getDoc(coll: CollectionName, id: string): Promise<Doc | null> {
-    const { data, error } = await sb.from(coll).select('id,data,version').eq('id', id).maybeSingle();
+    const { data, error } = await sb.from(coll).select(COLS).eq('id', id).maybeSingle();
     if (error) throw new Error(error.message);
     return data ? toDoc(data as Row) : null;
   }

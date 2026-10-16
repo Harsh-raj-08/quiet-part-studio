@@ -305,7 +305,9 @@ test('posts: caption editor saves packs.captionFinal; Mark as posted (https only
   await page.fill('#post-caption', 'New caption for the post.');
   await page.click('#posted-date');
   await page.waitForFunction(() => /Saved/.test(document.getElementById('post-caption-state').textContent));
-  assert.equal((await doc(page, 'packs', 'EN-04-v3')).captionFinal, 'New caption for the post.');
+  const cap = await doc(page, 'packs', 'EN-04-v3');
+  assert.equal(cap.captionFinal, 'New caption for the post.');
+  assert.equal(cap.editedBy, 'owner'); assert.match(cap.editedAt, /^2026-10-11T/, 'editedAt stamped with the (frozen) page clock');
   await page.fill('#posted-date', '2026-10-11');
   await page.fill('#posted-link', 'http://instagram.com/reel/x');
   await page.click('#posted-save');
@@ -378,3 +380,40 @@ for (const width of [1440, 1024]) {
     }
   });
 }
+
+test('last edited: the pack meta line, version chip tooltips, grid footer and drawer all show when it was written / edited', async () => {
+  const { page, ctx } = await open('#studio/script/FTW-05-v3');
+  await page.waitForSelector('[data-pack] [data-stamp]');
+  assert.match(await page.locator('[data-pack] [data-stamp]').first().innerText(), /^Written \d{1,2} [A-Z][a-z]{2}(?: \d{4})?, \d{1,2}:\d{2} (am|pm)/);
+  await page.evaluate(() => { location.hash = '#studio/script/PM-02-v2'; });
+  await page.waitForSelector('[id^="ver-"]');
+  assert.match(await page.locator('[id^="ver-"]').first().getAttribute('title'), /^v\d.* · written \d/);
+  await page.evaluate(() => { location.hash = '#studio'; });
+  await page.waitForSelector('[data-pack-grid]');
+  assert.match(await page.locator('[data-pack-card="FTW-05"] [data-pack-stamp]').innerText(), /^(written|edited) /);
+  await ctx.close();
+});
+
+test('last edited: an owner edit shows "Edited" next to "Written" straight away', async () => {
+  const { page, ctx } = await open('#studio/posts/EN-04-v3');
+  await page.waitForSelector('#post-caption');
+  // Pretend the pack was written two days ago so the edit is clearly later.
+  await mock(page, (m) => { const d = m.get('packs', 'EN-04-v3'); m.put('packs', 'EN-04-v3', { ...d.data, createdAt: new Date(Date.now() - 2 * 86400000).toISOString() }); });
+  await page.fill('#post-caption', 'A fresh caption.');
+  await page.click('#posted-date');
+  await page.waitForFunction(() => /Saved/.test(document.getElementById('post-caption-state').textContent));
+  await page.waitForSelector('[data-pack] [data-stamp]');
+  assert.match(await page.locator('[data-pack] [data-stamp]').first().innerText(), /Edited (just now|\d+ min ago)/);
+  await ctx.close();
+});
+
+test('grid: book select narrows the packs', async () => {
+  const { page, ctx } = await open('#studio');
+  await page.waitForSelector('[data-pack-grid]');
+  const n = await page.locator('[data-pack-card]').count();
+  if (await page.locator('#pack-book').count()) {
+    await page.selectOption('#pack-book', { index: 1 });
+    assert.ok(await page.locator('[data-pack-card]').count() < n);
+  }
+  await ctx.close();
+});

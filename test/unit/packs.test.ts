@@ -88,3 +88,44 @@ test('critic panel uses the v3 rubric for v3 scores and the v2 rubric for old pa
   assert.deepEqual(v2, ['hook', 'gap', 'scene', 'turn', 'rhythm', 'truth', 'ending']);
   assert.equal(critRubric({}).length, 7);
 });
+
+// ---- last edited
+import { ownerStamp, stampLine, stampLines, stampShort, versionTitle } from '../../src/lib/packs';
+import { fmtAgo, fmtStamp } from '../../src/lib/format';
+import type { Doc } from '../../src/data/types';
+
+const at = (y: number, mo: number, d: number, h: number, mi: number) => new Date(y, mo - 1, d, h, mi).toISOString();
+const NOW = new Date(2026, 9, 16, 12, 0).getTime();
+
+test('fmtStamp: local "15 Oct, 1:32 pm", relative under 24 h, year when not this year', () => {
+  assert.equal(fmtStamp(at(2026, 10, 15, 13, 32), NOW, false), '15 Oct, 1:32 pm');
+  assert.equal(fmtStamp(at(2026, 10, 15, 13, 32), NOW), '22 h ago');
+  assert.equal(fmtStamp(at(2026, 10, 16, 10, 0), NOW), '2 h ago');
+  assert.equal(fmtStamp(at(2026, 10, 16, 11, 40), NOW), '20 min ago');
+  assert.equal(fmtStamp(at(2026, 10, 16, 11, 59), NOW).includes('min ago'), true);
+  assert.equal(fmtAgo(at(2026, 10, 16, 12, 0), NOW), 'just now');
+  assert.equal(fmtStamp(at(2025, 12, 31, 0, 5), NOW), '31 Dec 2025, 12:05 am');
+  assert.equal(fmtStamp(at(2026, 1, 2, 12, 0), NOW), '2 Jan, 12:00 pm');
+  assert.equal(fmtStamp('nonsense', NOW), '');
+});
+
+const pk = (x: Record<string, unknown>, extra: Partial<Doc> = {}) => normPack({ id: 'X-v1', version: 1, data: { ideaCode: 'X', version: 1, ...x }, ...extra });
+
+test('written / edited lines: edited only when over a minute after it was written; row timestamps fill in', () => {
+  const w = at(2026, 10, 15, 13, 32); const e = at(2026, 10, 16, 11, 5);
+  assert.equal(stampLine(pk({ createdAt: w }), NOW), 'Written 15 Oct, 1:32 pm');
+  assert.equal(stampLine(pk({ createdAt: w, editedAt: e, editedBy: 'owner' }), NOW), 'Written 15 Oct, 1:32 pm · Edited 55 min ago');
+  assert.equal(stampLines(pk({ createdAt: w, editedAt: at(2026, 10, 15, 13, 32) }), NOW).edited, '');
+  assert.equal(stampLine(pk({}, { createdAt: w }), NOW), 'Written 15 Oct, 1:32 pm');
+  assert.equal(stampLine(pk({}), NOW), '');
+  assert.equal(stampShort(pk({ createdAt: w, editedAt: e }), NOW), 'edited 55 min ago');
+  assert.equal(stampShort(pk({ createdAt: at(2026, 10, 12, 9, 0), editedAt: at(2026, 10, 14, 9, 0) }), NOW), 'edited 14 Oct');
+  assert.equal(stampShort(pk({ createdAt: w }), NOW), 'written 15 Oct');
+  assert.equal(versionTitle(pk({ createdAt: w }), true, NOW), 'v1 (current) · written 15 Oct, 1:32 pm');
+  assert.equal(pk({ editedAt: e, editedBy: 'owner' }).editedBy, 'owner');
+});
+
+test('ownerStamp writes an ISO time and "owner"', () => {
+  const s = ownerStamp(new Date(Date.UTC(2026, 9, 16, 6, 30)));
+  assert.deepEqual(s, { editedAt: '2026-10-16T06:30:00.000Z', editedBy: 'owner' });
+});

@@ -1,6 +1,6 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { MONO, SANS, SERIF } from '../../design/fonts';
-import { fmtDur, packSegments } from '../../lib/packs';
+import { fmtDur, packSegments, stampShort } from '../../lib/packs';
 import { lsGet, lsSet } from '../../lib/storage';
 import { useStudio } from './useStudio';
 
@@ -22,7 +22,10 @@ export function PackGrid({ missing }: { missing: string | null }) {
   const posted = S.groups.filter((g) => g.idea.status === 'Posted');
   const chips = posted.length ? [...CHIPS, ['Posted', 'Posted'] as [string, string]] : CHIPS;
   const st = chips.some((c) => c[0] === stage) ? stage : 'all';
-  const shown = st === 'all' ? prod : S.groups.filter((g) => g.idea.status === st);
+  const [bookSel, setBookSel] = useState('all');
+  const bookIds = useMemo(() => Array.from(new Set(S.groups.map((g) => g.idea.bookId).filter(Boolean))), [S.groups]);
+  const bk = bookIds.includes(bookSel) ? bookSel : 'all';
+  const shown = (st === 'all' ? prod : S.groups.filter((g) => g.idea.status === st)).filter((g) => bk === 'all' || g.idea.bookId === bk);
 
   return (
     <>
@@ -39,6 +42,11 @@ export function PackGrid({ missing }: { missing: string | null }) {
             );
           })}
         </div>
+        {bookIds.length > 1 && (
+          <select id="pack-book" aria-label="Book" value={bk} onChange={(e) => setBookSel(e.target.value)} style={{ height: 34, padding: '0 10px', borderRadius: 999, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 13px/1 ${SANS}`, color: 'var(--ink)' }}>
+            <option value="all">All books</option>{bookIds.map((id) => <option key={id} value={id}>{S.bookById.get(id)?.title ?? id}</option>)}
+          </select>
+        )}
         <span style={{ font: `400 11px/1 ${MONO}`, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--faint)' }}>Copy into Claude Design · voiceover tool</span>
       </div>
       {missing && <p role="status" style={{ margin: '0 0 24px', font: `italic 400 17px/1.4 ${SERIF}`, color: 'var(--dim)' }}>That pack isn't here any more. Pick another below.</p>}
@@ -77,7 +85,10 @@ export function PackGrid({ missing }: { missing: string | null }) {
                   ))}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
-                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', font: `400 10px/1 ${MONO}`, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--faint)' }}>¹ From · {b?.title || idea.fromBook || '–'}</span>
+                  <span style={{ display: 'grid', gap: 8, minWidth: 0 }}>
+                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', font: `400 10px/1 ${MONO}`, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--faint)' }}>¹ From · {b?.title || idea.fromBook || '–'}</span>
+                    {stampShort(p) && <span data-pack-stamp style={{ font: `400 10.5px/1 ${MONO}`, color: 'var(--faint)' }}>{stampShort(p)}</span>}
+                  </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 'none' }}>
                     <span style={{ font: `400 11px/1 ${MONO}`, color: 'var(--dim)' }}>{[fmtDur(p.durationSec), `v${p.version}`].filter(Boolean).join(' · ')}</span>
                     {qv && <span data-qa-stamp={qv} style={qaStamp(qv)}>QA · {qv}</span>}

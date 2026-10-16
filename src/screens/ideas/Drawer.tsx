@@ -7,6 +7,7 @@ import { MONO, SANS, SERIF } from '../../design/fonts';
 import { Stamp } from '../../design/primitives';
 import { fmtDay, fmtRel, fmtSize, isToday, pgs } from '../../lib/format';
 import { pagesOverlap } from '../../lib/pages';
+import { stampLine } from '../../lib/packs';
 import { nextStage, prevStage, stageIndex } from '../../lib/stages';
 import { MovePrompt } from './Controls';
 import { useOps } from './ops';
@@ -215,6 +216,11 @@ export function IdeaDrawer() {
               )}
             </div>
           </div>
+        )}
+        {pack && (
+          <Section label="Pack" id="drawer-pack">
+            <div style={{ font: `400 14px/1.5 ${SANS}`, color: 'var(--dim)' }}>v{pack.version}{stampLine(pack) ? <span data-stamp style={{ font: `400 11.5px/1.5 ${MONO}`, color: 'var(--faint)' }}> · {stampLine(pack)}</span> : null}</div>
+          </Section>
         )}
         {idea.format && <Section label="Format"><span style={{ font: `400 14px/1.4 ${SANS}`, color: 'var(--dim)' }}>{idea.format}</span></Section>}
         <Notes idea={idea} />

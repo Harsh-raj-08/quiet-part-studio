@@ -158,3 +158,23 @@ export function whenText(iso: string, running: boolean, now: number): string {
 }
 /** "8 Oct" for a timestamp (ms), local. */
 export const shortDay = (t: number) => (t ? `${new Date(t).getDate()} ${MON[new Date(t).getMonth()]}` : '–');
+
+const clock12 = (d: Date) => `${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() < 12 ? 'am' : 'pm'}`;
+/** Under 24 h: "just now" / "12 min ago" / "2 h ago". */
+export function fmtAgo(s: string, now: number = Date.now()): string {
+  const t = parseWhen(s);
+  if (!Number.isFinite(t)) return '';
+  const d = Math.max(0, (now - t) / 1000);
+  if (d < 60) return 'just now';
+  if (d < 3600) return `${Math.floor(d / 60)} min ago`;
+  return `${Math.floor(d / 3600)} h ago`;
+}
+/** Local date and time as "15 Oct, 1:32 pm" (the year is added when it is not this year). Under 24 h it reads "2 h ago" instead. */
+export function fmtStamp(s: string, now: number = Date.now(), relative = true): string {
+  const t = parseWhen(s);
+  if (!Number.isFinite(t)) return '';
+  if (relative && now - t >= 0 && now - t < 86400000) return fmtAgo(s, now);
+  return `${fmtDay(s, new Date(now))}, ${clock12(new Date(t))}`;
+}
+/** The same instant without the relative form: "15 Oct, 1:32 pm" (for tooltips). */
+export const fmtStampFull = (s: string, now: number = Date.now()): string => fmtStamp(s, now, false);

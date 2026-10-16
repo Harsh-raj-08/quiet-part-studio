@@ -1,6 +1,7 @@
 // Pack rules shared by the Studio screens and the unit tests. Formats follow the old studio's SPEC exactly.
 import type { Beat, Idea, Pack, Post, Sticker } from '../data/types';
 import { STAGES } from '../data/types';
+import { fmtAgo, fmtDay, fmtStamp, fmtStampFull, ts } from './format';
 
 /** "Copy for Claude Design": designPrompt, a blank line, then every beat as [t]\nV.O: …\n[On-screen]: … joined by blank lines. */
 export function designText(p: Pick<Pack, 'designPrompt' | 'beats'>): string {
@@ -93,3 +94,31 @@ export function framesByBeat<F extends { t: string }>(beats: Pick<Beat, 't'>[], 
 
 /** New version id, in the studio's convention: {code}-v{n}. */
 export const versionId = (code: string, n: number) => `${code}-v${n}`;
+
+// ---------------------------------------------------------------- last edited
+/** The fields every owner edit from the app writes next to the change. */
+export const ownerStamp = (now: Date = new Date()): { editedAt: string; editedBy: 'owner' } => ({ editedAt: now.toISOString(), editedBy: 'owner' });
+
+type Stamped = { createdAt: string; rowCreatedAt: string; editedAt: string };
+/** When it was written (the document's own createdAt, else the row's created_at) and when the owner last edited it ('' unless later by over a minute). */
+export function stampTimes(p: Stamped): { written: string; edited: string } {
+  const written = p.createdAt || p.rowCreatedAt;
+  const edited = p.editedAt && (!written || ts(p.editedAt) - ts(written) > 60000) ? p.editedAt : '';
+  return { written, edited };
+}
+/** "Written 15 Oct, 1:32 pm" and, when edited later, "Edited 16 Oct, 11:05 am" / "Edited 2 h ago". */
+export function stampLines(p: Stamped, now: number = Date.now()): { written: string; edited: string } {
+  const t = stampTimes(p);
+  return { written: t.written ? `Written ${fmtStamp(t.written, now, false)}` : '', edited: t.edited ? `Edited ${fmtStamp(t.edited, now)}` : '' };
+}
+/** The one-line form: "Written 15 Oct, 1:32 pm · Edited 2 h ago". */
+export const stampLine = (p: Stamped, now: number = Date.now()): string => { const l = stampLines(p, now); return [l.written, l.edited].filter(Boolean).join(' · '); };
+/** Pack card footer: "edited 2 h ago" / "edited 15 Oct" / "written 15 Oct". */
+export function stampShort(p: Stamped, now: number = Date.now()): string {
+  const t = stampTimes(p);
+  if (t.edited) return `edited ${now - ts(t.edited) < 86400000 && now >= ts(t.edited) ? fmtAgo(t.edited, now) : fmtDay(t.edited, new Date(now))}`;
+  return t.written ? `written ${fmtDay(t.written, new Date(now))}` : '';
+}
+/** Tooltip for a version chip: "v2 · written 15 Oct, 1:32 pm". */
+export const versionTitle = (p: Stamped & { version: number }, current: boolean, now: number = Date.now()): string =>
+  [`v${p.version}${current ? ' (current)' : ''}`, stampTimes(p).written ? `written ${fmtStampFull(stampTimes(p).written, now)}` : ''].filter(Boolean).join(' · ');
