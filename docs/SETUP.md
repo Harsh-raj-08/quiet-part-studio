@@ -30,8 +30,8 @@ The worker is a Claude Code routine that works the job queue through the Worker 
 
 1. Create the routine on this repository with a schedule (for example every few hours) and the prompt: "Work the Studio job queue: follow playbooks/runner.md."
 2. Its cloud environment:
-   - **Network access: custom allowlist** with only `quiet-part-studio.vercel.app` and `github.com` (plus whatever the environment needs to clone the repo). Don't use full internet access: everything the worker reads is treated as data, but a narrow allowlist is the real control on where data can go.
-   - **Environment variable / secret** `WORKER_TOKEN`: the same value as in Vercel. `STUDIO_URL` defaults to `https://quiet-part-studio.vercel.app` in the playbook.
+   - **API credential** (Pro/Max): Edit environment → API credentials → Add credential. Name `Quiet Part Studio worker`, Allowed websites `quiet-part-studio.vercel.app`, header `Authorization`, prefix `Bearer`, value = the same `WORKER_TOKEN` as in Vercel. The agent proxy adds it to the worker's requests, so the token never reaches the session, its environment variables or any file. Don't put it in Environment variables.
+   - **Network access: Trusted** (the default) is enough: the credential's host and GitHub are reachable on their own paths. Never use Full.
 3. Add an **API trigger** to the routine. Put its URL in Vercel as `ROUTINE_FIRE_URL` and its token as `ROUTINE_FIRE_TOKEN`. "Run worker now" and every queued job then fire the routine through `/api/fire` (owner only, at most once a minute).
 4. Check it: queue a job from the studio, then watch System > Jobs; `settings/studio.workerSeenAt` updates on every pass ("Worker online").
 

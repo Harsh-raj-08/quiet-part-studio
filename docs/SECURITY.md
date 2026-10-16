@@ -26,16 +26,16 @@ The studio is a single-owner app. It holds unpublished scripts, voiceovers, vide
 
 ## Residual risks and follow-ups
 
-- **Worker network egress.** The API limits what the worker can change, not what it can read and send elsewhere. Keep the routine's environment on a custom network allowlist (`quiet-part-studio.vercel.app`, `github.com`). With full internet access, an injected instruction could make it send studio data out.
+- **Worker network egress.** The API limits what the worker can change, not what it can read and send elsewhere. Keep the routine's environment on Trusted (or a narrower Custom list), never Full. With full internet access, an injected instruction could make it send studio data out.
 - **Web fetch tools.** Even with a network allowlist, the worker's own web search/fetch tools can reach the web (scout and trends need them). Treat anything the worker can read as potentially disclosable through those tools, and keep the most sensitive material (for example unreleased book files you don't own) out of the studio.
-- **WORKER_TOKEN is a long-lived bearer.** Anyone with it has the worker's (limited) powers. Rotate it on any suspicion and periodically.
+- **WORKER_TOKEN is a long-lived bearer.** Anyone with it has the worker's (limited) powers. It is stored as an API credential on the routine's cloud environment, so the worker session never sees it and an injected instruction can't print or send it. Rotate it on any suspicion and periodically.
 - **No lockfile yet.** The npm registry was not reachable from the build environment, so `package-lock.json` has not been generated. Exact version pins limit drift, but transitive dependencies are not locked. Follow-up: run `npm install --package-lock-only` on a machine with registry access and commit the lockfile, then switch CI to `npm ci --ignore-scripts`.
 - **The service role key** lives in Vercel only; a Vercel account compromise exposes everything. Use 2FA on Vercel, GitHub and Supabase.
 - **Rate limit granularity.** `/api/fire` allows one fire a minute; a stolen owner session could still fire once a minute until the session is revoked (Supabase > Auth > Users > sign out user).
 
 ## Rotating tokens
 
-- **WORKER_TOKEN:** generate a new one (`openssl rand -hex 32`), set it in Vercel and redeploy, then update the routine environment's `WORKER_TOKEN`. Calls with the old token get 401 straight away.
+- **WORKER_TOKEN:** generate a new one (`openssl rand -hex 32`), set it in Vercel and redeploy, then delete and re-add the routine environment's API credential with the new value. Calls with the old token get 401 straight away.
 - **ROUTINE_FIRE_TOKEN:** regenerate the routine's API trigger token, update `ROUTINE_FIRE_URL`/`ROUTINE_FIRE_TOKEN` in Vercel and redeploy.
 - **SUPABASE_SERVICE_ROLE_KEY:** rotate in Supabase (API keys / JWT secret), update Vercel, redeploy. Rotating the JWT secret also signs out every session and invalidates a legacy anon key, so update `SUPABASE_ANON_KEY` and rebuild too.
 - **Owner session:** Supabase > Auth > Users > the owner > sign out of all sessions.

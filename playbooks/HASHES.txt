@@ -4,7 +4,7 @@ e289fbcadbdc8fc7  critic.md
 406a87bacdad0f25  qa.md
 5ed26015bcf5110b  research.md
 01a0bec5d65a051d  review.md
-23cac024c62a92fe  runner.md
+acfe5fcf2ca7d19d  runner.md
 6ec7281dbdfcce71  scout.md
 d2d5162c30685503  taste.md
 d4117240e16e1ddf  trends.md

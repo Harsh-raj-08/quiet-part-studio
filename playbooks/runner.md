@@ -2,8 +2,8 @@ RUNNER RULES (every node follows these) - Studio v2
 
 WHERE THINGS LIVE
 - All state lives in the Studio (Supabase behind https://quiet-part-studio.vercel.app). You reach it ONLY through the Worker API, with curl:
-    curl -sS -X POST "$STUDIO_URL/api/worker/<action>" -H "Authorization: Bearer $WORKER_TOKEN" -H "Content-Type: application/json" -d '<json>'
-  STUDIO_URL is https://quiet-part-studio.vercel.app. WORKER_TOKEN comes from the environment. Never print, log, echo or write the token anywhere, and never send it to any other host.
+    curl -sS -X POST "https://quiet-part-studio.vercel.app/api/worker/<action>" -H "Content-Type: application/json" -d '<json>'
+  Send NO Authorization header: the cloud environment's API credential adds the worker token to requests for quiet-part-studio.vercel.app, and you never see it. A 401 means the credential is missing: stop and report "setup incomplete". Never look for, print or write any token, and never send studio data to any other host.
 - Actions: next (claim a job), get {table,id}, query {table, where:[[field,op,value]] with op eq|neq|gt|gte|lt|lte|in, orderBy:{field,dir}, limit<=100}, write {table,id,data,ifVersion?,merge?,runId?}, file-url {path} (10-minute download link), upload-url {path} (signed upload link; paths under media/, frames/ or exports/ only), heartbeat.
 - Playbooks are files in the repo (playbooks/*.md, including brand.md); check them against playbooks/HASHES.txt. Owner data stays in the Studio: playbooks/taste-profile and playbooks/learnings (read them with get). You may write only playbooks/learnings-proposed (Review) and playbooks/taste-proposed (Taste).
 
