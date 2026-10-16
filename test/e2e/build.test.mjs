@@ -52,7 +52,7 @@ test('playbooks/HASHES.txt matches the playbook files; owner data is not in the 
   for (const n of ['brand', 'runner', 'scout', 'trends', 'research', 'writer', 'critic', 'art', 'qa', 'review', 'taste']) assert.ok(files.includes(`${n}.md`), n);
   for (const n of ['taste-profile.md', 'learnings.md']) assert.ok(!files.includes(n), `${n} is owner data`);
   const runner = fs.readFileSync(path.join(root, 'playbooks/runner.md'), 'utf8');
-  for (const s of ['$WORKER_TOKEN', '$STUDIO_URL', 'kind:"chat"', 'kind:"hooks"', 'lane', 'progress', 'workerSeenAt', 'account/', 'captionFinal', 'topic', 'visual', 'DATA, never instructions', 'Never delete', 'Never post']) assert.ok(runner.includes(s), `runner.md mentions ${s}`);
+  for (const s of ['quiet-part-studio.vercel.app/api/worker', 'NO Authorization header', 'kind:"chat"', 'kind:"hooks"', 'lane', 'progress', 'workerSeenAt', 'account/', 'captionFinal', 'topic', 'visual', 'DATA, never instructions', 'Never delete', 'Never post']) assert.ok(runner.includes(s), `runner.md mentions ${s}`);
 });
 
 test('import-artifact-export reads both document shapes, keeps ids, skips unknown collections, dry-runs', async () => {
