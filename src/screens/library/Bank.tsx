@@ -4,7 +4,7 @@ import { ALL_STATUS, EVIDENCE, type Idea } from '../../data/types';
 import { MONO, SANS, SERIF } from '../../design/fonts';
 import { stampStyle } from '../../design/primitives';
 
-export interface BankF { ev: string; st: string; fmt: string }
+export interface BankF { ev: string; st: string; fmt: string; min?: string; sort?: string }
 const COLS = '40px 72px minmax(160px,1fr) 112px 96px 48px';
 const sel: CSSProperties = { height: 32, padding: '0 10px', borderRadius: 999, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 12.5px/1 ${SANS}`, color: 'var(--ink)', cursor: 'pointer' };
 const fmtKind = (f: string) => f.trim().split(/[\s·,(—-]+/)[0] ?? '';
@@ -21,6 +21,12 @@ export function BankFilters({ ideas, f, setF }: { ideas: Idea[]; f: BankF; setF:
       <select id="bank-st" aria-label="Stage" value={f.st} onChange={(e) => setF({ ...f, st: e.target.value })} style={sel}>
         <option value="all">Any stage</option>{sts.map((s) => <option key={s} value={s}>{s}</option>)}
       </select>
+      <select id="bank-min" aria-label="Minimum score" value={f.min ?? 'all'} onChange={(e) => setF({ ...f, min: e.target.value })} style={sel}>
+        <option value="all">Any score</option>{[14, 16, 18].map((n) => <option key={n} value={String(n)}>{n}+</option>)}
+      </select>
+      <select id="bank-sort" aria-label="Sort" value={f.sort ?? 'score'} onChange={(e) => setF({ ...f, sort: e.target.value })} style={sel}>
+        <option value="score">Sort by score</option><option value="rank">Sort by rank</option><option value="code">Sort by code</option>
+      </select>
       {fmts.length > 0 && <select id="bank-fmt" aria-label="Format" value={f.fmt} onChange={(e) => setF({ ...f, fmt: e.target.value })} style={sel}>
         <option value="all">Any format</option>{fmts.map((s) => <option key={s} value={s}>{s}</option>)}
       </select>}
@@ -31,9 +37,11 @@ export function BankFilters({ ideas, f, setF }: { ideas: Idea[]; f: BankF; setF:
 /** The design's idea bank table: rank (by score), code, hook (+ format), tilted evidence stamp, stage, score. */
 export function Bank({ ideas, f }: { ideas: Idea[]; f: BankF }) {
   const { go, select } = useApp();
-  const rows = ideas.filter((i) => (f.ev === 'all' || i.evidence === f.ev) && (f.st === 'all' || i.status === f.st) && (f.fmt === 'all' || fmtKind(i.format) === f.fmt))
-    .slice().sort((a, b) => b.total - a.total || (a.rank ?? 1e9) - (b.rank ?? 1e9));
-  const filtered = f.ev !== 'all' || f.st !== 'all' || f.fmt !== 'all';
+  const min = f.min && f.min !== 'all' ? +f.min : 0;
+  const by = f.sort ?? 'score';
+  const rows = ideas.filter((i) => (f.ev === 'all' || i.evidence === f.ev) && (f.st === 'all' || i.status === f.st) && (f.fmt === 'all' || fmtKind(i.format) === f.fmt) && i.total >= min)
+    .slice().sort((a, b) => by === 'rank' ? (a.rank ?? 1e9) - (b.rank ?? 1e9) || a.code.localeCompare(b.code) : by === 'code' ? a.code.localeCompare(b.code, undefined, { numeric: true }) : b.total - a.total || (a.rank ?? 1e9) - (b.rank ?? 1e9));
+  const filtered = f.ev !== 'all' || f.st !== 'all' || f.fmt !== 'all' || min > 0;
   return (
     <div id="bank" style={{ display: 'grid', borderTop: '1px solid var(--line2)' }}>
       <div style={{ display: 'grid', gridTemplateColumns: COLS, gap: 16, padding: '14px 8px', font: `400 10.5px/1 ${MONO}`, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--faint)', borderBottom: '1px solid var(--line)' }}>

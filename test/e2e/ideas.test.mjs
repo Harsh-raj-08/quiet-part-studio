@@ -126,3 +126,45 @@ test('drawer: opens from a card, shows details, footer moves, Escape closes', as
   assert.equal((await idea(page, 'TFS-03')).status, 'Idea');
   await ctx.close();
 });
+
+test('More filters: text, lane, format, hook style, min score narrow the board and show "Showing X of Y"; Clear resets; remembered', async () => {
+  const { page, ctx } = await openApp(browser, srv.url);
+  const total = await page.locator('[data-card]').count();
+  await page.click('#more-filters');
+  await page.fill('#mf-q', 'zzzz-nothing');
+  assert.equal(await page.locator('[data-card]').count(), 0);
+  assert.match(await page.locator('[data-showing]').innerText(), new RegExp(`^Showing 0 of ${total}$`));
+  await page.fill('#mf-q', '');
+  await page.selectOption('#mf-min', '18');
+  const n18 = await page.locator('[data-card]').count();
+  assert.ok(n18 > 0 && n18 < total);
+  assert.equal(await page.locator('[data-card] [data-score]').evaluateAll((l) => l.every((e) => parseInt(e.textContent) >= 18)), true);
+  assert.match(await page.locator('#more-filters').innerText(), /More filters · 1/);
+  await page.selectOption('#mf-hs', 'question');
+  assert.equal(await page.locator('[data-card]').count(), 0);
+  await page.reload(); await page.waitForSelector('[data-board]');
+  assert.match(await page.locator('#more-filters').innerText(), /More filters · 2/);
+  await page.click('#more-filters'); await page.click('#mf-clear');
+  assert.equal(await page.locator('[data-card]').count(), total);
+  assert.ok((await page.locator('#mf-lane option').count()) > 1);
+  assert.ok((await page.locator('#mf-fmt option').count()) > 1);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#more-filters-pop').count(), 0);
+  await ctx.close();
+});
+
+test('list view: sortable headers (code, stage, evidence, updated, score) and an Updated column', async () => {
+  const { page, ctx } = await openApp(browser, srv.url, { view: 'list' });
+  const rows = () => page.locator('[data-row]').evaluateAll((l) => l.map((e) => e.getAttribute('data-row')));
+  const first = await rows();
+  await page.click('[data-sort=code]');
+  const byCode = await rows();
+  assert.deepEqual(byCode, byCode.slice().sort((a, b) => a.localeCompare(b, undefined, { numeric: true })));
+  await page.click('[data-sort=code]');
+  assert.deepEqual(await rows(), byCode.slice().reverse());
+  assert.equal(await page.locator('[role=columnheader][aria-sort=ascending]').count(), 1);
+  await page.click('[data-sort=score]');
+  assert.deepEqual(await rows(), first);
+  assert.ok((await page.locator('[data-updated]').first().innerText()).length > 0);
+  await ctx.close();
+});

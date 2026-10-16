@@ -8,6 +8,7 @@ import { initials } from '../../lib/format';
 import { lsGet, lsSet } from '../../lib/storage';
 import { Board, type DndState } from './Board';
 import { ListView } from './ListView';
+import { applyExtra, extraCount, loadExtra, MoreFilters, type Extra } from './MoreFilters';
 import { useOps } from './ops';
 
 type View = 'board' | 'list';
@@ -22,6 +23,7 @@ export function IdeasScreen() {
   const [ev, setEv] = useState('All');
   const [view, setViewState] = useState<View>(() => (lsGet('qps.ideasView') === 'list' ? 'list' : 'board'));
   const [dropped, setDropped] = useState(false);
+  const [extra, setExtra] = useState<Extra>(loadExtra);
   const [dnd, setDnd] = useState<DndState>({ drag: null, dragH: 170, over: null });
   const boardRef = useRef<HTMLDivElement>(null);
   const setView = (v: View) => { setViewState(v); lsSet('qps.ideasView', v); };
@@ -32,8 +34,9 @@ export function IdeasScreen() {
 
   const stages: Status[] = useMemo(() => (dropped ? [...STAGES, 'Dropped'] : [...STAGES]), [dropped]);
   const inScope = useMemo(() => ideas.filter((i) => dropped || i.status !== 'Dropped'), [ideas, dropped]);
-  const visible: Idea[] = useMemo(() => inScope.filter((i) => (book === 'all' || i.bookId === book) && (ev === 'All' || i.evidence === ev)), [inScope, book, ev]);
-  const filtered = book !== 'all' || ev !== 'All';
+  const bookById = useMemo(() => new Map(books.map((b) => [b.id, b])), [books]);
+  const visible: Idea[] = useMemo(() => applyExtra(inScope.filter((i) => (book === 'all' || i.bookId === book) && (ev === 'All' || i.evidence === ev)), extra, bookById), [inScope, book, ev, extra, bookById]);
+  const filtered = book !== 'all' || ev !== 'All' || extraCount(extra) > 0;
 
   const chips = [{ k: 'all', label: 'All books', title: 'All books', n: inScope.length }].concat(books.map((b) => ({ k: b.id, label: b.code || initials(b.title) || b.title, title: b.title, n: inScope.filter((i) => i.bookId === b.id).length })).filter((c) => c.n > 0 || c.k === book));
 
@@ -76,6 +79,7 @@ export function IdeasScreen() {
               {EV_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
             </select>
           </label>
+          <MoreFilters ideas={ideas} books={books} value={extra} onChange={setExtra} />
           <button type="button" data-toggle-dropped aria-pressed={dropped} onClick={() => setDropped((d) => !d)}
             style={{ height: 34, padding: '0 14px', borderRadius: 999, cursor: 'pointer', font: `400 13px/1 ${SANS}`, border: `1px ${dropped ? 'solid' : 'dashed'} var(--line2)`, background: 'transparent', color: dropped ? 'var(--ink)' : 'var(--dim)' }}>{dropped ? 'Hide dropped' : 'Show dropped'}</button>
           <Seg label="View" value={view} onChange={setView} options={[['board', 'Board'], ['list', 'List']]} />

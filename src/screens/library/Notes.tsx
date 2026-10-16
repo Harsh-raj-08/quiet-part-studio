@@ -1,4 +1,4 @@
-import { useEffect, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { useApp } from '../../app/context';
 import type { Book, BookNote, Idea } from '../../data/types';
 import { MONO, SANS, SERIF } from '../../design/fonts';
@@ -13,7 +13,13 @@ const pg = (p: string) => (p ? <span style={{ color: 'var(--faint)' }}> · {pgs(
 /** Two columns: the book's digest on the left, the chapter accordion on the right. */
 export function Notes({ book, notes, ideas, openId, setOpenId }: { book: Book; notes: BookNote[]; ideas: Idea[]; openId: string | null | undefined; setOpenId: (id: string | null) => void }) {
   const { go, select } = useApp();
-  const chs = notes.slice().sort((a, b) => a.chapterNo - b.chapterNo);
+  const [q, setQ] = useState('');
+  const [parts, setParts] = useState<Record<string, boolean>>({ keyIdeas: true, stories: true, claims: true, lines: true });
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const hay = (n: BookNote) => [n.title, n.summary, ...n.keyIdeas.map((k) => `${k.idea} ${k.mechanism}`), ...n.stories.map((k) => `${k.who} ${k.what}`), ...n.claims.map((k) => k.claim), ...n.lines.map((k) => k.text)].join(' ').toLowerCase();
+  const all = notes.slice().sort((a, b) => a.chapterNo - b.chapterNo);
+  const chs = words.length ? all.filter((n) => { const h = hay(n); return words.every((w) => h.includes(w)); }) : all;
+  const partsOff = Object.values(parts).some((v) => !v);
   // Default open: the first chapter (as designed); a search hand-off opens its chapter.
   const open = openId === undefined ? chs[0]?.id ?? null : openId;
   useEffect(() => {
@@ -31,6 +37,19 @@ export function Notes({ book, notes, ideas, openId, setOpenId }: { book: Book; n
           <span>Researched {book.researchedAt ? fmtDay(book.researchedAt) : '—'}</span>
         </div>
       </div>
+      <div style={{ display: 'grid', minWidth: 0 }}>
+      {notes.length > 0 && (
+        <div role="group" aria-label="Filter the chapter notes" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+          <input id="notes-q" className="qp-field" type="search" aria-label="Search the chapter notes" placeholder="Search ideas, stories, claims, lines" value={q} onChange={(e) => setQ(e.target.value)} style={{ height: 34, width: 'min(100%, 280px)', fontSize: 13, borderRadius: 999 }} />
+          {([['keyIdeas', 'Key ideas'], ['stories', 'Stories'], ['claims', 'Claims to check'], ['lines', 'Lines']] as const).map(([k, l]) => (
+            <button key={k} type="button" data-notes-part={k} aria-pressed={parts[k]} onClick={() => setParts({ ...parts, [k]: !parts[k] })}
+              style={{ height: 32, padding: '0 12px', borderRadius: 999, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, border: `1px ${parts[k] ? 'solid' : 'dashed'} ${parts[k] ? 'var(--ink)' : 'var(--line2)'}`, background: parts[k] ? 'var(--ink)' : 'transparent', color: parts[k] ? 'var(--on-ink)' : 'var(--dim)' }}>{l}</button>
+          ))}
+          {(words.length > 0 || partsOff) && <span data-notes-showing style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>Showing {chs.length} of {all.length}</span>}
+          {(words.length > 0 || partsOff) && <button type="button" id="notes-clear" onClick={() => { setQ(''); setParts({ keyIdeas: true, stories: true, claims: true, lines: true }); }} style={{ background: 'none', border: 0, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, color: 'var(--dim)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Clear</button>}
+        </div>
+      )}
+      {words.length > 0 && chs.length === 0 && <p style={{ margin: 0, font: `italic 400 19px/1.4 ${SERIF}`, color: 'var(--faint)' }}>Nothing matches “{q}”.</p>}
       <div id="chapters" style={{ display: 'grid', borderTop: '1px solid var(--line)' }}>
         {chs.map((n) => {
           const isOpen = open === n.id;
@@ -48,10 +67,10 @@ export function Notes({ book, notes, ideas, openId, setOpenId }: { book: Book; n
               {isOpen && (
                 <div id={`chap-body-${n.id}`} style={{ display: 'grid', gap: 22, padding: '0 4px 28px 64px' }}>
                   {n.summary && <p style={{ margin: 0, paddingLeft: 18, borderLeft: '1.5px solid var(--ink)', font: `italic 400 19px/1.5 ${SERIF}`, textWrap: 'pretty' }}>{n.summary}</p>}
-                  {n.keyIdeas.length > 0 && <Group label="Key ideas" show={n.stories.length + n.claims.length + n.lines.length > 0}><ul style={bullets}>{n.keyIdeas.map((k, i) => <li key={i}>{k.idea}{k.mechanism ? ` — ${k.mechanism}` : ''}{pg(k.pages)}</li>)}</ul></Group>}
-                  {n.stories.length > 0 && <Group label="Stories"><ul style={bullets}>{n.stories.map((k, i) => <li key={i}>{k.who && <span style={{ color: 'var(--ink)' }}>{k.who}: </span>}{k.what}{pg(k.pages)}</li>)}</ul></Group>}
-                  {n.claims.length > 0 && <Group label="Claims to check"><ul style={bullets}>{n.claims.map((k, i) => <li key={i}>{k.claim}{pg(k.pages)}</li>)}</ul></Group>}
-                  {n.lines.length > 0 && <Group label="Lines">{n.lines.map((k, i) => <blockquote key={i} style={{ margin: 0, paddingLeft: 18, borderLeft: '1.5px solid var(--lilac)', font: `italic 400 17px/1.5 ${SERIF}` }}>“{k.text}”{k.page && <span style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)', marginLeft: 8 }}>{pgs(k.page)}</span>}</blockquote>)}</Group>}
+                  {parts.keyIdeas && n.keyIdeas.length > 0 && <Group label="Key ideas" show={n.stories.length + n.claims.length + n.lines.length > 0}><ul style={bullets}>{n.keyIdeas.map((k, i) => <li key={i}>{k.idea}{k.mechanism ? ` — ${k.mechanism}` : ''}{pg(k.pages)}</li>)}</ul></Group>}
+                  {parts.stories && n.stories.length > 0 && <Group label="Stories"><ul style={bullets}>{n.stories.map((k, i) => <li key={i}>{k.who && <span style={{ color: 'var(--ink)' }}>{k.who}: </span>}{k.what}{pg(k.pages)}</li>)}</ul></Group>}
+                  {parts.claims && n.claims.length > 0 && <Group label="Claims to check"><ul style={bullets}>{n.claims.map((k, i) => <li key={i}>{k.claim}{pg(k.pages)}</li>)}</ul></Group>}
+                  {parts.lines && n.lines.length > 0 && <Group label="Lines">{n.lines.map((k, i) => <blockquote key={i} style={{ margin: 0, paddingLeft: 18, borderLeft: '1.5px solid var(--lilac)', font: `italic 400 17px/1.5 ${SERIF}` }}>“{k.text}”{k.page && <span style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)', marginLeft: 8 }}>{pgs(k.page)}</span>}</blockquote>)}</Group>}
                   {!c && !n.summary && <p style={{ margin: 0, font: `400 14px/1.5 ${SANS}`, color: 'var(--faint)' }}>Nothing recorded for this chapter yet.</p>}
                   {seeds.length > 0 && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
@@ -65,7 +84,8 @@ export function Notes({ book, notes, ideas, openId, setOpenId }: { book: Book; n
             </div>
           );
         })}
-        {!chs.length && <p id="notes-empty" style={{ margin: 0, padding: '32px 4px', font: `italic 400 19px/1.4 ${SERIF}`, color: 'var(--faint)' }}>Chapter notes appear once research has run on this book.</p>}
+        {!all.length && <p id="notes-empty" style={{ margin: 0, padding: '32px 4px', font: `italic 400 19px/1.4 ${SERIF}`, color: 'var(--faint)' }}>Chapter notes appear once research has run on this book.</p>}
+      </div>
       </div>
     </div>
   );

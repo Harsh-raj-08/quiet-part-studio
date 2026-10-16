@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../../app/context';
 import { checkBookFile, demoSays, errMsg, fireAndDescribe, queueJob, uploadBookFile } from '../../data/actions';
 import { useSignedUrl } from '../../data/files';
@@ -18,12 +18,33 @@ export function Shelf({ books, notes, ideas, jobs, loaded, focusId }: { books: B
     if (!focusId) return;
     document.getElementById(`book-${focusId}`)?.scrollIntoView({ block: 'center' });
   }, [focusId, loaded]);
+  const [st, setSt] = useState('all');
+  const [lane, setLane] = useState('all');
+  const [q, setQ] = useState('');
+  const statuses = useMemo(() => ['Candidate', 'In research', 'Idea bank ready', 'Done'].filter((x) => books.some((b) => b.status === x)), [books]);
+  const lanes = useMemo(() => Array.from(new Set(books.map((b) => b.lane).filter(Boolean))), [books]);
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const shown = books.filter((b) => (st === 'all' || b.status === st) && (lane === 'all' || b.lane === lane) && words.every((w) => `${b.title} ${b.author}`.toLowerCase().includes(w)));
+  const filtered = st !== 'all' || lane !== 'all' || words.length > 0;
   if (!loaded) return <div aria-busy="true" style={{ minHeight: 400 }} />;
   if (!books.length) return <p style={{ margin: 0, padding: '32px 4px', font: `italic 400 19px/1.4 ${SERIF}`, color: 'var(--faint)' }}>Nothing on the shelf yet. Add a book, upload its PDF, then run research.</p>;
+  const chip = (on: boolean) => ({ height: 32, padding: '0 12px', borderRadius: 999, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, border: `1px solid ${on ? 'var(--ink)' : 'var(--line2)'}`, background: on ? 'var(--ink)' : 'transparent', color: on ? 'var(--on-ink)' : 'var(--dim)' } as const);
   return (
+    <>
+    {books.length > 1 && (
+      <div role="group" aria-label="Filter the shelf" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+        {['all', ...statuses].map((x) => <button key={x} type="button" data-shelf-status={x} aria-pressed={st === x} onClick={() => setSt(x)} style={chip(st === x)}>{x === 'all' ? 'All' : x}</button>)}
+        {lanes.length > 1 && <select id="shelf-lane" aria-label="Lane" value={lane} onChange={(e) => setLane(e.target.value)} style={{ height: 32, padding: '0 10px', borderRadius: 999, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 12.5px/1 ${SANS}`, color: 'var(--ink)' }}><option value="all">Any lane</option>{lanes.map((l) => <option key={l} value={l}>{l}</option>)}</select>}
+        <input id="shelf-q" className="qp-field" type="search" aria-label="Filter by title or author" placeholder="Title or author" value={q} onChange={(e) => setQ(e.target.value)} style={{ height: 32, width: 200, fontSize: 12.5, borderRadius: 999 }} />
+        {filtered && <span data-shelf-showing style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>Showing {shown.length} of {books.length}</span>}
+        {filtered && <button type="button" id="shelf-clear" onClick={() => { setSt('all'); setLane('all'); setQ(''); }} style={{ background: 'none', border: 0, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, color: 'var(--dim)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Clear</button>}
+      </div>
+    )}
     <div id="shelf" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,280px),1fr))', gap: 16 }}>
-      {books.map((b) => <BookCard key={b.id} b={b} notes={notes.filter((n) => n.bookId === b.id)} ideas={ideas.filter((i) => i.bookId === b.id)} jobs={jobs} sel={b.id === focusId} />)}
+      {shown.length === 0 && <p style={{ margin: 0, font: `italic 400 19px/1.4 ${SERIF}`, color: 'var(--faint)' }}>No book matches.</p>}
+      {shown.map((b) => <BookCard key={b.id} b={b} notes={notes.filter((n) => n.bookId === b.id)} ideas={ideas.filter((i) => i.bookId === b.id)} jobs={jobs} sel={b.id === focusId} />)}
     </div>
+    </>
   );
 }
 
