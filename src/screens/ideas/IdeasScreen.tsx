@@ -74,12 +74,12 @@ export function IdeasScreen() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           {filtered && <span data-showing style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)', whiteSpace: 'nowrap' }}>Showing {visible.length} of {inScope.length}</span>}
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, font: `400 10.5px/1 ${MONO}`, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--faint)' }}>Evidence
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, font: `400 10.5px/1 ${MONO}`, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--faint)' }}>
+            <MoreFilters ideas={ideas} books={books} value={extra} onChange={setExtra} />
             <select aria-label="Evidence" value={ev} onChange={(e) => setEv(e.target.value)} style={{ height: 34, padding: '0 10px', borderRadius: 999, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 13px/1 ${SANS}`, letterSpacing: 0, textTransform: 'none', color: 'var(--ink)', cursor: 'pointer' }}>
               {EV_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
             </select>
-          </label>
-          <MoreFilters ideas={ideas} books={books} value={extra} onChange={setExtra} />
+          </div>
           <button type="button" data-toggle-dropped aria-pressed={dropped} onClick={() => setDropped((d) => !d)}
             style={{ height: 34, padding: '0 14px', borderRadius: 999, cursor: 'pointer', font: `400 13px/1 ${SANS}`, border: `1px ${dropped ? 'solid' : 'dashed'} var(--line2)`, background: 'transparent', color: dropped ? 'var(--ink)' : 'var(--dim)' }}>{dropped ? 'Hide dropped' : 'Show dropped'}</button>
           <Seg label="View" value={view} onChange={setView} options={[['board', 'Board'], ['list', 'List']]} />

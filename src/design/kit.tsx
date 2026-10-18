@@ -15,12 +15,34 @@ export function Label({ children, id, style }: { children: ReactNode; id?: strin
 export function subPill(on: boolean): CSSProperties {
   return { height: 32, padding: '0 16px', borderRadius: 999, border: 0, cursor: 'pointer', font: `400 13px/1 ${SANS}`, background: on ? 'var(--ink)' : 'transparent', color: on ? 'var(--on-ink)' : 'var(--dim)', whiteSpace: 'nowrap' };
 }
-export function SubTabs<T extends string>({ tabs, value, onChange, label, idPrefix }: { tabs: readonly (readonly [T, string])[]; value: T; onChange: (v: T) => void; label: string; idPrefix: string }) {
+export function SubTabs<T extends string>({ tabs, value, onChange, label, idPrefix, menu, badge }: { tabs: readonly (readonly [T, string])[]; value: T; onChange: (v: T) => void; label: string; idPrefix: string; menu?: Partial<Record<T, ReactNode>>; badge?: Partial<Record<T, number>> }) {
+  // Pressing the tab that is already active opens that tab's filter popover (when it has one); nothing extra shows at rest except a count while filters are active.
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => { setOpen(false); }, [value]);
+  useEffect(() => {
+    if (!open) return;
+    const down = (e: MouseEvent) => { if (root.current && !root.current.contains(e.target as Node)) setOpen(false); };
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false); } };
+    document.addEventListener('mousedown', down); document.addEventListener('keydown', key, true);
+    return () => { document.removeEventListener('mousedown', down); document.removeEventListener('keydown', key, true); };
+  }, [open]);
+  const pop = menu?.[value];
   return (
-    <div role="tablist" aria-label={label} style={{ display: 'inline-flex', padding: 3, border: '1px solid var(--line2)', borderRadius: 999 }}>
-      {tabs.map(([k, l]) => (
-        <button key={k} id={`${idPrefix}-${k}`} type="button" role="tab" aria-selected={value === k} onClick={() => onChange(k)} style={subPill(value === k)}>{l}</button>
-      ))}
+    <div ref={root} style={{ position: 'relative', display: 'inline-flex' }}>
+      <div role="tablist" aria-label={label} style={{ display: 'inline-flex', padding: 3, border: '1px solid var(--line2)', borderRadius: 999 }}>
+        {tabs.map(([k, l]) => {
+          const hasMenu = k === value && !!menu?.[k];
+          const n = badge?.[k] ?? 0;
+          return (
+            <button key={k} id={`${idPrefix}-${k}`} type="button" role="tab" aria-selected={value === k} {...(hasMenu ? { 'aria-haspopup': 'dialog' as const, 'aria-expanded': open, title: 'Press again for filters' } : {})}
+              onClick={() => { if (hasMenu) setOpen((o) => !o); else onChange(k); }} style={subPill(value === k)}>{l}{n > 0 ? ` · ${n}` : ''}</button>
+          );
+        })}
+      </div>
+      {open && pop && (
+        <div id={`${idPrefix}-menu`} role="dialog" aria-label="Filters" style={{ position: 'absolute', left: 0, top: 'calc(100% + 8px)', zIndex: 30, width: 'min(340px, 90vw)', display: 'grid', gap: 12, padding: 18, borderRadius: 14, border: '1px solid var(--line2)', background: 'var(--sf)', boxShadow: '0 24px 60px -20px var(--shadow)' }}>{pop}</div>
+      )}
     </div>
   );
 }

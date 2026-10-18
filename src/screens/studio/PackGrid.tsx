@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { MONO, SANS, SERIF } from '../../design/fonts';
 import { fmtDur, packSegments, stampShort } from '../../lib/packs';
 import { lsGet, lsSet } from '../../lib/storage';
@@ -25,28 +25,39 @@ export function PackGrid({ missing }: { missing: string | null }) {
   const [bookSel, setBookSel] = useState('all');
   const bookIds = useMemo(() => Array.from(new Set(S.groups.map((g) => g.idea.bookId).filter(Boolean))), [S.groups]);
   const bk = bookIds.includes(bookSel) ? bookSel : 'all';
+  const [pop, setPop] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!pop) return;
+    const down = (e: MouseEvent) => { if (!box.current?.contains(e.target as Node)) setPop(false); };
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') setPop(false); };
+    document.addEventListener('mousedown', down); document.addEventListener('keydown', key);
+    return () => { document.removeEventListener('mousedown', down); document.removeEventListener('keydown', key); };
+  }, [pop]);
   const shown = (st === 'all' ? prod : S.groups.filter((g) => g.idea.status === st)).filter((g) => bk === 'all' || g.idea.bookId === bk);
 
   return (
     <>
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, margin: '48px 0 32px' }}>
-        <div role="group" aria-label="Filter by stage" style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        <div ref={box} role="group" aria-label="Filter by stage" style={{ display: 'flex', flexWrap: 'wrap', gap: 6, position: 'relative' }}>
           {chips.map(([k, l]) => {
             const on = st === k;
             const n = k === 'all' ? prod.length : S.groups.filter((g) => g.idea.status === k).length;
             return (
-              <button key={k} type="button" data-stage-chip={k} aria-pressed={on} onClick={() => setStage(k)} className="qp-hv-line-faint"
+              <button key={k} type="button" data-stage-chip={k} aria-pressed={on} onClick={() => { if (on && bookIds.length > 1) setPop((o) => !o); else { setStage(k); setPop(false); } }} aria-haspopup={on && bookIds.length > 1 ? 'dialog' : undefined} title={on && bookIds.length > 1 ? 'Press again to filter by book' : undefined} className="qp-hv-line-faint"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 8, height: 34, padding: '0 14px', borderRadius: 999, cursor: 'pointer', font: `400 13px/1 ${SANS}`, border: `1px solid ${on ? 'var(--ink)' : 'var(--line2)'}`, background: on ? 'var(--ink)' : 'transparent', color: on ? 'var(--on-ink)' : 'var(--dim)' }}>
-                {l}<span style={{ font: `400 10.5px/1 ${MONO}`, opacity: 0.6 }}>{S.loaded ? n : '–'}</span>
+                {l}{on && bk !== 'all' ? ' · book' : ''}<span style={{ font: `400 10.5px/1 ${MONO}`, opacity: 0.6 }}>{S.loaded ? n : '–'}</span>
               </button>
             );
           })}
-        </div>
-        {bookIds.length > 1 && (
-          <select id="pack-book" aria-label="Book" value={bk} onChange={(e) => setBookSel(e.target.value)} style={{ height: 34, padding: '0 10px', borderRadius: 999, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 13px/1 ${SANS}`, color: 'var(--ink)' }}>
+          {pop && bookIds.length > 1 && (
+            <div id="pack-menu" role="dialog" aria-label="Filters" style={{ position: 'absolute', left: 0, top: 'calc(100% + 8px)', zIndex: 20, width: 'min(300px,90vw)', padding: 14, borderRadius: 12, border: '1px solid var(--line2)', background: 'var(--bg)', boxShadow: '0 12px 32px rgba(0,0,0,.28)' }}>
+          <select id="pack-book" aria-label="Book" value={bk} onChange={(e) => setBookSel(e.target.value)} style={{ width: '100%', height: 34, padding: '0 10px', borderRadius: 999, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 13px/1 ${SANS}`, color: 'var(--ink)' }}>
             <option value="all">All books</option>{bookIds.map((id) => <option key={id} value={id}>{S.bookById.get(id)?.title ?? id}</option>)}
           </select>
-        )}
+            </div>
+          )}
+        </div>
         <span style={{ font: `400 11px/1 ${MONO}`, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--faint)' }}>Copy into Claude Design · voiceover tool</span>
       </div>
       {missing && <p role="status" style={{ margin: '0 0 24px', font: `italic 400 17px/1.4 ${SERIF}`, color: 'var(--dim)' }}>That pack isn't here any more. Pick another below.</p>}

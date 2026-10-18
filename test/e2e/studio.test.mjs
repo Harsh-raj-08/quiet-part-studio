@@ -411,6 +411,7 @@ test('grid: book select narrows the packs', async () => {
   const { page, ctx } = await open('#studio');
   await page.waitForSelector('[data-pack-grid]');
   const n = await page.locator('[data-pack-card]').count();
+  await page.locator('[data-stage-chip][aria-pressed="true"]').click();
   if (await page.locator('#pack-book').count()) {
     await page.selectOption('#pack-book', { index: 1 });
     assert.ok(await page.locator('[data-pack-card]').count() < n);

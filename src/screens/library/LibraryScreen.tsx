@@ -8,9 +8,9 @@ import { SANS, SERIF } from '../../design/fonts';
 import { monoChip, SubTabs } from '../../design/kit';
 import { Eyebrow, Headline } from '../../design/primitives';
 import { AddBook } from './AddBook';
-import { Bank, BankFilters, type BankF } from './Bank';
-import { Notes } from './Notes';
-import { Shelf } from './Shelf';
+import { Bank, BankFilters, BankMenu, bankCount, type BankF } from './Bank';
+import { NO_NOTES, Notes, NotesMenu, notesCount, type NotesF } from './Notes';
+import { NO_SHELF, Shelf, ShelfMenu, shelfCount, type ShelfF } from './Shelf';
 
 const SUBS = [['shelf', 'Shelf'], ['notes', 'Chapter notes'], ['bank', 'Idea bank']] as const;
 type Sub = (typeof SUBS)[number][0];
@@ -27,6 +27,8 @@ export function LibraryScreen() {
   const booksLoaded = useLoaded('books');
   const [adding, setAdding] = useState(false);
   const [bf, setBf] = useState<BankF>({ ev: 'all', st: 'all', fmt: 'all' });
+  const [sf, setSf] = useState<ShelfF>(NO_SHELF);
+  const [nf, setNf] = useState<NotesF>(NO_NOTES);
   const [openCh, setOpenCh] = useState<string | null | undefined>(undefined);
   const s = (SUBS.some((x) => x[0] === sub) ? sub : 'shelf') as Sub;
 
@@ -53,7 +55,9 @@ export function LibraryScreen() {
       </section>
       {adding && <AddBook books={books} onDone={(bid) => { setAdding(false); go('library', 'shelf', bid); }} />}
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, margin: '48px 0 32px' }}>
-        <SubTabs tabs={SUBS} value={s} onChange={(k) => { setOpenCh(undefined); go('library', k, k === 'shelf' ? undefined : book?.id); }} label="Library sections" idPrefix="sub-library" />
+        <SubTabs tabs={SUBS} value={s} onChange={(k) => { setOpenCh(undefined); go('library', k, k === 'shelf' ? undefined : book?.id); }} label="Library sections" idPrefix="sub-library"
+          menu={{ shelf: <ShelfMenu books={books} f={sf} setF={setSf} />, notes: <NotesMenu notes={book ? notes.filter((n) => n.bookId === book.id) : []} f={nf} setF={setNf} />, bank: <BankMenu f={bf} setF={setBf} /> }}
+          badge={{ shelf: shelfCount(sf), notes: notesCount(nf), bank: bankCount(bf) }} />
         {s !== 'shelf' && (
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
             {s === 'bank' && book && <BankFilters ideas={ideas.filter((i) => i.bookId === book.id)} f={bf} setF={setBf} />}
@@ -66,8 +70,8 @@ export function LibraryScreen() {
           </div>
         )}
       </div>
-      {s === 'shelf' && <Shelf books={books} notes={notes} ideas={ideas} jobs={jobs} loaded={booksLoaded} focusId={id} />}
-      {s === 'notes' && (book ? <Notes book={book} notes={notes.filter((n) => n.bookId === book.id)} ideas={ideas.filter((i) => i.bookId === book.id)} openId={openCh} setOpenId={setOpenCh} /> : <EmptyShelf loaded={booksLoaded} />)}
+      {s === 'shelf' && <Shelf books={books} notes={notes} ideas={ideas} jobs={jobs} loaded={booksLoaded} focusId={id} f={sf} />}
+      {s === 'notes' && (book ? <Notes book={book} notes={notes.filter((n) => n.bookId === book.id)} ideas={ideas.filter((i) => i.bookId === book.id)} openId={openCh} setOpenId={setOpenCh} f={nf} /> : <EmptyShelf loaded={booksLoaded} />)}
       {s === 'bank' && (book ? <Bank ideas={ideas.filter((i) => i.bookId === book.id)} f={bf} /> : <EmptyShelf loaded={booksLoaded} />)}
     </div>
   );

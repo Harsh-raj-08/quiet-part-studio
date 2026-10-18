@@ -4,18 +4,17 @@ import type { Idea } from '../../data/types';
 import { MONO, SERIF } from '../../design/fonts';
 import { Stamp } from '../../design/primitives';
 import { byScore } from '../../lib/stages';
-import { fmtDay, shortBookTitle, ts } from '../../lib/format';
+import { shortBookTitle } from '../../lib/format';
 import { ALL_STATUS } from '../../data/types';
 import { useOps } from './ops';
 
-const COLS = '88px minmax(0,1fr) 180px 110px 128px 96px 72px';
-type SortKey = 'score' | 'code' | 'stage' | 'evidence' | 'updated';
+const COLS = '88px minmax(0,1fr) 200px 120px 128px 72px';
+type SortKey = 'score' | 'code' | 'stage' | 'evidence';
 const CMP: Record<SortKey, (a: Idea, b: Idea) => number> = {
   score: (a, b) => b.total - a.total,
   code: (a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }),
   stage: (a, b) => ALL_STATUS.indexOf(a.status) - ALL_STATUS.indexOf(b.status),
   evidence: (a, b) => a.evidence.localeCompare(b.evidence),
-  updated: (a, b) => ts(b.updatedAt) - ts(a.updatedAt),
 };
 
 export function ListView({ rows }: { rows: Idea[] }) {
@@ -34,7 +33,7 @@ export function ListView({ rows }: { rows: Idea[] }) {
   return (
     <div role="table" aria-label="Ideas" data-list style={{ display: 'grid', borderTop: '1px solid var(--line2)' }}>
       <div role="row" style={{ display: 'grid', gridTemplateColumns: COLS, gap: 24, padding: '14px 8px', font: `400 10.5px/1 ${MONO}`, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--faint)', borderBottom: '1px solid var(--line)' }}>
-        {head('code', 'Code')}<span role="columnheader">Hook</span><span role="columnheader">Source</span>{head('stage', 'Stage')}{head('evidence', 'Evidence')}{head('updated', 'Updated')}{head('score', 'Score', true)}
+        {head('code', 'Code')}<span role="columnheader">Hook</span><span role="columnheader">Source</span>{head('stage', 'Stage')}{head('evidence', 'Evidence')}{head('score', 'Score', true)}
       </div>
       {sorted.map((r, k) => {
         const b = ops.bookById.get(r.bookId);
@@ -46,7 +45,6 @@ export function ListView({ rows }: { rows: Idea[] }) {
             <span role="cell" style={{ font: `400 10.5px/1.6 ${MONO}`, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--faint)' }}>{b ? shortBookTitle(b.title) : r.fromBook}</span>
             <span role="cell" style={{ font: `italic 400 16px/1.4 ${SERIF}`, color: 'var(--dim)' }}>{r.status}</span>
             <span role="cell"><Stamp ev={r.evidence} index={k} flat /></span>
-            <span role="cell" data-updated style={{ font: `400 11px/1.6 ${MONO}`, color: 'var(--faint)' }}>{fmtDay(r.updatedAt)}</span>
             <span role="cell" style={{ textAlign: 'right', font: `400 20px/1.2 ${SERIF}`, fontVariantNumeric: 'tabular-nums' }}>{r.total}</span>
           </div>
         );

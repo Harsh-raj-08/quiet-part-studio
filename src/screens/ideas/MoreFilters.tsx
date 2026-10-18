@@ -57,10 +57,11 @@ export function MoreFilters({ ideas, books, value, onChange }: { ideas: Idea[]; 
   const fmts = Array.from(new Set(ideas.map((i) => fmtKind(i.format)).filter(Boolean))).sort();
   return (
     <div ref={root} style={{ position: 'relative' }}>
-      <button type="button" id="more-filters" aria-expanded={open} aria-controls="more-filters-pop" onClick={() => setOpen((o) => !o)}
-        style={{ height: 34, padding: '0 14px', borderRadius: 999, cursor: 'pointer', font: `400 13px/1 ${SANS}`, border: `1px solid ${n ? 'var(--ink)' : 'var(--line2)'}`, background: 'transparent', color: n ? 'var(--ink)' : 'var(--dim)' }}>More filters{n ? ` · ${n}` : ''}</button>
+      {/* Looks exactly like the toolbar's "Evidence" caption; it opens the extra filters. A count shows only when some are active. */}
+      <button type="button" id="more-filters" aria-expanded={open} aria-controls="more-filters-pop" aria-haspopup="dialog" title="More filters" onClick={() => setOpen((o) => !o)}
+        style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: 'inherit', letterSpacing: 'inherit', textTransform: 'inherit', color: n ? 'var(--ink)' : 'inherit' }}>Evidence{n ? ` · ${n}` : ''}</button>
       {open && (
-        <div id="more-filters-pop" role="dialog" aria-label="More filters" style={{ position: 'absolute', right: 0, top: 42, zIndex: 30, width: 'min(300px, 86vw)', display: 'grid', gap: 14, padding: 18, borderRadius: 14, border: '1px solid var(--line2)', background: 'var(--sf)', boxShadow: '0 24px 60px -20px var(--shadow)' }}>
+        <div id="more-filters-pop" role="dialog" aria-label="More filters" style={{ position: 'absolute', right: 0, top: 30, zIndex: 30, width: 'min(300px, 86vw)', display: 'grid', gap: 14, padding: 18, borderRadius: 14, border: '1px solid var(--line2)', background: 'var(--sf)', boxShadow: '0 24px 60px -20px var(--shadow)' }}>
           <label style={lab}>Search<input id="mf-q" className="qp-field" type="search" placeholder="Code, hook or quiet part" value={value.q} onChange={(e) => set({ q: e.target.value })} style={{ height: 34, fontSize: 13 }} /></label>
           <label style={lab}>Lane<select id="mf-lane" value={value.lane} onChange={(e) => set({ lane: e.target.value })} style={sel}><option value="all">Any lane</option>{lanes.map((l) => <option key={l} value={l}>{l}</option>)}</select></label>
           <label style={lab}>Format<select id="mf-fmt" value={value.fmt} onChange={(e) => set({ fmt: e.target.value })} style={sel}><option value="all">Any format</option>{fmts.map((l) => <option key={l} value={l}>{l}</option>)}</select></label>

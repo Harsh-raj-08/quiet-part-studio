@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { useApp } from '../../app/context';
 import type { Book, BookNote, Idea } from '../../data/types';
 import { MONO, SANS, SERIF } from '../../design/fonts';
@@ -11,15 +11,40 @@ const bullets: CSSProperties = { margin: 0, padding: '0 0 0 18px', display: 'gri
 const pg = (p: string) => (p ? <span style={{ color: 'var(--faint)' }}> · {pgs(p)}</span> : null);
 
 /** Two columns: the book's digest on the left, the chapter accordion on the right. */
-export function Notes({ book, notes, ideas, openId, setOpenId }: { book: Book; notes: BookNote[]; ideas: Idea[]; openId: string | null | undefined; setOpenId: (id: string | null) => void }) {
+export interface NotesF { q: string; parts: Record<string, boolean> }
+export const NO_NOTES: NotesF = { q: '', parts: { keyIdeas: true, stories: true, claims: true, lines: true } };
+export const notesCount = (f: NotesF): number => (f.q.trim() ? 1 : 0) + (Object.values(f.parts).some((v) => !v) ? 1 : 0);
+const notesHay = (n: BookNote) => [n.title, n.summary, ...n.keyIdeas.map((k) => `${k.idea} ${k.mechanism}`), ...n.stories.map((k) => `${k.who} ${k.what}`), ...n.claims.map((k) => k.claim), ...n.lines.map((k) => k.text)].join(' ').toLowerCase();
+const notesMatch = (all: BookNote[], q: string) => { const w = q.toLowerCase().split(/\s+/).filter(Boolean); return w.length ? all.filter((n) => { const h = notesHay(n); return w.every((x) => h.includes(x)); }) : all; };
+
+/** Chapter-note filters, shown in the popover of the active "Chapter notes" tab. */
+export function NotesMenu({ notes, f, setF }: { notes: BookNote[]; f: NotesF; setF: (f: NotesF) => void }) {
+  const n = notesCount(f);
+  return (
+    <div role="group" aria-label="Filter the chapter notes" style={{ display: 'grid', gap: 12 }}>
+      <input id="notes-q" className="qp-field" type="search" aria-label="Search the chapter notes" placeholder="Search ideas, stories, claims, lines" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} style={{ height: 34, fontSize: 13 }} />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {([['keyIdeas', 'Key ideas'], ['stories', 'Stories'], ['claims', 'Claims to check'], ['lines', 'Lines']] as const).map(([k, l]) => (
+          <button key={k} type="button" data-notes-part={k} aria-pressed={f.parts[k]} onClick={() => setF({ ...f, parts: { ...f.parts, [k]: !f.parts[k] } })}
+            style={{ height: 30, padding: '0 12px', borderRadius: 999, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, border: `1px ${f.parts[k] ? 'solid' : 'dashed'} ${f.parts[k] ? 'var(--ink)' : 'var(--line2)'}`, background: f.parts[k] ? 'var(--ink)' : 'transparent', color: f.parts[k] ? 'var(--on-ink)' : 'var(--dim)' }}>{l}</button>
+        ))}
+      </div>
+      {n > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span data-notes-showing style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>Showing {notesMatch(notes, f.q).length} of {notes.length}</span>
+          <button type="button" id="notes-clear" onClick={() => setF(NO_NOTES)} style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, color: 'var(--dim)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Clear</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Notes({ book, notes, ideas, openId, setOpenId, f }: { book: Book; notes: BookNote[]; ideas: Idea[]; openId: string | null | undefined; setOpenId: (id: string | null) => void; f: NotesF }) {
   const { go, select } = useApp();
-  const [q, setQ] = useState('');
-  const [parts, setParts] = useState<Record<string, boolean>>({ keyIdeas: true, stories: true, claims: true, lines: true });
-  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
-  const hay = (n: BookNote) => [n.title, n.summary, ...n.keyIdeas.map((k) => `${k.idea} ${k.mechanism}`), ...n.stories.map((k) => `${k.who} ${k.what}`), ...n.claims.map((k) => k.claim), ...n.lines.map((k) => k.text)].join(' ').toLowerCase();
+  const { q, parts } = f;
+  const words = q.split(/\s+/).filter(Boolean);
   const all = notes.slice().sort((a, b) => a.chapterNo - b.chapterNo);
-  const chs = words.length ? all.filter((n) => { const h = hay(n); return words.every((w) => h.includes(w)); }) : all;
-  const partsOff = Object.values(parts).some((v) => !v);
+  const chs = notesMatch(all, q);
   // Default open: the first chapter (as designed); a search hand-off opens its chapter.
   const open = openId === undefined ? chs[0]?.id ?? null : openId;
   useEffect(() => {
@@ -37,18 +62,6 @@ export function Notes({ book, notes, ideas, openId, setOpenId }: { book: Book; n
           <span>Researched {book.researchedAt ? fmtDay(book.researchedAt) : '—'}</span>
         </div>
       </div>
-      <div style={{ display: 'grid', minWidth: 0 }}>
-      {notes.length > 0 && (
-        <div role="group" aria-label="Filter the chapter notes" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <input id="notes-q" className="qp-field" type="search" aria-label="Search the chapter notes" placeholder="Search ideas, stories, claims, lines" value={q} onChange={(e) => setQ(e.target.value)} style={{ height: 34, width: 'min(100%, 280px)', fontSize: 13, borderRadius: 999 }} />
-          {([['keyIdeas', 'Key ideas'], ['stories', 'Stories'], ['claims', 'Claims to check'], ['lines', 'Lines']] as const).map(([k, l]) => (
-            <button key={k} type="button" data-notes-part={k} aria-pressed={parts[k]} onClick={() => setParts({ ...parts, [k]: !parts[k] })}
-              style={{ height: 32, padding: '0 12px', borderRadius: 999, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, border: `1px ${parts[k] ? 'solid' : 'dashed'} ${parts[k] ? 'var(--ink)' : 'var(--line2)'}`, background: parts[k] ? 'var(--ink)' : 'transparent', color: parts[k] ? 'var(--on-ink)' : 'var(--dim)' }}>{l}</button>
-          ))}
-          {(words.length > 0 || partsOff) && <span data-notes-showing style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>Showing {chs.length} of {all.length}</span>}
-          {(words.length > 0 || partsOff) && <button type="button" id="notes-clear" onClick={() => { setQ(''); setParts({ keyIdeas: true, stories: true, claims: true, lines: true }); }} style={{ background: 'none', border: 0, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, color: 'var(--dim)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Clear</button>}
-        </div>
-      )}
       {words.length > 0 && chs.length === 0 && <p style={{ margin: 0, font: `italic 400 19px/1.4 ${SERIF}`, color: 'var(--faint)' }}>Nothing matches “{q}”.</p>}
       <div id="chapters" style={{ display: 'grid', borderTop: '1px solid var(--line)' }}>
         {chs.map((n) => {
@@ -85,7 +98,6 @@ export function Notes({ book, notes, ideas, openId, setOpenId }: { book: Book; n
           );
         })}
         {!all.length && <p id="notes-empty" style={{ margin: 0, padding: '32px 4px', font: `italic 400 19px/1.4 ${SERIF}`, color: 'var(--faint)' }}>Chapter notes appear once research has run on this book.</p>}
-      </div>
       </div>
     </div>
   );

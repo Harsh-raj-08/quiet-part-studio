@@ -9,6 +9,22 @@ const COLS = '40px 72px minmax(160px,1fr) 112px 96px 48px';
 const sel: CSSProperties = { height: 32, padding: '0 10px', borderRadius: 999, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 12.5px/1 ${SANS}`, color: 'var(--ink)', cursor: 'pointer' };
 const fmtKind = (f: string) => f.trim().split(/[\s·,(—-]+/)[0] ?? '';
 
+export const bankCount = (f: BankF): number => (f.min && f.min !== 'all' ? 1 : 0) + (f.sort && f.sort !== 'score' ? 1 : 0);
+/** Minimum score and sort order, in the popover of the active "Idea bank" tab. */
+export function BankMenu({ f, setF }: { f: BankF; setF: (f: BankF) => void }) {
+  const wide = { ...sel, width: '100%' };
+  return (
+    <div role="group" aria-label="Score and order" style={{ display: 'grid', gap: 10 }}>
+      <select id="bank-min" aria-label="Minimum score" value={f.min ?? 'all'} onChange={(e) => setF({ ...f, min: e.target.value })} style={wide}>
+        <option value="all">Any score</option>{[14, 16, 18].map((n) => <option key={n} value={String(n)}>{n}+</option>)}
+      </select>
+      <select id="bank-sort" aria-label="Sort" value={f.sort ?? 'score'} onChange={(e) => setF({ ...f, sort: e.target.value })} style={wide}>
+        <option value="score">Sort by score</option><option value="rank">Sort by rank</option><option value="code">Sort by code</option>
+      </select>
+    </div>
+  );
+}
+
 /** Evidence, stage and format selects, sitting in the sub-tab row (left of the book chips). */
 export function BankFilters({ ideas, f, setF }: { ideas: Idea[]; f: BankF; setF: (f: BankF) => void }) {
   const fmts = Array.from(new Set(ideas.map((i) => fmtKind(i.format)).filter(Boolean))).sort();
@@ -20,12 +36,6 @@ export function BankFilters({ ideas, f, setF }: { ideas: Idea[]; f: BankF; setF:
       </select>
       <select id="bank-st" aria-label="Stage" value={f.st} onChange={(e) => setF({ ...f, st: e.target.value })} style={sel}>
         <option value="all">Any stage</option>{sts.map((s) => <option key={s} value={s}>{s}</option>)}
-      </select>
-      <select id="bank-min" aria-label="Minimum score" value={f.min ?? 'all'} onChange={(e) => setF({ ...f, min: e.target.value })} style={sel}>
-        <option value="all">Any score</option>{[14, 16, 18].map((n) => <option key={n} value={String(n)}>{n}+</option>)}
-      </select>
-      <select id="bank-sort" aria-label="Sort" value={f.sort ?? 'score'} onChange={(e) => setF({ ...f, sort: e.target.value })} style={sel}>
-        <option value="score">Sort by score</option><option value="rank">Sort by rank</option><option value="code">Sort by code</option>
       </select>
       {fmts.length > 0 && <select id="bank-fmt" aria-label="Format" value={f.fmt} onChange={(e) => setF({ ...f, fmt: e.target.value })} style={sel}>
         <option value="all">Any format</option>{fmts.map((s) => <option key={s} value={s}>{s}</option>)}

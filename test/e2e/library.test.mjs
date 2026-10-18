@@ -173,6 +173,7 @@ test('shelf filters, notes search and type chips, bank min score and sort', asyn
   const { page, ctx } = await openApp(browser, srv.url, { sideHidden: true, hash: '#library' });
   await page.waitForSelector('#shelf');
   const n = await page.locator('#shelf > article, #shelf > div[id^="book-"]').count();
+  await page.click('#sub-library-shelf');
   await page.fill('#shelf-q', 'zzzz-no-such');
   assert.match(await page.locator('[data-shelf-showing]').innerText(), /^Showing 0 of \d+$/);
   await page.click('#shelf-clear');
@@ -180,6 +181,8 @@ test('shelf filters, notes search and type chips, bank min score and sort', asyn
   await page.locator('[data-shelf-status]').nth(1).click();
   assert.match(await page.locator('[data-shelf-showing]').innerText(), /^Showing \d+ of \d+$/);
   await page.evaluate(() => { location.hash = '#library/notes'; });
+  await page.waitForSelector('#chapters');
+  await page.click('#sub-library-notes');
   await page.waitForSelector('#notes-q');
   await page.fill('#notes-q', 'zzzz-no-such');
   assert.match(await page.locator('[data-notes-showing]').innerText(), /^Showing 0 of \d+$/);
@@ -187,6 +190,8 @@ test('shelf filters, notes search and type chips, bank min score and sort', asyn
   await page.click('[data-notes-part=lines]');
   assert.equal(await page.locator('[data-notes-part=lines]').getAttribute('aria-pressed'), 'false');
   await page.evaluate(() => { location.hash = '#library/bank'; });
+  await page.waitForSelector('[data-bank-row]');
+  await page.click('#sub-library-bank');
   await page.waitForSelector('#bank-min');
   const all = await page.locator('[data-bank-row]').count();
   await page.selectOption('#bank-min', '18');

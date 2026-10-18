@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../../app/context';
 import { checkBookFile, demoSays, errMsg, fireAndDescribe, queueJob, uploadBookFile } from '../../data/actions';
 import { useSignedUrl } from '../../data/files';
@@ -13,38 +13,50 @@ import { noteCount, researched } from './LibraryScreen';
 
 const live = (j: Job) => j.status === 'queued' || j.status === 'running';
 
-export function Shelf({ books, notes, ideas, jobs, loaded, focusId }: { books: Book[]; notes: BookNote[]; ideas: Idea[]; jobs: Job[]; loaded: boolean; focusId: string }) {
+export interface ShelfF { st: string; lane: string; q: string }
+export const NO_SHELF: ShelfF = { st: 'all', lane: 'all', q: '' };
+export const shelfCount = (f: ShelfF): number => (f.st !== 'all' ? 1 : 0) + (f.lane !== 'all' ? 1 : 0) + (f.q.trim() ? 1 : 0);
+export const shelfShown = (books: Book[], f: ShelfF): Book[] => {
+  const words = f.q.toLowerCase().split(/\s+/).filter(Boolean);
+  return books.filter((b) => (f.st === 'all' || b.status === f.st) && (f.lane === 'all' || b.lane === f.lane) && words.every((w) => `${b.title} ${b.author}`.toLowerCase().includes(w)));
+};
+
+/** Shelf filters, shown in the popover of the active "Shelf" tab. */
+export function ShelfMenu({ books, f, setF }: { books: Book[]; f: ShelfF; setF: (f: ShelfF) => void }) {
+  const statuses = ['Candidate', 'In research', 'Idea bank ready', 'Done'].filter((x) => books.some((b) => b.status === x));
+  const lanes = Array.from(new Set(books.map((b) => b.lane).filter(Boolean)));
+  const chip = (on: boolean) => ({ height: 30, padding: '0 12px', borderRadius: 999, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, border: `1px solid ${on ? 'var(--ink)' : 'var(--line2)'}`, background: on ? 'var(--ink)' : 'transparent', color: on ? 'var(--on-ink)' : 'var(--dim)' } as const);
+  const n = shelfCount(f);
+  return (
+    <div role="group" aria-label="Filter the shelf" style={{ display: 'grid', gap: 12 }}>
+      <input id="shelf-q" className="qp-field" type="search" aria-label="Filter by title or author" placeholder="Title or author" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} style={{ height: 34, fontSize: 13 }} />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {['all', ...statuses].map((x) => <button key={x} type="button" data-shelf-status={x} aria-pressed={f.st === x} onClick={() => setF({ ...f, st: x })} style={chip(f.st === x)}>{x === 'all' ? 'All' : x}</button>)}
+      </div>
+      {lanes.length > 1 && <select id="shelf-lane" aria-label="Lane" value={f.lane} onChange={(e) => setF({ ...f, lane: e.target.value })} style={{ height: 34, padding: '0 10px', borderRadius: 8, border: '1px solid var(--line2)', background: 'var(--bg)', font: `400 13px/1 ${SANS}`, color: 'var(--ink)' }}><option value="all">Any lane</option>{lanes.map((l) => <option key={l} value={l}>{l}</option>)}</select>}
+      {n > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span data-shelf-showing style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>Showing {shelfShown(books, f).length} of {books.length}</span>
+          <button type="button" id="shelf-clear" onClick={() => setF(NO_SHELF)} style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, color: 'var(--dim)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Clear</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Shelf({ books, notes, ideas, jobs, loaded, focusId, f }: { books: Book[]; notes: BookNote[]; ideas: Idea[]; jobs: Job[]; loaded: boolean; focusId: string; f: ShelfF }) {
   useEffect(() => {
     if (!focusId) return;
     document.getElementById(`book-${focusId}`)?.scrollIntoView({ block: 'center' });
   }, [focusId, loaded]);
-  const [st, setSt] = useState('all');
-  const [lane, setLane] = useState('all');
-  const [q, setQ] = useState('');
-  const statuses = useMemo(() => ['Candidate', 'In research', 'Idea bank ready', 'Done'].filter((x) => books.some((b) => b.status === x)), [books]);
-  const lanes = useMemo(() => Array.from(new Set(books.map((b) => b.lane).filter(Boolean))), [books]);
-  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
-  const shown = books.filter((b) => (st === 'all' || b.status === st) && (lane === 'all' || b.lane === lane) && words.every((w) => `${b.title} ${b.author}`.toLowerCase().includes(w)));
-  const filtered = st !== 'all' || lane !== 'all' || words.length > 0;
+  const shown = shelfShown(books, f);
   if (!loaded) return <div aria-busy="true" style={{ minHeight: 400 }} />;
   if (!books.length) return <p style={{ margin: 0, padding: '32px 4px', font: `italic 400 19px/1.4 ${SERIF}`, color: 'var(--faint)' }}>Nothing on the shelf yet. Add a book, upload its PDF, then run research.</p>;
-  const chip = (on: boolean) => ({ height: 32, padding: '0 12px', borderRadius: 999, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, border: `1px solid ${on ? 'var(--ink)' : 'var(--line2)'}`, background: on ? 'var(--ink)' : 'transparent', color: on ? 'var(--on-ink)' : 'var(--dim)' } as const);
   return (
-    <>
-    {books.length > 1 && (
-      <div role="group" aria-label="Filter the shelf" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-        {['all', ...statuses].map((x) => <button key={x} type="button" data-shelf-status={x} aria-pressed={st === x} onClick={() => setSt(x)} style={chip(st === x)}>{x === 'all' ? 'All' : x}</button>)}
-        {lanes.length > 1 && <select id="shelf-lane" aria-label="Lane" value={lane} onChange={(e) => setLane(e.target.value)} style={{ height: 32, padding: '0 10px', borderRadius: 999, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 12.5px/1 ${SANS}`, color: 'var(--ink)' }}><option value="all">Any lane</option>{lanes.map((l) => <option key={l} value={l}>{l}</option>)}</select>}
-        <input id="shelf-q" className="qp-field" type="search" aria-label="Filter by title or author" placeholder="Title or author" value={q} onChange={(e) => setQ(e.target.value)} style={{ height: 32, width: 200, fontSize: 12.5, borderRadius: 999 }} />
-        {filtered && <span data-shelf-showing style={{ font: `400 11px/1 ${MONO}`, color: 'var(--faint)' }}>Showing {shown.length} of {books.length}</span>}
-        {filtered && <button type="button" id="shelf-clear" onClick={() => { setSt('all'); setLane('all'); setQ(''); }} style={{ background: 'none', border: 0, cursor: 'pointer', font: `400 12.5px/1 ${SANS}`, color: 'var(--dim)', textDecoration: 'underline', textUnderlineOffset: 3 }}>Clear</button>}
-      </div>
-    )}
     <div id="shelf" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,280px),1fr))', gap: 16 }}>
       {shown.length === 0 && <p style={{ margin: 0, font: `italic 400 19px/1.4 ${SERIF}`, color: 'var(--faint)' }}>No book matches.</p>}
       {shown.map((b) => <BookCard key={b.id} b={b} notes={notes.filter((n) => n.bookId === b.id)} ideas={ideas.filter((i) => i.bookId === b.id)} jobs={jobs} sel={b.id === focusId} />)}
     </div>
-    </>
   );
 }
 
