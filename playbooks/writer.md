@@ -37,8 +37,16 @@ PROCESS
 1. Story notes (scratch, also saved in story{}): belief, truth, the relatable moment, the shift, the reveal, the reframe line, the feeling.
 2. Write 3 hooks (different styles: contrarian, number, question, story, direct-you). Pick the one that most makes YOU need line 2. Store all three in hooks[].
 3. Write the full script in the SHAPE. Then read it aloud in your head, start to finish: fix any line that doesn't flow from the one before.
-4. CRITIC: if the Agent tool is available, spawn ONE sub-agent (model "opus") with playbooks/critic's text, the idea card, the taste profile, the GOLD scripts' vo lines and your draft; it returns JSON. Otherwise apply the rubric yourself, strictly.
-5. Rewrite every flagged line. Repeat critic once if total < 30/35 or any category < 4. Ship the best version; if still below, say what's weak in watchouts.
+4. INDEPENDENT CRITIC (required, never skipped): spawn ONE sub-agent with the Agent/Task tool, model "opus", that did not write the draft. Give it: playbooks/critic.md's full text, the idea card, the taste profile and taste-proposed text, the newest rating notes, the GOLD scripts' beats[].vo, and your draft's beats[].vo. Tell it to score harshly against the GOLD scripts and return critic.md's JSON. If, and only if, no sub-agent tool exists, do the critic pass yourself as a separate step after a full re-read, as a harsh outsider, and say "critic: self-check" in watchouts.
+5. FIX: rewrite every flagged line (minimal, targeted edits; keep THE SHAPE). Run the critic again (a fresh sub-agent) if total < 31/35 or any category < 4; at most 3 critic rounds. Ship the best-scoring version; if still below the bar, name the weak line in watchouts. critic{} in the pack = the LAST independent critic's scores and a 1-2 sentence note (never your own self-score when a sub-agent ran).
+6. CHECK before saving (run it; fix and re-check on any failure):
+   - voiceover == beats[].vo joined with "\n", word for word
+   - last beat's vo is exactly "...and that's the quiet part." (or with "…"), 2 s long
+   - 135-160 words (up to 175 only with the reason in watchouts); durationSec matches the last beat's end
+   - beats contiguous, 2-9 s each; exactly one beat has lit:true; every beat has a visual
+   - no banned phrase (VOICE RULES) and no CTA words in the voiceover (save this, send this, follow, share, comment, link in bio)
+   - every claim is in the card or booknotes; evidenceNote wording followed
+   A pack that fails this check is never saved.
 
 TRUTH (never trade truth for drama)
 Every claim traceable to the card (fromBook, evidenceNote, sources) or booknotes. Follow evidenceNote wording rules exactly (e.g. "according to the potter"). Evidence words match the label: MIXED -> "linked to", "researchers think"; MYTH -> the myth is the belief, the evidence is the reveal; PHILOSOPHY -> an idea someone held, not a finding. Never invent quotes, numbers, names, dates or page refs. Health/diet: no numbers, no advice beyond the card.
@@ -51,7 +59,7 @@ On-screen: concrete drawable line-art visuals in our style; the caption's one ke
 designPrompt: start "Using the.quiet_part brand kit, create a 9:16 reel (1080x1920), about N seconds, timed to the attached voiceover. Follow the script beats below." then the brand look line from the digest, then the carried metaphor and how the last frame echoes the first, then "Draw everything in our own line style. No photos, no book covers." Do not repeat the beats.
 caption: first line adds a new angle (not the hook), 2-3 short lines, one natural CTA (save / send to someone specific), credit "From <Book> by <Author>", <= 5 hashtags.
 Then update the idea: status "Scripted" (only if it was Approved), packCurrent, hookStyle, updatedAt, and append {status, at} to history when status changed.
-Runs summary: hook line, reframe line, critic total, predicted owner score.
+Runs summary: hook line, reframe line, word count, critic total (first round -> final), predicted owner score, critic rounds.
 
 CAROUSEL (job.kind "carousel") - same story notes, voice and truth rules. posts/<ideaCode>-carousel-v<n> = {ideaCode, kind:"carousel", version, title, slides:[{n, headline (<= 8 words), body (<= 30 words), visual}], designPrompt, cover, caption, altText, critic, createdBy:"writer-v3", createdAt}. 7-9 slides, 4:5 (1080x1350), text 80 px from edges. Slide 1 = the hook; 2 = the anchor; then build, shift, reveal; the reframe gets its own slide; last slide = "...and that's the quiet part." + "from <BOOK> by <AUTHOR>". designPrompt starts "Using the.quiet_part brand kit, create a <N>-slide Instagram carousel at 1080x1350." altText: one sentence per slide.
 

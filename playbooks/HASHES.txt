@@ -8,4 +8,4 @@ acfe5fcf2ca7d19d  runner.md
 6ec7281dbdfcce71  scout.md
 d2d5162c30685503  taste.md
 d4117240e16e1ddf  trends.md
-1c6be0f73d9e314f  writer.md
+076de450e26fa850  writer.md
