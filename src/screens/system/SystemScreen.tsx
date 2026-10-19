@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from
 import { useApp } from '../../app/context';
 import { useHeadline } from '../../app/useHeadline';
 import { useBooks, useChats, useJobs, useLoaded, usePlaybooks, useRuns, useSettings } from '../../data/hooks';
+import { authMessage } from '../../app/Auth';
 import { useRunner } from '../../data/useRunner';
 import type { Job, StudioSettings } from '../../data/types';
 import { MONO, SANS, SERIF, EASE } from '../../design/fonts';
@@ -156,6 +157,42 @@ function SRow({ k, d, children, id }: { k: string; d: ReactNode; children: React
 const valPill = (on: boolean): CSSProperties => ({ justifySelf: 'end', font: `500 10px/1 ${MONO}`, letterSpacing: '.14em', textTransform: 'uppercase', color: on ? 'var(--grow)' : 'var(--faint)', border: `1px ${on ? 'solid' : 'dashed'} currentColor`, borderRadius: 999, padding: '6px 10px', whiteSpace: 'nowrap' });
 const selStyle: CSSProperties = { justifySelf: 'end', width: '100%', height: 40, padding: '0 12px', borderRadius: 10, border: '1px solid var(--line2)', background: 'var(--sf)', font: `400 14px/1 ${SANS}`, color: 'var(--ink)' };
 
+const PW_MIN = 10;
+/** "Your password": new + confirm, behind one button so the row stays quiet at rest. */
+function PasswordRow() {
+  const R = useRunner();
+  const [open, setOpen] = useState(false);
+  const [pw, setPw] = useState('');
+  const [again, setAgain] = useState('');
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+  const submit = async () => {
+    if (pw.length < PW_MIN) { setMsg(`Use at least ${PW_MIN} characters.`); return; }
+    if (pw !== again) { setMsg("The two passwords don't match."); return; }
+    setBusy(true); setMsg('');
+    const r = await R.store.adapter.updatePassword(pw);
+    setBusy(false);
+    if (!r.ok) { setMsg(authMessage(r.kind, 'change')); return; }
+    setOpen(false); setPw(''); setAgain(''); R.toast('Password updated.');
+  };
+  const field: CSSProperties = { width: '100%', height: 40, padding: '0 12px', borderRadius: 10, border: '1px solid var(--line2)', background: 'var(--bg)', font: `400 14px/1 ${SANS}`, color: 'var(--ink)' };
+  return (
+    <SRow id="info-password" k="Your password" d="Sign in with your email and this password. Ten characters or more.">
+      {!open ? <Btn id="pw-open" onClick={() => setOpen(true)} style={{ justifySelf: 'end' }}>Change password</Btn> : (
+        <form onSubmit={(e) => { e.preventDefault(); void submit(); }} style={{ display: 'grid', gap: 8 }}>
+          <input id="pw-new" type="password" autoComplete="new-password" aria-label="New password" placeholder="New password" value={pw} onChange={(e) => setPw(e.target.value)} style={field} />
+          <input id="pw-confirm" type="password" autoComplete="new-password" aria-label="Confirm new password" placeholder="Confirm new password" value={again} onChange={(e) => setAgain(e.target.value)} style={field} />
+          {msg && <span id="pw-msg" role="alert" style={{ font: `400 12.5px/1.4 ${SANS}`, color: 'var(--caution)' }}>{msg}</span>}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <Btn type="button" kind="quiet" onClick={() => { setOpen(false); setPw(''); setAgain(''); setMsg(''); }}>Cancel</Btn>
+            <Btn id="pw-save" type="submit" kind="ink" disabled={busy}>{busy ? 'Saving…' : 'Update password'}</Btn>
+          </div>
+        </form>
+      )}
+    </SRow>
+  );
+}
+
 function Settings() {
   const set = useSettings();
   const pbs = usePlaybooks();
@@ -195,6 +232,7 @@ function Settings() {
         <span>Files are private.</span>
         <span>Your Instagram and ElevenLabs logins never touch this page.</span>
       </span>}><span style={valPill(true)}>Owner only</span></SRow>
+      {mode !== 'demo' && <PasswordRow />}
     </div>
   );
 }

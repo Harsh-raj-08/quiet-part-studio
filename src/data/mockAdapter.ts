@@ -1,4 +1,4 @@
-import type { Adapter, AuthState, FireResult, UploadResult, WriteOpts } from './adapter';
+import type { Adapter, AuthResult, AuthState, FireResult, UploadResult, WriteOpts } from './adapter';
 import { MissingDocError, VersionConflictError } from './adapter';
 import { COLLECTIONS, type CollectionName, type Doc, type StudioUser } from './types';
 
@@ -16,6 +16,12 @@ export interface MockHandle {
   /** Make the next write fail with a version conflict (tests the retry). */
   conflictNext(n?: number): void;
   failNext(message?: string): void;
+  /** Sign out or in without a real provider (mock mode only), to show the login screen. */
+  setSignedIn(on: boolean): void;
+  /** Make the next link, password sign-in or password change fail with this kind. */
+  failAuthNext(kind: NonNullable<AuthResult['kind']>): void;
+  /** The last password accepted by updatePassword (so tests can sign in with it). */
+  password: string;
   get(coll: CollectionName, id: string): Doc | null;
   list(coll: CollectionName): Doc[];
   /** Write as the worker would (not logged in `writes`): creates or merges, then notifies subscribers. */
@@ -39,7 +45,11 @@ export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { 
   let conflicts = 0;
   let failMsg: string | null = null;
   const user: StudioUser = { id: 'mock-owner', email: 'owner@example.test' };
-  const authState: AuthState = { status: 'signed-in', user, owner: true };
+  let authState: AuthState = { status: 'signed-in', user, owner: true };
+  const authCbs = new Set<(s: AuthState) => void>();
+  const setAuth = (a: AuthState) => { authState = a; for (const cb of authCbs) cb(a); };
+  let authFail: AuthResult['kind'] | null = null;
+  const takeAuthFail = () => { const k = authFail; authFail = null; return k; };
 
   const handle: MockHandle = {
     writes: [], uploads: [], fires: 0,
@@ -47,6 +57,9 @@ export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { 
     seed(f) { base = f; handle.reset(); },
     conflictNext(n = 1) { conflicts = n; },
     failNext(message = 'write_failed') { failMsg = message; },
+    setSignedIn(on) { if (mode === 'mock') setAuth(on ? { status: 'signed-in', user, owner: true } : { status: 'signed-out', user: null, owner: false }); },
+    failAuthNext(kind) { authFail = kind; },
+    password: 'correct-horse-battery',
     get: (c, id) => { const d = store.get(c)?.get(id); return d ? clone(d) : null; },
     list: (c) => list(c).map(clone),
     put(c, id, data) {
@@ -147,9 +160,23 @@ export function createMockAdapter(fixtures: Fixtures, mode: 'mock' | 'demo'): { 
     async fireWorker(): Promise<FireResult> { handle.fires++; return { ok: true }; },
     async user() { return user; },
     auth: () => authState,
-    onAuth: () => () => {},
-    async signInWithEmail() { return { ok: true }; },
-    async signOut() {},
+    onAuth(cb) { authCbs.add(cb); return () => { authCbs.delete(cb); }; },
+    async signInWithEmail() { const k = takeAuthFail(); return k ? { ok: false, kind: k } : { ok: true }; },
+    async signInWithPassword(email, password) {
+      const k = takeAuthFail();
+      if (k) return { ok: false, kind: k };
+      if (password !== handle.password) return { ok: false, kind: 'invalid' };
+      setAuth({ status: 'signed-in', user: { ...user, email }, owner: true });
+      return { ok: true };
+    },
+    async updatePassword(password) {
+      const k = takeAuthFail();
+      if (k) return { ok: false, kind: k };
+      if (password === handle.password) return { ok: false, kind: 'same' };
+      handle.password = password;
+      return { ok: true };
+    },
+    async signOut() { if (mode === 'mock') setAuth({ status: 'signed-out', user: null, owner: false }); },
   };
   return { adapter, handle };
 }

@@ -96,3 +96,59 @@ for (const width of [1440, 1024]) {
     }
   });
 }
+
+const setIn = (page, on) => page.evaluate((v) => window.__mock.setSignedIn(v), on);
+const failAuth = (page, k) => page.evaluate((v) => window.__mock.failAuthNext(v), k);
+
+test('sign-in: password success, wrong password, link rate limit, network, raw text never shown', async () => {
+  const { page, ctx } = await open('#system');
+  await page.waitForSelector('#runs-table');
+  await setIn(page, false);
+  await page.waitForSelector('#login-email');
+  assert.equal(await page.locator('#login-submit').innerText(), 'Sign in with password');
+  assert.equal(await page.locator('#login-link').innerText(), 'Email me a sign-in link instead');
+  await page.fill('#login-email', 'second@example.test');
+  await page.fill('#login-password', 'wrong-password-1');
+  await page.press('#login-password', 'Enter');
+  assert.equal(await page.locator('[role=alert]').innerText(), "That email and password don't match.");
+  await page.click('#login-link');
+  await page.waitForSelector('[role=status]');
+  await page.click('#login-back');
+  await page.waitForSelector('#login-email');
+  await page.fill('#login-email', 'second@example.test');
+  await failAuth(page, 'rate');
+  await page.click('#login-link');
+  assert.equal(await page.locator('[role=alert]').innerText(), 'Too many sign-in emails were sent in the last hour. Use your password, or try the link again in an hour.');
+  await page.fill('#login-password', 'x');
+  await failAuth(page, 'network');
+  await page.click('#login-submit');
+  assert.equal(await page.locator('[role=alert]').innerText(), "Can't reach the studio. Check your connection.");
+  await page.fill('#login-password', 'correct-horse-battery');
+  await page.press('#login-password', 'Enter');
+  await page.waitForSelector('#runs-table');
+  assert.equal(await page.locator('#login-email').count(), 0);
+  await ctx.close();
+});
+
+test('Settings: change password validates length and match, then toasts', async () => {
+  const { page, ctx } = await open('#system/settings');
+  await page.waitForSelector('#settings');
+  await page.click('#pw-open');
+  await page.fill('#pw-new', 'short');
+  await page.fill('#pw-confirm', 'short');
+  await page.click('#pw-save');
+  assert.match(await page.locator('#pw-msg').innerText(), /at least 10/);
+  await page.fill('#pw-new', 'a-long-new-password');
+  await page.fill('#pw-confirm', 'a-long-new-passwore');
+  await page.click('#pw-save');
+  assert.match(await page.locator('#pw-msg').innerText(), /don't match/);
+  await page.fill('#pw-confirm', 'a-long-new-password');
+  await failAuth(page, 'weak');
+  await page.click('#pw-save');
+  assert.match(await page.locator('#pw-msg').innerText(), /stronger/);
+  await page.click('#pw-save');
+  await page.waitForFunction(() => /Password updated\./.test(document.querySelector('[data-toast]')?.textContent || ''));
+  assert.equal(await page.locator('#pw-new').count(), 0);
+  assert.equal(await page.evaluate(() => window.__mock.password), 'a-long-new-password');
+  await ctx.close();
+});

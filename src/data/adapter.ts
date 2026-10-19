@@ -23,6 +23,9 @@ export interface AuthState {
   owner: boolean;
 }
 
+/** Outcome of an auth call. `kind` is a classified failure; raw provider text is never exposed. */
+export interface AuthResult { ok: boolean; kind?: 'invalid' | 'rate' | 'network' | 'weak' | 'same' | 'other' }
+
 export interface Adapter {
   readonly mode: 'supabase' | 'mock' | 'demo';
   /** Delivers the full current list immediately (once loaded), then again after every change. */
@@ -41,6 +44,9 @@ export interface Adapter {
   // auth (mock/demo adapters are always signed in as the owner)
   auth(): AuthState;
   onAuth(cb: (s: AuthState) => void): Unsub;
-  signInWithEmail(email: string): Promise<{ ok: boolean; error?: string }>;
+  signInWithEmail(email: string): Promise<AuthResult>;
+  signInWithPassword(email: string, password: string): Promise<AuthResult>;
+  /** Set a new password for the signed-in user. */
+  updatePassword(password: string): Promise<AuthResult>;
   signOut(): Promise<void>;
 }

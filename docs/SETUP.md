@@ -46,3 +46,13 @@ Playbooks are pinned by `playbooks/HASHES.txt` (first 16 hex of sha256). After e
 `STUDIO_MODE=supabase` (default when the Supabase vars are set), `demo` (in-memory invented fixtures, "Demo, changes aren't saved"; this is what GitHub Pages serves), `mock` (tests).
 
 Token rotation and the threat model: see [SECURITY.md](SECURITY.md).
+
+## Adding another owner
+
+Magic links depend on Supabase's built-in email (about 2 emails an hour) and break in in-app browsers such as Gmail's, so give each extra owner a password:
+
+1. Supabase, Authentication, Users, Add user, Create new user. Enter their email and a temporary password, and tick **Auto Confirm User**.
+2. Copy the new user's UUID and run `insert into studio_owner (user_id) values ('<their-user-uuid>');`.
+3. They sign in with "Sign in with password", then set their own in System, Settings, Your password (ten characters or more).
+
+The emailed link still works as the alternative. If an account signs in but is not in `studio_owner`, it sees "Signed in, but this account isn't the studio owner" with a Sign out button.

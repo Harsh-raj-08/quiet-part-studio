@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { Adapter, AuthState, FireResult, UploadResult, WriteOpts } from './adapter';
+import type { Adapter, AuthResult, AuthState, FireResult, UploadResult, WriteOpts } from './adapter';
 import { MissingDocError, VersionConflictError } from './adapter';
 import type { CollectionName, Doc, QpConfig, StudioUser } from './types';
 
@@ -19,6 +19,18 @@ export const isMissingTable = (e: { code?: string; message?: string } | null | u
 
 /** Collections that may not exist yet in an older database; a missing one reads as empty instead of failing. */
 const OPTIONAL: ReadonlySet<CollectionName> = new Set<CollectionName>(['account']);
+
+/** Classify a Supabase auth error without ever passing its text on to the UI. */
+function authKind(e: unknown): NonNullable<AuthResult['kind']> {
+  const x = (e ?? {}) as { status?: number; code?: string; message?: string; name?: string };
+  const msg = String(x.message ?? '');
+  if (x.status === 429 || x.code === 'over_email_send_rate_limit' || x.code === 'over_request_rate_limit' || /rate limit/i.test(msg)) return 'rate';
+  if (x.code === 'invalid_credentials' || /invalid login credentials/i.test(msg)) return 'invalid';
+  if (x.code === 'weak_password' || /weak|at least \d+ char/i.test(msg)) return 'weak';
+  if (x.code === 'same_password' || /different from the old/i.test(msg)) return 'same';
+  if (x.name === 'AuthRetryableFetchError' || x.status === 0 || /fetch|network|load failed/i.test(msg)) return 'network';
+  return 'other';
+}
 
 export function createSupabaseAdapter(cfg: QpConfig, client?: SupabaseClient): Adapter {
   const sb: SupabaseClient = client ?? createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
@@ -154,7 +166,19 @@ export function createSupabaseAdapter(cfg: QpConfig, client?: SupabaseClient): A
     onAuth(cb) { authCbs.add(cb); return () => { authCbs.delete(cb); }; },
     async signInWithEmail(email) {
       const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: window.location.origin } });
-      return error ? { ok: false, error: error.message } : { ok: true };
+      return error ? { ok: false, kind: authKind(error) } : { ok: true };
+    },
+    async signInWithPassword(email, password) {
+      try {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        return error ? { ok: false, kind: authKind(error) } : { ok: true };
+      } catch (e) { return { ok: false, kind: authKind(e) }; }
+    },
+    async updatePassword(password) {
+      try {
+        const { error } = await sb.auth.updateUser({ password });
+        return error ? { ok: false, kind: authKind(error) } : { ok: true };
+      } catch (e) { return { ok: false, kind: authKind(e) }; }
     },
     async signOut() { await sb.auth.signOut(); },
   };
